@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: arindam-healthcare
+    name: carepulse-healthcare
     runtime: docker
     plan: free
     region: singapore

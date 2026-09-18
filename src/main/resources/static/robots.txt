@@ -1,5 +1,5 @@
-# Robots.txt for Arindam Healthcare
-# Developed by Arindam Sahoo
+# Robots.txt for CarePulse Healthcare
+# Universal Healthcare Platform
 # Allows Googlebot, Bingbot, and all search engine crawlers
 
 User-agent: *
