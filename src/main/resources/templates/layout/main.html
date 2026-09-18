@@ -312,12 +312,14 @@
         <div class="w-full max-w-[1440px] mx-auto px-3 sm:px-6 flex justify-between items-center h-14 sm:h-16">
             
             <!-- Logo & Platform Identity -->
-            <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-base sm:text-xl shadow-md shrink-0">
+            <a href="/" class="flex items-center gap-1.5 sm:gap-3 shrink min-w-0">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-sm sm:text-xl shadow-md shrink-0">
                     <i class="fa-solid fa-heart-pulse"></i>
                 </div>
-                <div>
-                    <span class="text-base sm:text-lg font-black tracking-tight text-slate-900 block leading-tight">CAREPULSE <span class="text-sky-600">HEALTHCARE</span></span>
+                <div class="min-w-0">
+                    <span class="text-sm sm:text-lg font-black tracking-tight text-slate-900 block leading-tight truncate">
+                        CAREPULSE <span class="text-sky-600">HEALTH</span><span class="hidden sm:inline text-sky-600">CARE</span>
+                    </span>
                     <span class="hidden sm:block text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-slate-500 block leading-none">Universal Health Platform</span>
                 </div>
             </a>
@@ -375,26 +377,26 @@
             </div>
 
             <!-- User Menu, Notifications, Health Passport & Profile -->
-            <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0 pr-1">
-                <!-- Digital Health Passport (Compact on smaller screens) -->
-                <a href="/health-passport" title="Emergency Health Passport & QR" class="flex items-center gap-1.5 text-xs bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-700 px-2 py-1.5 sm:px-2.5 rounded-xl border border-slate-200 transition font-medium flex-shrink-0">
+            <div class="flex items-center gap-1 sm:gap-2.5 shrink-0">
+                <!-- Digital Health Passport (Visible on md and larger screens) -->
+                <a href="/health-passport" title="Emergency Health Passport & QR" class="hidden md:flex items-center gap-1.5 text-xs bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-700 px-2 py-1.5 sm:px-2.5 rounded-xl border border-slate-200 transition font-medium flex-shrink-0">
                     <i class="fa-solid fa-qrcode text-sky-600"></i>
                     <span class="hidden xl:inline">Health Passport</span>
                 </a>
 
                 <!-- Notification Bell -->
                 <div class="relative flex-shrink-0">
-                    <button onclick="toggleNotificationDrawer()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 relative transition">
+                    <button onclick="toggleNotificationDrawer()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 relative transition cursor-pointer" title="Notifications">
                         <i class="fa-regular fa-bell text-xs sm:text-sm"></i>
-                        <span th:if="${unreadNotifCount > 0}" th:text="${unreadNotifCount}" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold"></span>
+                        <span th:if="${unreadNotifCount > 0}" th:text="${unreadNotifCount}" class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] sm:text-[10px] w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center font-bold"></span>
                     </button>
                 </div>
 
                 <!-- User Auth State: Profile dropdown if logged in -->
-                <div th:if="${isAuthenticated}" class="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-slate-200 flex-shrink-0">
+                <div th:if="${isAuthenticated}" class="flex items-center gap-1 sm:gap-2 pl-1 sm:pl-2 border-l border-slate-200 flex-shrink-0">
                     <div class="relative group">
-                        <button class="flex items-center gap-1.5 sm:gap-2 text-left focus:outline-none cursor-pointer py-1">
-                            <div th:if="${photoUrl != null && !photoUrl.isEmpty()}" class="w-8 h-8 rounded-full overflow-hidden border border-sky-400 shadow-sm flex-shrink-0">
+                        <button class="flex items-center gap-1 sm:gap-2 text-left focus:outline-none cursor-pointer py-1">
+                            <div th:if="${photoUrl != null && !photoUrl.isEmpty()}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-sky-400 shadow-sm flex-shrink-0">
                                 <img th:src="${photoUrl}" 
                                      id="navbar-user-avatar-img"
                                      referrerpolicy="no-referrer"
@@ -402,14 +404,14 @@
                                      onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent(this.getAttribute('data-fallback-letter') || 'Arindam') + '&background=0284c7&color=fff&size=96&bold=true';"
                                      alt="Profile Avatar" class="w-full h-full object-cover" />
                             </div>
-                            <div th:unless="${photoUrl != null && !photoUrl.isEmpty()}" id="navbar-user-avatar-fallback" class="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center font-bold text-xs shadow-sm flex-shrink-0">
+                            <div th:unless="${photoUrl != null && !photoUrl.isEmpty()}" id="navbar-user-avatar-fallback" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center font-bold text-xs shadow-sm flex-shrink-0">
                                 <span th:text="${currentUser != null and currentUser.fullName != null and !currentUser.fullName.isEmpty() ? currentUser.fullName.substring(0, 1).toUpperCase() : 'A'}">A</span>
                             </div>
                             <div class="hidden sm:block text-xs text-left max-w-[85px] md:max-w-[105px]">
                                 <span class="font-bold text-slate-800 block leading-tight truncate" th:text="${currentUser.fullName}">User</span>
                                 <span class="text-[10px] text-emerald-600 font-semibold block">Connected</span>
                             </div>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 flex-shrink-0"></i>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 flex-shrink-0 hidden sm:inline"></i>
                         </button>
                         <!-- Dropdown Menu (Comfortably positioned inside viewport) -->
                         <div class="hidden group-hover:block absolute right-0 top-full pt-1.5 w-52 z-50">
@@ -432,16 +434,15 @@
                 </div>
 
                 <!-- Unauthenticated: Sign In / Create Account Button -->
-                <div th:unless="${isAuthenticated}" class="flex items-center pl-1.5 sm:pl-2 border-l border-slate-200 flex-shrink-0">
-                    <a href="/login" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer active:scale-95" title="Sign In / Register">
+                <div th:unless="${isAuthenticated}" class="flex items-center pl-1 sm:pl-2 border-l border-slate-200 flex-shrink-0">
+                    <a href="/login" class="flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer active:scale-95" title="Sign In / Register">
                         <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
-                        <span class="hidden sm:inline">Sign In / Register</span>
-                        <span class="sm:hidden">Login</span>
+                        <span class="text-[11px] sm:text-xs">Login</span>
                     </a>
                 </div>
 
-                <!-- Mobile Menu Hamburger Button (Placed cleanly on far right) -->
-                <button type="button" onclick="toggleMobileNavDrawer()" aria-label="Open Mobile Menu" class="lg:hidden flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer active:scale-95 flex-shrink-0 ml-1">
+                <!-- Mobile Menu Hamburger Button (Always visible on mobile, cleanly aligned on far right) -->
+                <button type="button" onclick="toggleMobileNavDrawer()" aria-label="Open Mobile Menu" class="lg:hidden flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer active:scale-95 flex-shrink-0" title="Menu">
                     <i class="fa-solid fa-bars text-sm"></i>
                 </button>
             </div>
