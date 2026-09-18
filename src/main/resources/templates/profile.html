@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+
+        <!-- Header Card -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 flex items-center gap-1.5 w-fit">
+                    <i class="fa-solid fa-database text-emerald-600"></i> MongoDB Dynamic User Profile • West Bengal
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Universal Health Account & Profile
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Manage your verified citizen profile, Google identity, residential address in West Bengal, and emergency clinical data persisted in MongoDB collection <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-mono text-xs">users</code>.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> MongoDB Cloud Connected
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- LEFT COLUMN: Profile Card & Quick Info -->
+            <div class="space-y-6">
+                <!-- User Identity Card -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 right-0 h-20 bg-gradient-to-r from-sky-600 via-teal-500 to-emerald-500"></div>
+                    
+                    <div class="relative pt-6">
+                        <!-- Avatar -->
+                        <div id="profile-avatar-wrapper" class="w-24 h-24 rounded-full mx-auto p-1 bg-white shadow-lg relative group">
+                            <img th:if="${mongoUser.photoUrl != null && !mongoUser.photoUrl.isEmpty()}" 
+                                 th:src="${mongoUser.photoUrl}" 
+                                 id="profile-avatar-img"
+                                 referrerpolicy="no-referrer"
+                                 th:attr="data-fallback-letter=${mongoUser.fullName != null && !mongoUser.fullName.isEmpty() ? mongoUser.fullName.substring(0, 1).toUpperCase() : 'A'}"
+                                 onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent(this.getAttribute('data-fallback-letter') || 'Arindam') + '&background=0284c7&color=fff&size=256&bold=true';"
+                                 alt="Profile Avatar" class="w-full h-full rounded-full object-cover" />
+                            <div th:unless="${mongoUser.photoUrl != null && !mongoUser.photoUrl.isEmpty()}"
+                                 id="profile-avatar-fallback"
+                                 class="w-full h-full rounded-full bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center text-3xl font-black">
+                                <span th:text="${mongoUser.fullName != null && !mongoUser.fullName.isEmpty() ? mongoUser.fullName.substring(0, 1).toUpperCase() : 'A'}">A</span>
+                            </div>
+                            <span class="absolute top-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" title="Active & Verified"></span>
+                            <!-- Camera Edit Button on Avatar -->
+                            <button type="button" onclick="openAvatarModal()" 
+                                    class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-sky-600 hover:bg-sky-700 text-white flex items-center justify-center text-xs shadow-md border-2 border-white transition transform hover:scale-110 active:scale-95 cursor-pointer"
+                                    title="Change Profile Icon">
+                                <i class="fa-solid fa-camera"></i>
+                            </button>
+                        </div>
+
+                        <!-- Change Profile Icon Trigger Button -->
+                        <div class="mt-2.5">
+                            <button type="button" onclick="openAvatarModal()" 
+                                    class="inline-flex items-center gap-1.5 text-xs font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-1 rounded-full transition cursor-pointer shadow-xs">
+                                <i class="fa-solid fa-camera-rotate text-[11px] text-sky-600"></i> <span>Change Profile Icon</span>
+                            </button>
+                        </div>
+
+                        <!-- Name & Email -->
+                        <h2 id="card-fullname" class="text-lg font-black text-slate-900 mt-3" th:text="${mongoUser.fullName}">Universal Patient</h2>
+                        <p id="card-email" class="text-xs text-slate-500" th:text="${mongoUser.email}">patient@carepulse.org</p>
+
+                        <!-- Role & Location Badges -->
+                        <div class="flex flex-wrap items-center justify-center gap-1.5 mt-3">
+                            <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-2.5 py-0.5 rounded-full uppercase" th:text="${mongoUser.role}">PATIENT</span>
+                            <span id="card-badge-blood" class="text-[10px] bg-red-100 text-red-800 font-bold px-2.5 py-0.5 rounded-full" th:text="${'🩸 ' + (mongoUser.bloodGroup != null ? mongoUser.bloodGroup : 'O+')}">🩸 O+</span>
+                            <span id="card-badge-loc" class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2.5 py-0.5 rounded-full" th:text="${'📍 ' + (mongoUser.city != null ? mongoUser.city : 'Kolkata') + ', ' + (mongoUser.state != null ? mongoUser.state : 'West Bengal')}">📍 Kolkata, West Bengal</span>
+                        </div>
+                    </div>
+
+                    <!-- MongoDB & Firebase Technical Details -->
+                    <div class="mt-6 pt-4 border-t border-slate-100 text-left space-y-2 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400 font-medium">MongoDB ID:</span>
+                            <span class="font-mono text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded text-[11px] truncate max-w-[170px]" th:text="${mongoUser.id}">65f123abc456</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400 font-medium">Firebase UID:</span>
+                            <span class="font-mono text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded text-[11px] truncate max-w-[170px]" th:text="${mongoUser.firebaseUid}">fb_usr_9981</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400 font-medium">Phone:</span>
+                            <span id="card-phone" class="font-semibold text-slate-800" th:text="${mongoUser.phone != null ? mongoUser.phone : '+91 98300 12345'}">+91 98300 12345</span>
+                        </div>
+                    </div>
+
+                    <!-- 1-Click Google Account Switcher -->
+                    <div class="mt-5 pt-4 border-t border-slate-100">
+                        <button type="button" onclick="signInWithGoogle()"
+                                class="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold py-2 px-3 rounded-xl text-xs transition shadow-sm cursor-pointer">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                            </svg>
+                            <span>Switch / Connect Google Account</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fast Navigation Card -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Integrated Medical Modules</h3>
+                    <a href="/health-passport" class="flex items-center justify-between p-3 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-800 transition text-xs font-bold">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-qrcode text-sky-600 text-base"></i>
+                            <div>
+                                <span class="block">Emergency Health Passport</span>
+                                <span class="text-[10px] text-sky-600 font-normal">Offline QR Code for Paramedics</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-sky-400"></i>
+                    </a>
+                    <a href="/medical-records" class="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 transition text-xs font-bold">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-folder-open text-emerald-600 text-base"></i>
+                            <div>
+                                <span class="block">MongoDB Medical Records</span>
+                                <span class="text-[10px] text-emerald-600 font-normal">FHIR & Clinical Artifacts</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-emerald-400"></i>
+                    </a>
+                    <a href="/hospitals" class="flex items-center justify-between p-3 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 transition text-xs font-bold">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fa-solid fa-hospital text-indigo-600 text-base"></i>
+                            <div>
+                                <span class="block">West Bengal Hospital Network</span>
+                                <span class="text-[10px] text-indigo-600 font-normal">Live ICU Beds & Digital Admissions</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-indigo-400"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Edit Form with MongoDB Persistence -->
+            <div class="lg:col-span-2">
+                <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-lg font-black text-slate-900">Edit Patient Health Profile</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Changes are immediately saved to MongoDB and synchronized across all health modules.</p>
+                        </div>
+                        <div id="profile-save-status" class="hidden text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-check"></i> <span>Saved</span>
+                        </div>
+                    </div>
+
+                    <form id="profile-edit-form" onsubmit="saveProfileToMongo(event)" class="space-y-6 text-xs">
+                        <input type="hidden" name="photoUrl" id="input-photoUrl" th:value="${mongoUser.photoUrl}" />
+                        
+                        <!-- Section 1: Personal & Identity -->
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-sky-600 mb-3 flex items-center gap-1.5">
+                                <i class="fa-solid fa-id-card"></i> 1. Personal & Contact Information
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Full Legal Name *</label>
+                                    <input type="text" name="fullName" id="input-fullName" required 
+                                           th:value="${mongoUser.fullName}"
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Email Address *</label>
+                                    <input type="email" name="email" id="input-email" required
+                                           th:value="${mongoUser.email}"
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Mobile Phone *</label>
+                                    <input type="tel" name="phone" id="input-phone"
+                                           th:value="${mongoUser.phone}"
+                                           placeholder="+91 98300 12345"
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Blood Group *</label>
+                                    <select name="bloodGroup" id="input-bloodGroup" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white font-bold text-red-700">
+                                        <option value="O+" th:selected="${mongoUser.bloodGroup == 'O+'}">O Positive (O+)</option>
+                                        <option value="O-" th:selected="${mongoUser.bloodGroup == 'O-'}">O Negative (O-)</option>
+                                        <option value="A+" th:selected="${mongoUser.bloodGroup == 'A+'}">A Positive (A+)</option>
+                                        <option value="A-" th:selected="${mongoUser.bloodGroup == 'A-'}">A Negative (A-)</option>
+                                        <option value="B+" th:selected="${mongoUser.bloodGroup == 'B+'}">B Positive (B+)</option>
+                                        <option value="B-" th:selected="${mongoUser.bloodGroup == 'B-'}">B Negative (B-)</option>
+                                        <option value="AB+" th:selected="${mongoUser.bloodGroup == 'AB+'}">AB Positive (AB+)</option>
+                                        <option value="AB-" th:selected="${mongoUser.bloodGroup == 'AB-'}">AB Negative (AB-)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: West Bengal Address & Neighborhood -->
+                        <div class="pt-4 border-t border-slate-100">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-sky-600 mb-3 flex items-center gap-1.5">
+                                <i class="fa-solid fa-map-location-dot"></i> 2. West Bengal Residential Location (Local Hospitals & Doctors)
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">State</label>
+                                    <select name="state" id="input-state" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white font-semibold">
+                                        <option value="West Bengal" th:selected="${mongoUser.state == 'West Bengal'}">West Bengal (Primary)</option>
+                                        <option value="Odisha" th:selected="${mongoUser.state == 'Odisha'}">Odisha</option>
+                                        <option value="Delhi" th:selected="${mongoUser.state == 'Delhi'}">Delhi NCR</option>
+                                        <option value="Maharashtra" th:selected="${mongoUser.state == 'Maharashtra'}">Maharashtra</option>
+                                        <option value="Karnataka" th:selected="${mongoUser.state == 'Karnataka'}">Karnataka</option>
+                                        <option value="Tamil Nadu" th:selected="${mongoUser.state == 'Tamil Nadu'}">Tamil Nadu</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">City / Municipal Area</label>
+                                    <select name="city" id="input-city" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white font-semibold">
+                                        <option value="Kolkata" th:selected="${mongoUser.city == 'Kolkata'}">Kolkata</option>
+                                        <option value="Salt Lake" th:selected="${mongoUser.city == 'Salt Lake'}">Salt Lake (Bidhannagar)</option>
+                                        <option value="New Town" th:selected="${mongoUser.city == 'New Town'}">New Town (Rajarhat)</option>
+                                        <option value="Howrah" th:selected="${mongoUser.city == 'Howrah'}">Howrah</option>
+                                        <option value="Siliguri" th:selected="${mongoUser.city == 'Siliguri'}">Siliguri (North Bengal)</option>
+                                        <option value="Durgapur" th:selected="${mongoUser.city == 'Durgapur'}">Durgapur</option>
+                                        <option value="Asansol" th:selected="${mongoUser.city == 'Asansol'}">Asansol</option>
+                                        <option value="Kharagpur" th:selected="${mongoUser.city == 'Kharagpur'}">Kharagpur</option>
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block font-bold text-slate-700 mb-1">Exact Neighborhood / Locality</label>
+                                    <input type="text" name="locality" id="input-locality"
+                                           th:value="${mongoUser.locality != null ? mongoUser.locality : 'Salt Lake Sector V'}"
+                                           placeholder="e.g. Salt Lake Sector V, Bhowanipore, Ballygunge, Park Circus..."
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block font-bold text-slate-700 mb-1">Full Street Address</label>
+                                    <input type="text" name="address" id="input-address"
+                                           th:value="${mongoUser.address != null ? mongoUser.address : 'Salt Lake City, Sector V, Kolkata, West Bengal 700091'}"
+                                           placeholder="House/Flat No., Street, Postal PIN"
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Emergency & Clinical Profile -->
+                        <div class="pt-4 border-t border-slate-100">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-sky-600 mb-3 flex items-center gap-1.5">
+                                <i class="fa-solid fa-heart-pulse"></i> 3. Clinical & Emergency Details
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Emergency Contact Person</label>
+                                    <input type="text" name="emergencyContactName" id="input-emergencyContactName"
+                                           th:value="${mongoUser.emergencyContactName}"
+                                           placeholder="e.g. Debashis Sahoo (Family)"
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Emergency Phone Number</label>
+                                    <input type="tel" name="emergencyContactPhone" id="input-emergencyContactPhone"
+                                           th:value="${mongoUser.emergencyContactPhone}"
+                                           placeholder="+91 98301 54321"
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Known Drug / Food Allergies</label>
+                                    <input type="text" name="allergies" id="input-allergies"
+                                           th:value="${mongoUser.allergies}"
+                                           placeholder="e.g. Penicillin, Peanuts, Sulfa (or 'None known')"
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 mb-1">Chronic Health Conditions</label>
+                                    <input type="text" name="chronicConditions" id="input-chronicConditions"
+                                           th:value="${mongoUser.chronicConditions}"
+                                           placeholder="e.g. Type 2 Diabetes, Hypertension (or 'None')"
+                                           class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <button type="submit" id="save-profile-btn"
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-2xl text-xs sm:text-sm transition shadow-md flex items-center gap-2 cursor-pointer">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>Save & Sync with MongoDB</span>
+                            </button>
+                            <span class="text-[11px] text-slate-400">Target collection: <strong class="text-emerald-700 font-mono">users</strong></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Change Profile Icon Modal Dialog -->
+    <div id="avatar-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <!-- Backdrop click listener -->
+        <div class="fixed inset-0" onclick="closeAvatarModal()"></div>
+
+        <!-- Modal Dialog Content -->
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-7 border border-slate-200 relative z-10 animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-100 text-sky-600 flex items-center justify-center text-lg shadow-xs">
+                        <i class="fa-solid fa-camera-rotate"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900">Change Profile Icon</h3>
+                        <p class="text-[11px] text-slate-500">Pick a verified avatar, upload your own photo, or paste a link</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAvatarModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition cursor-pointer" title="Close">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Active Avatar Live Preview -->
+            <div class="py-4 px-3 text-center bg-slate-50 rounded-2xl my-4 border border-slate-100 flex items-center justify-center gap-4">
+                <div class="w-20 h-20 rounded-full p-1 bg-white shadow-md border-2 border-sky-500 relative shrink-0">
+                    <img id="modal-preview-avatar-img" 
+                         src="" 
+                         referrerpolicy="no-referrer"
+                         th:attr="data-fallback-letter=${mongoUser.fullName != null && !mongoUser.fullName.isEmpty() ? mongoUser.fullName.substring(0, 1).toUpperCase() : 'A'}"
+                         onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent(this.getAttribute('data-fallback-letter') || 'Arindam') + '&background=0284c7&color=fff&size=256&bold=true';"
+                         alt="Preview" class="w-full h-full rounded-full object-cover" />
+                    <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] border-2 border-white shadow">
+                        <i class="fa-solid fa-check"></i>
+                    </span>
+                </div>
+                <div class="text-left min-w-0">
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-sky-600 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-100">Live Preview</span>
+                    <div class="text-xs font-bold text-slate-800 mt-1 truncate max-w-[240px]" id="modal-preview-avatar-label">Current Avatar</div>
+                    <div class="text-[11px] text-slate-400">Click Save below to update across your profile & navbar</div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="flex border-b border-slate-200 mb-4">
+                <button type="button" onclick="switchAvatarTab('presets')" id="tab-btn-presets" class="flex-1 py-2 text-xs font-bold border-b-2 border-sky-600 text-sky-600 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-icons"></i> Preset Avatars
+                </button>
+                <button type="button" onclick="switchAvatarTab('upload')" id="tab-btn-upload" class="flex-1 py-2 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo
+                </button>
+                <button type="button" onclick="switchAvatarTab('url')" id="tab-btn-url" class="flex-1 py-2 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-link"></i> Web Link
+                </button>
+            </div>
+
+            <!-- Tab 1: Preset Avatars -->
+            <div id="tab-content-presets" class="space-y-3">
+                <div id="preset-avatars-grid" class="grid grid-cols-4 gap-2.5 max-h-48 overflow-y-auto p-1">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Tab 2: Upload Photo -->
+            <div id="tab-content-upload" class="hidden space-y-3">
+                <div onclick="document.getElementById('avatar-file-input').click()" 
+                     class="border-2 border-dashed border-slate-300 hover:border-sky-500 bg-slate-50 hover:bg-sky-50/50 rounded-2xl p-6 text-center cursor-pointer transition group">
+                    <div class="w-12 h-12 mx-auto rounded-full bg-sky-100 group-hover:bg-sky-200 text-sky-600 flex items-center justify-center text-xl mb-2 transition">
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                    </div>
+                    <div class="text-xs font-bold text-slate-700">Click to choose image or drag &amp; drop</div>
+                    <div class="text-[11px] text-slate-400 mt-1">JPEG, PNG, WEBP • Automatically center-cropped &amp; optimized</div>
+                </div>
+                <input type="file" id="avatar-file-input" accept="image/png, image/jpeg, image/webp" class="hidden" onchange="handleAvatarFileUpload(event)" />
+                <div id="upload-status-msg" class="text-xs text-emerald-600 font-bold hidden flex items-center gap-1">
+                    <i class="fa-solid fa-circle-check"></i> <span id="upload-status-filename">Photo loaded & ready!</span>
+                </div>
+            </div>
+
+            <!-- Tab 3: Web Link / Image URL -->
+            <div id="tab-content-url" class="hidden space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Direct Image URL (HTTPS)</label>
+                    <div class="flex gap-2">
+                        <input type="url" id="custom-avatar-url-input" placeholder="https://example.com/my-photo.jpg" 
+                               class="flex-1 px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                        <button type="button" onclick="applyCustomUrlAvatar()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-3 py-2 rounded-xl text-xs transition cursor-pointer">
+                            Preview
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Paste a link from Google Drive, Unsplash, Imgur, or any public image URL.</p>
+                </div>
+            </div>
+
+            <!-- Modal Action Footer -->
+            <div class="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between">
+                <button type="button" onclick="closeAvatarModal()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" id="save-avatar-btn" onclick="confirmSaveAvatar()" class="px-5 py-2.5 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 active:scale-95 rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Save Profile Icon</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast / Feedback Notification -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // ==========================================
+        // PROFILE AVATAR MANAGEMENT & MODAL LOGIC
+        // ==========================================
+        const PRESET_AVATARS = [
+            {
+                name: "Dr. Roy",
+                role: "Specialist",
+                url: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=256&h=256&fit=crop&crop=faces"
+            },
+            {
+                name: "Dr. Sen",
+                role: "Physician",
+                url: "https://images.unsplash.com/photo-1594824813501-48af330058b8?w=256&h=256&fit=crop&crop=faces"
+            },
+            {
+                name: "Citizen Male",
+                role: "Patient",
+                url: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=256&h=256&fit=crop&crop=faces"
+            },
+            {
+                name: "Citizen Female",
+                role: "Patient",
+                url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=256&h=256&fit=crop&crop=faces"
+            },
+            {
+                name: "Senior",
+                role: "Elder Care",
+                url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=256&h=256&fit=crop&crop=faces"
+            },
+            {
+                name: "Nurse Staff",
+                role: "Healthcare",
+                url: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=256&h=256&fit=crop&crop=faces"
+            },
+            {
+                name: "CarePulse AI",
+                role: "Assistant",
+                url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=256&h=256&fit=crop&crop=faces"
+            },
+            {
+                name: "Initials Badge",
+                role: "Monogram",
+                url: "https://ui-avatars.com/api/?name=" + encodeURIComponent(document.getElementById('card-fullname')?.innerText || 'Arindam+Sahoo') + "&background=0284c7&color=fff&size=256&bold=true"
+            }
+        ];
+
+        let selectedAvatarUrl = "";
+
+        function initPresetAvatars() {
+            const grid = document.getElementById('preset-avatars-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            PRESET_AVATARS.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'preset-avatar-btn flex flex-col items-center p-2 rounded-2xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 transition cursor-pointer group text-center';
+                btn.onclick = () => selectPresetAvatar(item.url, item.name + ' (' + item.role + ')', btn);
+
+                btn.innerHTML = `
+                    <div class="w-12 h-12 rounded-full overflow-hidden border border-slate-200 group-hover:scale-105 transition shadow-xs">
+                        <img src="${item.url}" alt="${item.name}" referrerpolicy="no-referrer" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&background=0284c7&color=fff&size=128&bold=true';" />
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-700 mt-1.5 truncate max-w-full block leading-tight">${item.name}</span>
+                    <span class="text-[9px] text-slate-400 truncate max-w-full block leading-none">${item.role}</span>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function openAvatarModal() {
+            const modal = document.getElementById('avatar-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+
+            // Default to current avatar or first preset
+            const currentImg = document.getElementById('profile-avatar-img');
+            const hiddenPhoto = document.getElementById('input-photoUrl')?.value;
+            selectedAvatarUrl = (currentImg && currentImg.src && !currentImg.src.includes('ui-avatars.com')) ? currentImg.src : (hiddenPhoto || PRESET_AVATARS[0].url);
+
+            const previewImg = document.getElementById('modal-preview-avatar-img');
+            if (previewImg) previewImg.src = selectedAvatarUrl;
+            const previewLabel = document.getElementById('modal-preview-avatar-label');
+            if (previewLabel) previewLabel.innerText = "Active Selection";
+
+            highlightMatchingPreset(selectedAvatarUrl);
+            switchAvatarTab('presets');
+        }
+
+        function closeAvatarModal() {
+            const modal = document.getElementById('avatar-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function switchAvatarTab(tab) {
+            const tabs = ['presets', 'upload', 'url'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('tab-btn-' + t);
+                const content = document.getElementById('tab-content-' + t);
+                if (t === tab) {
+                    btn?.classList.remove('border-transparent', 'text-slate-500');
+                    btn?.classList.add('border-sky-600', 'text-sky-600');
+                    content?.classList.remove('hidden');
+                } else {
+                    btn?.classList.remove('border-sky-600', 'text-sky-600');
+                    btn?.classList.add('border-transparent', 'text-slate-500');
+                    content?.classList.add('hidden');
+                }
+            });
+        }
+
+        function selectPresetAvatar(url, label, btnEl) {
+            selectedAvatarUrl = url;
+            const previewImg = document.getElementById('modal-preview-avatar-img');
+            if (previewImg) previewImg.src = url;
+            const previewLabel = document.getElementById('modal-preview-avatar-label');
+            if (previewLabel) previewLabel.innerText = label || "Preset Avatar";
+
+            document.querySelectorAll('.preset-avatar-btn').forEach(b => {
+                b.classList.remove('ring-2', 'ring-sky-500', 'bg-sky-50', 'border-sky-500');
+            });
+            if (btnEl) {
+                btnEl.classList.add('ring-2', 'ring-sky-500', 'bg-sky-50', 'border-sky-500');
+            }
+        }
+
+        function highlightMatchingPreset(url) {
+            document.querySelectorAll('.preset-avatar-btn').forEach((btn, idx) => {
+                btn.classList.remove('ring-2', 'ring-sky-500', 'bg-sky-50', 'border-sky-500');
+                if (PRESET_AVATARS[idx] && PRESET_AVATARS[idx].url === url) {
+                    btn.classList.add('ring-2', 'ring-sky-500', 'bg-sky-50', 'border-sky-500');
+                }
+            });
+        }
+
+        function handleAvatarFileUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select a valid image file (JPG, PNG, WEBP).', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 256;
+                    canvas.height = 256;
+                    const ctx = canvas.getContext('2d');
+
+                    const minDim = Math.min(img.width, img.height);
+                    const sx = (img.width - minDim) / 2;
+                    const sy = (img.height - minDim) / 2;
+
+                    ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, 256, 256);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+                    selectedAvatarUrl = dataUrl;
+                    const previewImg = document.getElementById('modal-preview-avatar-img');
+                    if (previewImg) previewImg.src = dataUrl;
+
+                    const previewLabel = document.getElementById('modal-preview-avatar-label');
+                    if (previewLabel) previewLabel.innerText = "Custom Upload: " + file.name;
+
+                    const statusMsg = document.getElementById('upload-status-msg');
+                    const statusText = document.getElementById('upload-status-filename');
+                    if (statusText) statusText.innerText = file.name + " (" + Math.round(dataUrl.length / 1024) + " KB ready)";
+                    if (statusMsg) statusMsg.classList.remove('hidden');
+
+                    showToast("Photo processed & resized cleanly! Click 'Save Profile Icon'.", "info");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyCustomUrlAvatar() {
+            const input = document.getElementById('custom-avatar-url-input');
+            const url = input?.value?.trim();
+            if (!url) {
+                showToast('Please enter an image URL.', 'error');
+                return;
+            }
+
+            const testImg = new Image();
+            testImg.onload = function() {
+                selectedAvatarUrl = url;
+                const previewImg = document.getElementById('modal-preview-avatar-img');
+                if (previewImg) previewImg.src = url;
+                const previewLabel = document.getElementById('modal-preview-avatar-label');
+                if (previewLabel) previewLabel.innerText = "Custom Web Link";
+                showToast("Web image loaded successfully!", "info");
+            };
+            testImg.onerror = function() {
+                showToast("Unable to load image from that URL. Please verify the link.", "error");
+            };
+            testImg.src = url;
+        }
+
+        async function confirmSaveAvatar() {
+            if (!selectedAvatarUrl) {
+                showToast('Please select or upload an avatar first.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('save-avatar-btn');
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Saving Icon...</span>';
+
+            try {
+                const params = new URLSearchParams();
+                params.append('photoUrl', selectedAvatarUrl);
+
+                const resp = await fetch('/api/auth/profile/update-avatar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                });
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const finalUrl = data.photoUrl || selectedAvatarUrl;
+
+                    updateProfileAvatarInDOM(finalUrl);
+
+                    const inputPhotoUrl = document.getElementById('input-photoUrl');
+                    if (inputPhotoUrl) inputPhotoUrl.value = finalUrl;
+
+                    showToast("Profile icon successfully updated and saved to MongoDB!", "success");
+                    closeAvatarModal();
+                } else {
+                    const errData = await resp.json().catch(() => ({}));
+                    showToast(errData.message || "Failed to update profile icon on server.", "error");
+                }
+            } catch (err) {
+                console.error("Error saving avatar:", err);
+                showToast("Network error while saving profile icon.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }
+
+        function updateProfileAvatarInDOM(newUrl) {
+            const wrapper = document.getElementById('profile-avatar-wrapper');
+            const fallback = document.getElementById('profile-avatar-fallback');
+            let img = document.getElementById('profile-avatar-img');
+
+            if (fallback) fallback.classList.add('hidden');
+
+            if (!img && wrapper) {
+                img = document.createElement('img');
+                img.id = 'profile-avatar-img';
+                img.referrerPolicy = 'no-referrer';
+                img.className = 'w-full h-full rounded-full object-cover';
+                img.alt = 'Profile Avatar';
+                img.onerror = function() {
+                    this.onerror = null;
+                    this.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(document.getElementById('card-fullname')?.innerText || 'Arindam') + '&background=0284c7&color=fff&size=256&bold=true';
+                };
+                wrapper.prepend(img);
+            }
+
+            if (img) {
+                img.classList.remove('hidden');
+                img.src = newUrl;
+            }
+
+            // Also synchronize navbar avatar if rendered on this page
+            const navImg = document.getElementById('navbar-user-avatar-img');
+            const navFallback = document.getElementById('navbar-user-avatar-fallback');
+            if (navFallback) navFallback.classList.add('hidden');
+            if (navImg) {
+                navImg.parentElement.classList.remove('hidden');
+                navImg.src = newUrl;
+            }
+        }
+
+        // Auto-open modal if navigated from 'Change Profile Icon' in navbar (?openAvatar=1)
+        document.addEventListener('DOMContentLoaded', () => {
+            initPresetAvatars();
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('openAvatar') === '1' || window.location.hash === '#avatar-modal') {
+                openAvatarModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAvatarModal();
+            }
+        });
+
+        // ==========================================
+        // PROFILE EDIT FORM & MONGO PERSISTENCE
+        // ==========================================
+        async function saveProfileToMongo(event) {
+            event.preventDefault();
+            const btn = document.getElementById('save-profile-btn');
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Saving to MongoDB...</span>';
+
+            const form = document.getElementById('profile-edit-form');
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                params.append(key, value);
+            }
+
+            try {
+                const resp = await fetch('/api/auth/profile/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                });
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    
+                    // Update visual UI elements
+                    const fullName = document.getElementById('input-fullName').value;
+                    const email = document.getElementById('input-email').value;
+                    const phone = document.getElementById('input-phone').value;
+                    const blood = document.getElementById('input-bloodGroup').value;
+                    const city = document.getElementById('input-city').value;
+                    const state = document.getElementById('input-state').value;
+
+                    document.getElementById('card-fullname').innerText = fullName;
+                    document.getElementById('card-email').innerText = email;
+                    document.getElementById('card-phone').innerText = phone;
+                    document.getElementById('card-badge-blood').innerText = '🩸 ' + blood;
+                    document.getElementById('card-badge-loc').innerText = '📍 ' + city + ', ' + state;
+
+                    showToast("Profile successfully synchronized with MongoDB collection 'users'!", "success");
+                    
+                    const statusBadge = document.getElementById('profile-save-status');
+                    statusBadge.classList.remove('hidden');
+                    setTimeout(() => statusBadge.classList.add('hidden'), 4000);
+                } else {
+                    showToast("Failed to save profile on server.", "error");
+                }
+            } catch (err) {
+                console.error("Save profile error:", err);
+                showToast("Network error while synchronizing profile.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        }
+
+        function showToast(message, type = "info") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === "success" ? "bg-emerald-600 text-white" : (type === "error" ? "bg-red-600 text-white" : "bg-slate-800 text-white");
+            toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl text-xs font-bold flex items-center gap-2 transition-all transform duration-300`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info')}"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+
+    <!-- Footer from Main Layout -->
+    <div th:replace="~{layout/main :: footer}"></div>
+</body>
+</html>

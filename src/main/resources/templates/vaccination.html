@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+                    💉 Module 16: Immunization & Vaccination Schedules
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Digital Vaccination Records & Boosters
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Universal child immunization cards, adult booster reminders, and verifiable certificate exports.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button th:if="${currentUser != null}" onclick="openRecordVaccineModal('ADULT')" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Record Vaccination
+                </button>
+                <a th:if="${currentUser == null}" th:href="@{/login}" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In to Record
+                </a>
+                <button onclick="alert('Vaccination reminder scheduled in Notification Feed.')" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-bell"></i> Set Reminders
+                </button>
+            </div>
+        </div>
+
+        <!-- GUEST SECURITY & PRIVACY NOTICE -->
+        <div th:if="${currentUser == null}" class="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-lg border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-6 mb-6">
+            <div class="space-y-1.5 text-center sm:text-left">
+                <div class="inline-flex items-center gap-2 bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full text-xs font-bold border border-sky-400/30">
+                    <i class="fa-solid fa-shield-halved text-sky-400"></i> Individual Health Records Protected
+                </div>
+                <h2 class="text-xl font-black tracking-tight">Sign In to View Your Vaccination Records &amp; Certificates</h2>
+                <p class="text-xs text-slate-300 max-w-xl">
+                    You are currently browsing as a guest. Please sign in or register to securely access your personal adult vaccination history, pediatric growth schedules, booster alerts, and download digitally verifiable PDF certificates.
+                </p>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+                <a th:href="@{/login}" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs px-5 py-3 rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In / Register
+                </a>
+            </div>
+        </div>
+
+        <!-- TWO COLUMN: Adult Immunization vs Child Growth Schedule -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- ADULT VACCINES -->
+            <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-syringe text-sky-600"></i> Adult Vaccination Records (<span th:text="${currentUser != null ? currentUser.fullName : 'Guest'}">Individual</span>)
+                    </h3>
+                    <span class="text-xs bg-sky-100 text-sky-800 font-bold px-2.5 py-0.5 rounded-full" th:text="${adultVaccines != null ? adultVaccines.size() + ' Recorded' : '0 Recorded'}">0 Recorded</span>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(adultVaccines)}" class="text-center py-10 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-lg mx-auto mb-2">
+                        <i class="fa-solid fa-syringe"></i>
+                    </div>
+                    <h4 class="text-xs font-bold text-slate-700" th:text="${currentUser == null ? 'Sign in to view your records' : 'No adult vaccination records yet'}">No adult vaccination records yet</h4>
+                    <p class="text-[11px] text-slate-400 max-w-xs mx-auto mt-0.5 mb-3" th:text="${currentUser == null ? 'Sign in to access your personal vaccination certificates, booster doses, and history.' : 'Record an adult vaccine (e.g. Flu shot, COVID booster, Hep-B) to generate a verifiable certificate.'}">Record an adult vaccine to generate a verifiable certificate.</p>
+                    <button th:if="${currentUser != null}" type="button" onclick="openRecordVaccineModal('ADULT')" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm transition">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Adult Vaccine
+                    </button>
+                    <a th:if="${currentUser == null}" th:href="@{/login}" class="inline-flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm transition">
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In to View Records
+                    </a>
+                </div>
+
+                <div class="space-y-3" th:unless="${#lists.isEmpty(adultVaccines)}">
+                    <div th:each="v : ${adultVaccines}" class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex justify-between items-center text-xs">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 th:text="${v.vaccineName}" class="font-bold text-sm text-slate-900">Influenza Quadrivalent</h4>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.2 rounded" th:text="${v.doseNumber}">Booster 2026</span>
+                            </div>
+                            <span class="text-slate-500 text-[11px] block mt-0.5" th:text="${'Given: ' + v.administeredDate + ' • ' + v.providerName}">Administered: 2026-01-15</span>
+                            <span th:if="${v.nextDueDate != null}" class="text-indigo-600 font-bold text-[11px] block mt-0.5" th:text="${'Next Due: ' + v.nextDueDate}">Next Due: 2027</span>
+                        </div>
+                        <a th:href="@{/api/certificates/vaccination/{id}/download(id=${v.id})}" target="_blank" class="bg-slate-900 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg hover:bg-slate-800 shadow-sm flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-file-arrow-down text-sky-400"></i> Download PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHILD IMMUNIZATION SCHEDULE -->
+            <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-baby text-pink-500"></i> Pediatric Immunization Schedule
+                    </h3>
+                    <span class="text-xs bg-pink-100 text-pink-800 font-bold px-2.5 py-0.5 rounded-full" th:text="${childVaccines != null ? childVaccines.size() + ' Recorded' : '0 Recorded'}">0 Recorded</span>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(childVaccines)}" class="text-center py-10 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-500 flex items-center justify-center text-lg mx-auto mb-2">
+                        <i class="fa-solid fa-baby"></i>
+                    </div>
+                    <h4 class="text-xs font-bold text-slate-700" th:text="${currentUser == null ? 'Sign in to view child immunization' : 'No child immunization entries yet'}">No child immunization entries yet</h4>
+                    <p class="text-[11px] text-slate-400 max-w-xs mx-auto mt-0.5 mb-3" th:text="${currentUser == null ? 'Sign in to access pediatric immunization schedules, developmental milestones, and certificates.' : 'Record pediatric immunization doses (e.g. MMR, DTP, Polio) to track childhood growth milestones.'}">Record pediatric immunization doses.</p>
+                    <button th:if="${currentUser != null}" type="button" onclick="openRecordVaccineModal('CHILD')" class="bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-sm transition">
+                        <i class="fa-solid fa-plus mr-1"></i> Add Child Vaccine
+                    </button>
+                    <a th:if="${currentUser == null}" th:href="@{/login}" class="inline-flex items-center gap-1.5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm transition">
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In to View Child Records
+                    </a>
+                </div>
+
+                <div class="space-y-3" th:unless="${#lists.isEmpty(childVaccines)}">
+                    <div th:each="v : ${childVaccines}" class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex justify-between items-center text-xs">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 th:text="${v.vaccineName}" class="font-bold text-sm text-slate-900">MMR</h4>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.2 rounded" th:text="${v.doseNumber}">Dose 2</span>
+                            </div>
+                            <span class="text-slate-500 text-[11px] block mt-0.5" th:text="${'Administered at ' + v.providerName + ' (' + v.batchNumber + ')'}">Apollo Cradle</span>
+                            <span th:if="${v.nextDueDate != null}" class="text-amber-600 font-bold text-[11px] block mt-0.5" th:text="${'Upcoming Booster: ' + v.nextDueDate}">Booster: 2027</span>
+                        </div>
+                        <a th:href="@{/api/certificates/vaccination/{id}/download(id=${v.id})}" target="_blank" class="bg-slate-900 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg hover:bg-slate-800 shadow-sm flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-file-arrow-down text-pink-400"></i> Download PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Record Vaccine Modal -->
+    <div id="record-vaccine-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-900">Record Immunization Dose</h3>
+                <button type="button" onclick="closeRecordVaccineModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="vaccine-record-form" onsubmit="submitVaccineRecord(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Target Group *</label>
+                    <select id="vax-group" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <option value="ADULT">Adult Immunization</option>
+                        <option value="CHILD">Child / Pediatric Schedule</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Vaccine Name *</label>
+                    <input type="text" id="vax-name" required placeholder="e.g. Influenza Quadrivalent / MMR / COVID-19 Booster" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Dose / Schedule</label>
+                        <input type="text" id="vax-dose" placeholder="e.g. Dose 1, Booster 2026" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Recipient Name</label>
+                        <input type="text" id="vax-recipient" th:value="${currentUser != null ? currentUser.fullName : 'Individual'}" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Date Administered</label>
+                        <input type="date" id="vax-date" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Next Due Date (Optional)</label>
+                        <input type="date" id="vax-due" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Hospital / Clinic / Provider</label>
+                    <input type="text" id="vax-provider" placeholder="e.g. AIIMS / Apollo Hospital / Local Health Center" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 rounded-xl shadow transition">
+                        Save Immunization Record &rarr;
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openRecordVaccineModal(group) {
+            const modal = document.getElementById('record-vaccine-modal');
+            const select = document.getElementById('vax-group');
+            if (select && group) select.value = group;
+            const dateInp = document.getElementById('vax-date');
+            if (dateInp && !dateInp.value) {
+                dateInp.value = new Date().toISOString().split('T')[0];
+            }
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeRecordVaccineModal() {
+            const modal = document.getElementById('record-vaccine-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function submitVaccineRecord(event) {
+            event.preventDefault();
+            const group = document.getElementById('vax-group').value;
+            const name = document.getElementById('vax-name').value;
+            const dose = document.getElementById('vax-dose').value;
+            const recipient = document.getElementById('vax-recipient').value;
+            const adminDate = document.getElementById('vax-date').value;
+            const dueDate = document.getElementById('vax-due').value;
+            const provider = document.getElementById('vax-provider').value;
+
+            const params = new URLSearchParams();
+            params.append('targetGroup', group);
+            params.append('vaccineName', name);
+            if (dose) params.append('doseNumber', dose);
+            if (recipient) params.append('recipientName', recipient);
+            if (adminDate) params.append('administeredDate', adminDate);
+            if (dueDate) params.append('nextDueDate', dueDate);
+            if (provider) params.append('providerName', provider);
+
+            try {
+                const resp = await fetch('/api/vaccinations/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                });
+                if (resp.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to save vaccination record.');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Network error saving vaccination.');
+            }
+        }
+    </script>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                    🛡️ Modules 25 & 26: Insurance Vault & Healthcare Expenses
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Health Insurance & Expense Analytics
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Manage cashless policies, coverage limits, TPA pre-authorization, and medical expenditure trends.
+                </p>
+            </div>
+            <button onclick="alert('Claim document submission checklist generated.')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                <i class="fa-solid fa-file-invoice-dollar"></i> New Reimbursement Claim
+            </button>
+        </div>
+
+        <!-- INSURANCE POLICIES VAULT (Module 25) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div th:each="p : ${policies}" class="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                            <i class="fa-solid fa-shield-halved"></i> CASHLESS NETWORK ACTIVE
+                        </span>
+                        <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700 font-mono" th:text="${p.policyNumber}">
+                            STAR-HLT-2026-99412
+                        </span>
+                    </div>
+
+                    <h3 th:text="${p.providerName}" class="text-xl font-black mb-1">Star Health Comprehensive</h3>
+                    <p class="text-xs text-slate-400 mb-6" th:text="${p.planName}">Family Floater Gold Protection</p>
+
+                    <div class="bg-slate-950/80 p-5 rounded-2xl border border-slate-800 text-xs space-y-3 mb-6">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Total Sum Insured:</span>
+                            <span class="text-base font-black text-white" th:text="${'₹' + #numbers.formatDecimal(p.sumInsured, 0, 'COMMA', 0, 'POINT')}">₹10,00,000</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Remaining Balance:</span>
+                            <span class="text-base font-black text-emerald-400" th:text="${'₹' + #numbers.formatDecimal(p.remainingBalance, 0, 'COMMA', 0, 'POINT')}">₹9,55,000</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Valid Until:</span>
+                            <span class="text-slate-200 font-mono font-bold" th:text="${p.validUntil}">2027-07-16</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">TPA 24x7 Helpline:</span>
+                            <span class="text-slate-200 font-mono" th:text="${p.tpaContactPhone}">1800-425-2255</span>
+                        </div>
+                    </div>
+
+                    <p class="text-[11px] text-slate-400 italic mb-4" th:text="${'Covered Benefits: ' + p.coveredBenefits}"></p>
+                </div>
+
+                <div class="flex gap-2 pt-3 border-t border-slate-800">
+                    <a href="/hospitals" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition text-center">
+                        Find Cashless Hospitals
+                    </a>
+                    <button onclick="showToast('Pre-authorization checklist downloaded.', 'info')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl text-xs transition">
+                        Claim Checklist
+                    </button>
+                </div>
+            </div>
+
+            <!-- EXPENSE BREAKDOWN (Module 26) -->
+            <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-receipt text-sky-600"></i> Healthcare Expense History
+                        </h3>
+                        <span class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full">YTD: ₹2,830</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div th:each="e : ${expenses}" class="p-4 rounded-2xl border border-slate-100 bg-slate-50 flex justify-between items-center text-xs">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 th:text="${e.description}" class="font-bold text-slate-900">Endocrinologist consultation</h4>
+                                    <span class="text-[10px] uppercase font-bold text-sky-700 bg-sky-100 px-2 py-0.2 rounded" th:text="${e.category}">DOCTOR_FEE</span>
+                                </div>
+                                <span class="text-slate-400 text-[11px] mt-0.5 block" th:text="${e.facilityOrVendor + ' • ' + e.expenseDate}">Apollo Hospitals</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-black text-slate-900" th:text="${'₹' + e.amount}">₹900</span>
+                                <span class="text-[10px] text-emerald-600 font-bold block" th:text="${e.paymentStatus}">PAID</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 mt-4 text-center">
+                    <button onclick="alert('Exported comprehensive financial healthcare tax statement (Section 80D format).')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+                        Download 80D Tax Statement & Tax Receipts
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+</body>
+</html>

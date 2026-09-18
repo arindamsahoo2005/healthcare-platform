@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot",
+        "vmware.vscode-boot-dev-dash",
+        "formulahendry.auto-rename-tag",
+        "humao.rest-client"
+    ]
+}

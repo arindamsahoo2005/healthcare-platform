@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-purple-600 bg-purple-50 px-3 py-1 rounded-full border border-purple-100">
+                    🧪 Module 10: Labs, Diagnostics &amp; Home Collection
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2" th:text="${'Diagnostic Tests & Pathology Labs in ' + (selectedCity != null ? selectedCity : (selectedState != null ? selectedState : 'Your Region'))}">
+                    Diagnostic Tests &amp; Pathology Labs
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Compare certified laboratories near <strong th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your Area')}">Your Area</strong>, schedule home sample collection, and review fasting guidelines.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="/medical-records" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-waveform"></i> View Digital Locker Reports
+                </a>
+            </div>
+        </div>
+
+        <!-- Regional Multi-City Filter Tabs -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Select City:</span>
+                <span class="text-xs bg-purple-50 text-purple-700 font-bold px-2.5 py-0.5 rounded-full border border-purple-200"
+                      th:text="${'📍 Active: ' + (selectedCity != null ? selectedCity : (selectedState != null ? selectedState : 'West Bengal'))}">📍 Active</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                <a th:href="@{/diagnostics(category=${selectedCategory})}"
+                   th:class="${selectedCity == null && (selectedState == 'West Bengal' || selectedState == null) ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3.5 py-1.5 rounded-xl transition font-medium'">
+                    📍 West Bengal
+                </a>
+                <a th:href="@{/diagnostics(city='Kolkata', category=${selectedCategory})}"
+                   th:class="${selectedCity == 'Kolkata' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    Kolkata
+                </a>
+                <a th:href="@{/diagnostics(city='Delhi', category=${selectedCategory})}"
+                   th:class="${selectedCity == 'Delhi' || selectedCity == 'New Delhi' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🏛️ Delhi / NCR
+                </a>
+                <a th:href="@{/diagnostics(city='Mumbai', category=${selectedCategory})}"
+                   th:class="${selectedCity == 'Mumbai' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🏙️ Mumbai
+                </a>
+                <a th:href="@{/diagnostics(city='Bengaluru', category=${selectedCategory})}"
+                   th:class="${selectedCity == 'Bengaluru' || selectedCity == 'Bangalore' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🌿 Bengaluru
+                </a>
+                <a th:href="@{/diagnostics(city='Hyderabad', category=${selectedCategory})}"
+                   th:class="${selectedCity == 'Hyderabad' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    💎 Hyderabad
+                </a>
+                <a th:href="@{/diagnostics(city='Chennai', category=${selectedCategory})}"
+                   th:class="${selectedCity == 'Chennai' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🌊 Chennai
+                </a>
+                <a th:href="@{/diagnostics(city='Bhubaneswar', category=${selectedCategory})}"
+                   th:class="${selectedCity == 'Bhubaneswar' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🏛️ Bhubaneswar
+                </a>
+                <a th:href="@{/diagnostics(city='ALL', category=${selectedCategory})}"
+                   th:class="${selectedCity == 'ALL' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🇮🇳 All India
+                </a>
+            </div>
+        </div>
+
+        <!-- Category Filters -->
+        <div class="flex flex-wrap gap-2 text-xs">
+            <a th:href="@{/diagnostics(city=${selectedCity})}" 
+               th:class="${selectedCategory == null ? 'bg-purple-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-4 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                All Tests
+            </a>
+            <a th:href="@{/diagnostics(category='Blood', city=${selectedCity})}" 
+               th:class="${selectedCategory == 'Blood' ? 'bg-purple-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-4 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🩸 Blood Panels
+            </a>
+            <a th:href="@{/diagnostics(category='Imaging', city=${selectedCity})}" 
+               th:class="${selectedCategory == 'Imaging' ? 'bg-purple-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-4 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🩻 CT &amp; MRI Imaging
+            </a>
+            <a th:href="@{/diagnostics(category='Pathology', city=${selectedCity})}" 
+               th:class="${selectedCategory == 'Pathology' ? 'bg-purple-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-4 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🔬 Pathology &amp; Biopsy
+            </a>
+        </div>
+
+        <!-- Diagnostic Tests Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="t : ${labTests}" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 hover:border-purple-400 hover:shadow-md transition flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="bg-purple-50 text-purple-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase" th:text="${t.category}">
+                                Blood
+                            </span>
+                            <span th:if="${t.isGovernment()}" class="text-[9px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <i class="fa-solid fa-building-columns text-amber-600"></i> Govt Lab
+                            </span>
+                            <span th:if="${!t.isGovernment()}" class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <i class="fa-solid fa-shield-halved text-emerald-600"></i> Private Lab
+                            </span>
+                        </div>
+                        <span class="bg-sky-50 text-sky-800 text-[11px] font-bold px-2.5 py-1 rounded-full font-mono">
+                            <i class="fa-solid fa-location-arrow text-[10px]"></i> <span th:text="${t.distanceKm != null ? t.distanceKm + ' km' : t.city}">1.5 km</span>
+                        </span>
+                    </div>
+
+                    <h3 th:text="${t.testName}" class="text-base font-black text-slate-900 mb-1">Complete Blood Count (CBC)</h3>
+                    <p class="text-xs text-slate-500 mb-3" th:text="${t.centerName + ' • ' + t.city}">Dr. Lal PathLabs</p>
+
+                    <!-- Instructions & Details Box -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs space-y-2 mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Price:</span>
+                            <span class="text-base font-black text-slate-900" th:text="${'₹' + t.price}">₹350</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Turnaround Time:</span>
+                            <strong class="text-slate-700" th:text="${t.turnaroundHours + ' Hours'}">8 Hours</strong>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Home Sample Pickup:</span>
+                            <strong class="text-emerald-700 font-bold" th:text="${t.homeCollectionAvailable ? 'Available ✓' : 'Center Visit Only'}">Available ✓</strong>
+                        </div>
+                        <div class="pt-2 border-t border-slate-200">
+                            <span class="text-slate-400 block mb-0.5">Preparation Instructions:</span>
+                            <p class="text-slate-600 italic text-[11px]" th:text="${t.preparationInstructions}">No special fasting required.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 space-y-2">
+                    <div class="flex gap-2">
+                        <button th:if="${t.homeCollectionAvailable}" onclick="bookHomeCollection(this)" class="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-house-medical"></i> Home Pickup
+                        </button>
+                        <button onclick="bookCenterSlot(this)" class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition cursor-pointer">
+                            Book Center Slot
+                        </button>
+                    </div>
+                    <button type="button"
+                            th:attr="data-name=${t.centerName}, data-address=${t.centerName + ', ' + t.city}"
+                            onclick="openFacilityNavigation(this.getAttribute('data-name'), this.getAttribute('data-address'), null, null, null)"
+                            class="w-full py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-[11px] transition flex items-center justify-center gap-1.5 border border-slate-200 cursor-pointer">
+                        <i class="fa-solid fa-diamond-turn-right text-purple-600"></i> Get Directions to Lab
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+
+    <script>
+        function bookHomeCollection(btn) {
+            alert("✓ Home Sample Collection Booked!\n\nA certified phlebotomist will arrive with barcoded collection tubes at your registered address tomorrow morning between 07:00 AM - 08:30 AM.");
+        }
+        function bookCenterSlot(btn) {
+            alert("✓ Center Appointment Slot Reserved!\n\nYour appointment token has been issued. Fasting preparation reminder added to your notification feed.");
+        }
+    </script>
+</body>
+</html>

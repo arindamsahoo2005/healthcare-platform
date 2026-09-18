@@ -1,0 +1,12 @@
+# Robots.txt for Arindam Healthcare
+# Developed by Arindam Sahoo
+# Allows Googlebot, Bingbot, and all search engine crawlers
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /h2-console/
+
+# Host & Sitemap Declaration
+Host: https://arindam-healthcare.onrender.com
+Sitemap: https://arindam-healthcare.onrender.com/sitemap.xml

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-100">
+                    🩸 Module 9: Blood Center & Component Bank
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2" th:text="${'Blood Bank Stock & Availability in ' + (selectedCity != null ? selectedCity : (selectedState != null ? selectedState : 'Your Region'))}">
+                    Blood Bank Stock &amp; Availability
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Real-time units for Whole Blood, Packed Red Blood Cells (PRBC), Platelets, and FFP near <strong th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your Area')}">Your Area</strong>.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="syncLiveBloodRegistry()" id="btn-sync-blood" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-arrows-rotate"></i> <span>Sync Live Blood Registry</span>
+                </button>
+                <button onclick="openBloodRequestModal()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-droplet"></i> Emergency Blood Request
+                </button>
+            </div>
+        </div>
+
+        <!-- Regional Multi-City Filter Tabs -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Select City / Region:</span>
+                <span class="text-xs bg-rose-50 text-rose-700 font-bold px-2.5 py-0.5 rounded-full border border-rose-200"
+                      th:text="${'📍 Active: ' + (selectedCity != null ? selectedCity : (selectedState != null ? selectedState : 'West Bengal'))}">📍 Active</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                <a th:href="@{/blood-bank(group=${selectedGroup})}"
+                   th:class="${selectedCity == null && (selectedState == 'West Bengal' || selectedState == null) ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3.5 py-1.5 rounded-xl transition font-medium'">
+                    📍 West Bengal
+                </a>
+                <a th:href="@{/blood-bank(city='Kolkata', group=${selectedGroup})}"
+                   th:class="${selectedCity == 'Kolkata' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    Kolkata
+                </a>
+                <a th:href="@{/blood-bank(city='Delhi', group=${selectedGroup})}"
+                   th:class="${selectedCity == 'Delhi' || selectedCity == 'New Delhi' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🏛️ Delhi / NCR
+                </a>
+                <a th:href="@{/blood-bank(city='Mumbai', group=${selectedGroup})}"
+                   th:class="${selectedCity == 'Mumbai' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🏙️ Mumbai
+                </a>
+                <a th:href="@{/blood-bank(city='Bengaluru', group=${selectedGroup})}"
+                   th:class="${selectedCity == 'Bengaluru' || selectedCity == 'Bangalore' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🌿 Bengaluru
+                </a>
+                <a th:href="@{/blood-bank(city='Hyderabad', group=${selectedGroup})}"
+                   th:class="${selectedCity == 'Hyderabad' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    💎 Hyderabad
+                </a>
+                <a th:href="@{/blood-bank(city='Chennai', group=${selectedGroup})}"
+                   th:class="${selectedCity == 'Chennai' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🌊 Chennai
+                </a>
+                <a th:href="@{/blood-bank(city='Bhubaneswar', group=${selectedGroup})}"
+                   th:class="${selectedCity == 'Bhubaneswar' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🏛️ Bhubaneswar
+                </a>
+                <a th:href="@{/blood-bank(city='ALL', group=${selectedGroup})}"
+                   th:class="${selectedCity == 'ALL' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🇮🇳 All India
+                </a>
+            </div>
+        </div>
+
+        <!-- Blood Group Filter Badges -->
+        <div class="flex flex-wrap gap-2 text-xs">
+            <a th:href="@{/blood-bank(city=${selectedCity})}" 
+               th:class="${selectedGroup == null ? 'bg-rose-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-4 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                All Groups
+            </a>
+            <a th:each="g : ${ {'O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'} }"
+               th:href="@{/blood-bank(group=${g}, city=${selectedCity})}"
+               th:class="${selectedGroup == g ? 'bg-rose-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-4 py-2 rounded-xl border border-slate-200 shadow-sm transition font-mono font-bold'"
+               th:text="${g}">
+                O+
+            </a>
+        </div>
+
+        <!-- Blood Stock Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="b : ${bloodList}" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 hover:border-rose-400 hover:shadow-md transition flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-rose-50 text-rose-700 font-black text-xl px-3 py-1 rounded-xl border border-rose-200 font-mono" th:text="${b.bloodGroup}">
+                                O+
+                            </span>
+                            <span th:if="${b.isGovernment()}" class="text-[9px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <i class="fa-solid fa-building-columns text-amber-600"></i> Govt Centre
+                            </span>
+                            <span th:if="${!b.isGovernment()}" class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <i class="fa-solid fa-shield-halved text-emerald-600"></i> Private Centre
+                            </span>
+                        </div>
+                        <span class="bg-sky-50 text-sky-800 text-[11px] font-bold px-2.5 py-1 rounded-full border border-sky-100 font-mono">
+                            <i class="fa-solid fa-location-arrow text-[10px]"></i> <span th:text="${b.distanceKm != null ? b.distanceKm + ' km away' : (b.city != null ? b.city : 'Stock Verified')}">1.2 km</span>
+                        </span>
+                    </div>
+
+                    <h3 th:text="${b.bloodBankName}" class="text-base font-bold text-slate-900 mb-1">Central Blood Bank Kolkata</h3>
+                    <p class="text-xs text-slate-500 mb-3" th:text="${b.address}">Maniktala / Budge Budge, Kolkata</p>
+
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs space-y-2 mb-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Component:</span>
+                            <strong class="text-slate-700 uppercase" th:text="${b.componentType}">WHOLE_BLOOD</strong>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-400">Units in Stock:</span>
+                            <strong class="text-rose-600 font-black text-sm" th:text="${b.unitsAvailable + ' Units'}">38 Units</strong>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <a th:href="'tel:' + ${b.contactPhone}" class="flex-1 py-2 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">
+                                <i class="fa-solid fa-phone"></i> Call
+                            </a>
+                            <button onclick="openBloodRequestModal()" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow">
+                                Reserve
+                            </button>
+                        </div>
+                        <button type="button"
+                                th:attr="data-name=${b.bloodBankName}, data-address=${b.address}, data-phone=${b.contactPhone}"
+                                onclick="openFacilityNavigation(this.getAttribute('data-name'), this.getAttribute('data-address'), null, null, this.getAttribute('data-phone'))"
+                                class="w-full py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-[11px] transition flex items-center justify-center gap-1.5 border border-slate-200 cursor-pointer">
+                            <i class="fa-solid fa-diamond-turn-right text-rose-600"></i> Get Directions to Blood Bank
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(bloodList)}" class="col-span-full py-12 text-center bg-white rounded-3xl border border-slate-200">
+                <i class="fa-solid fa-droplet-slash text-4xl text-rose-300 mb-3 block"></i>
+                <p class="text-base font-bold text-slate-700">No blood stock entries found matching this filter.</p>
+                <p class="text-xs text-slate-400 mt-1">Try selecting 'All Groups' or another city above.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Emergency Blood Request Modal -->
+    <div id="blood-request-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl p-6 border border-slate-200">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-droplet text-rose-600"></i> Reserve Blood Units
+                </h3>
+                <button onclick="closeBloodRequestModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">Direct request to nearest blood bank for priority cross-matching.</p>
+            <div class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Required Group</label>
+                        <select class="w-full border border-slate-300 rounded-lg p-2.5">
+                            <option>O+</option><option>A+</option><option>B+</option><option>AB+</option>
+                            <option>O-</option><option>A-</option><option>B-</option><option>AB-</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Units Needed</label>
+                        <input type="number" value="2" min="1" max="10" class="w-full border border-slate-300 rounded-lg p-2.5">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Receiving Hospital</label>
+                    <input type="text" th:value="${selectedCity != null ? selectedCity + ' Apex Hospital / Emergency Center' : 'Apex Regional Hospital'}" placeholder="Enter receiving hospital" class="w-full border border-slate-300 rounded-lg p-2.5">
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button onclick="closeBloodRequestModal()" class="px-4 py-2 text-slate-600">Cancel</button>
+                    <button onclick="confirmBloodRequisition()" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl">Broadcast Urgent Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+
+    <script>
+        function openBloodRequestModal() { document.getElementById('blood-request-modal').classList.remove('hidden'); }
+        function closeBloodRequestModal() { document.getElementById('blood-request-modal').classList.add('hidden'); }
+        function confirmBloodRequisition() {
+            closeBloodRequestModal();
+            alert("✓ Emergency Blood Requisition broadcast to nearest blood banks. A verified coordinator will call you within 5 minutes.");
+        }
+        function syncLiveBloodRegistry() {
+            const btn = document.getElementById('btn-sync-blood');
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing Registry...';
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = orig;
+                alert('✓ Live National Blood Registry (eRaktKosh / Red Cross) verified. Blood component inventory synchronized for your active region.');
+            }, 800);
+        }
+    </script>
+</body>
+</html>

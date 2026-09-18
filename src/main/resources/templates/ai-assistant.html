@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                    🤖 Module 1 & 13: AI Health Assistant & Ask My Records
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Clinical AI Guidance & Record Intelligence
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Ask questions about your uploaded lab reports, active prescriptions, triage symptoms, and prepare for doctor visits.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-[10px]"></i> Multilingual (12 Indian Languages)
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEFT CHAT CONSOLE (8 cols) -->
+            <div class="lg:col-span-8 bg-white rounded-3xl shadow-sm border border-slate-200 flex flex-col h-[650px] overflow-hidden">
+                
+                <!-- Chat Header -->
+                <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-lg shadow-md">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-900">CarePulse Clinical Assistant</h3>
+                            <span class="text-[11px] text-emerald-600 flex items-center gap-1 font-medium">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Authorized Record Access Active
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-600 px-2 py-1 rounded">
+                            <i class="fa-solid fa-arrow-rotate-right"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Stream -->
+                <div id="ai-chat-messages" class="flex-grow p-5 overflow-y-auto space-y-4">
+                    
+                    <!-- Welcome AI message -->
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs shrink-0 font-bold">
+                            AI
+                        </div>
+                        <div class="bg-slate-100 text-slate-800 p-4 rounded-2xl rounded-tl-sm max-w-[85%] text-xs leading-relaxed space-y-2">
+                            <p><strong th:text="${currentUser != null ? 'Hello ' + currentUser.fullName + '!' : 'Hello!'}">Hello!</strong> I am your AI Health Assistant. I have secure, authorized access to your private health records, active prescriptions, and medicine timer schedule.</p>
+                            <p>How can I assist you today? You can ask:</p>
+                            <div class="flex flex-wrap gap-1.5 pt-1">
+                                <button onclick="quickPrompt('When was my last blood test?')" class="bg-white hover:bg-slate-50 border border-slate-200 text-indigo-600 font-medium px-2.5 py-1 rounded-lg text-[11px]">
+                                    "When was my last blood test?"
+                                </button>
+                                <button onclick="quickPrompt('Explain my Metformin and Telmisartan prescriptions')" class="bg-white hover:bg-slate-50 border border-slate-200 text-indigo-600 font-medium px-2.5 py-1 rounded-lg text-[11px]">
+                                    "Explain my prescriptions"
+                                </button>
+                                <button onclick="quickPrompt('What questions should I ask my doctor for my next visit?')" class="bg-white hover:bg-slate-50 border border-slate-200 text-indigo-600 font-medium px-2.5 py-1 rounded-lg text-[11px]">
+                                    "Prepare questions for doctor"
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Input Area -->
+                <div class="p-4 border-t border-slate-200 bg-white">
+                    <form onsubmit="sendAiMessage(event)" class="flex items-center gap-2">
+                        <button type="button" onclick="toggleVoiceAssistant()" title="Speak voice query" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 flex items-center justify-center transition">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        <input id="ai-chat-input" type="text" placeholder="Ask about symptoms, lab reports, medicine food timing, or records..." class="flex-grow border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-md flex items-center gap-1.5">
+                            <span>Ask</span> <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                        </button>
+                    </form>
+                    <div class="flex justify-between items-center mt-2 text-[10px] text-slate-400">
+                        <span>🔒 Emergency Red-Flag detection active. Responses cite verified user documents.</span>
+                        <span id="ai-lang-label">Language: English</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT PANEL: AUTHORIZED DOCUMENTS & DOCTOR PREP (4 cols) -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Authorized Health Locker Documents -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-folder-open text-sky-600"></i> Connected Health Records
+                        </h3>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">4 Verified</span>
+                    </div>
+
+                    <p class="text-xs text-slate-500 mb-3">AI answers directly from these documents with verifiable citations:</p>
+
+                    <div class="space-y-2.5">
+                        <div th:each="r : ${records}" class="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50/40 hover:border-indigo-300 transition cursor-pointer"
+                             th:attr="data-title=${r.title}" onclick="quickPromptFromRecord(this)">
+                            <div class="flex justify-between items-start">
+                                <h4 class="text-xs font-bold text-slate-800" th:text="${r.title}">Complete Lipid & HbA1c Panel</h4>
+                                <span class="text-[10px] uppercase font-bold text-indigo-700 bg-indigo-100 px-1.5 py-0.2 rounded" th:text="${r.recordType}">BLOOD_TEST</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500 block mt-1" th:text="${r.recordDate + ' • ' + r.doctorName}">20 Aug 2026</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Red-Flag Protocol Card -->
+                <div class="bg-red-50 border border-red-200 p-5 rounded-3xl text-xs space-y-2">
+                    <div class="flex items-center gap-2 text-red-700 font-bold">
+                        <i class="fa-solid fa-triangle-exclamation text-base"></i>
+                        <span>Red-Flag Emergency Protocol</span>
+                    </div>
+                    <p class="text-red-800 leading-relaxed">
+                        If symptoms include acute chest pain, sudden numbness/paralysis, or severe breathlessness, the AI immediately overrides to the 1-Click SOS protocol.
+                    </p>
+                    <a href="/emergency" class="inline-block mt-2 bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-sm">
+                        Emergency Center &rarr;
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+
+    <script>
+        function quickPromptFromRecord(el) {
+            const title = el.getAttribute('data-title');
+            quickPrompt('Tell me about my ' + title);
+        }
+
+        function quickPrompt(text) {
+            document.getElementById('ai-chat-input').value = text;
+            sendAiMessage();
+        }
+
+        function clearChat() {
+            window.location.reload();
+        }
+
+        async function sendAiMessage(e) {
+            if (e) e.preventDefault();
+            const input = document.getElementById('ai-chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const chatContainer = document.getElementById('ai-chat-messages');
+
+            // Append User Message
+            chatContainer.innerHTML += `
+                <div class="flex items-start gap-3 justify-end">
+                    <div class="bg-indigo-600 text-white p-3.5 rounded-2xl rounded-tr-sm max-w-[85%] text-xs leading-relaxed">
+                        ${escapeHtml(message)}
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs shrink-0 font-bold">
+                        You
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Loading bubble
+            const loadingId = 'loading-' + Date.now();
+            chatContainer.innerHTML += `
+                <div id="${loadingId}" class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs shrink-0 font-bold">AI</div>
+                    <div class="bg-slate-100 text-slate-500 p-3 rounded-2xl text-xs italic flex items-center gap-2">
+                        <span class="animate-spin text-indigo-600"><i class="fa-solid fa-circle-notch"></i></span>
+                        <span>Analyzing authorized records and clinical database...</span>
+                    </div>
+                </div>
+            `;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            const lang = localStorage.getItem('site_lang') || 'en';
+
+            try {
+                const resp = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `message=${encodeURIComponent(message)}&language=${lang}`
+                });
+                const data = await resp.json();
+
+                document.getElementById(loadingId)?.remove();
+
+                let sourcesHtml = '';
+                if (data.sourceDocuments && data.sourceDocuments.length > 0) {
+                    sourcesHtml = `<div class="mt-3 pt-2 border-t border-slate-200 text-[11px] text-slate-500">
+                        <strong>Source Document:</strong> ${data.sourceDocuments.join(', ')}
+                    </div>`;
+                }
+
+                let questionsHtml = '';
+                if (data.questionsForDoctor && data.questionsForDoctor.length > 0) {
+                    questionsHtml = `<div class="mt-3 bg-white p-3 rounded-xl border border-indigo-100 text-[11px] text-indigo-900 space-y-1">
+                        <strong>Questions to ask your doctor:</strong>
+                        <ul class="list-disc pl-4 space-y-0.5">
+                            ${data.questionsForDoctor.map(q => `<li>${q}</li>`).join('')}
+                        </ul>
+                    </div>`;
+                }
+
+                let redFlagClass = data.emergencyRedFlag ? 'bg-red-50 border-2 border-red-500 text-red-950' : 'bg-slate-100 text-slate-800';
+
+                chatContainer.innerHTML += `
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs shrink-0 font-bold">
+                            AI
+                        </div>
+                        <div class="${redFlagClass} p-4 rounded-2xl rounded-tl-sm max-w-[85%] text-xs leading-relaxed">
+                            <div class="prose-sm">${formatMarkdown(data.answer)}</div>
+                            ${questionsHtml}
+                            ${sourcesHtml}
+                            <div class="mt-3 flex gap-2">
+                                <button onclick="speakText('${escapeQuotes(data.answer)}', '${lang}')" class="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 text-[11px]">
+                                    <i class="fa-solid fa-volume-high"></i> Read Out Loud
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById(loadingId)?.remove();
+                chatContainer.innerHTML += `<div class="text-xs text-red-600 p-3">Assistant temporarily unavailable. Please try again.</div>`;
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+        }
+        function formatMarkdown(text) {
+            if (!text) return '';
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                       .replace(/\n\n/g, '<br><br>')
+                       .replace(/\n/g, '<br>');
+        }
+    </script>
+</body>
+</html>

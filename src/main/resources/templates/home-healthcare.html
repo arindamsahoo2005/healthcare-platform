@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
+                    🏠 Module 23: Home Healthcare & In-Home Nursing
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Verified Home Healthcare & Attendants
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Book certified clinical nurses, physiotherapists, and eldercare attendants at home in <strong th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your Area')}">Your Area</strong>.
+                </p>
+            </div>
+            <button onclick="document.getElementById('homecare-modal').classList.remove('hidden')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                <i class="fa-solid fa-calendar-plus"></i> Book Home Health Visit
+            </button>
+        </div>
+
+        <!-- SERVICE CATEGORIES CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm text-center">
+                <div class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-user-nurse"></i>
+                </div>
+                <h4 class="font-bold text-sm text-slate-900">Clinical Home Nursing</h4>
+                <p class="text-[11px] text-slate-500 mt-1">Wound dressing, catheter care, IV antibiotic infusions, and vitals monitoring.</p>
+                <span class="inline-block mt-3 text-xs font-bold text-teal-700">₹600 / Visit</span>
+            </div>
+
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm text-center">
+                <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-person-walking-with-cane"></i>
+                </div>
+                <h4 class="font-bold text-sm text-slate-900">Home Physiotherapy</h4>
+                <p class="text-[11px] text-slate-500 mt-1">Post-operative joint rehab, stroke neuro-rehabilitation, and gait training.</p>
+                <span class="inline-block mt-3 text-xs font-bold text-sky-700">₹850 / Session</span>
+            </div>
+
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm text-center">
+                <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-hands-holding-child"></i>
+                </div>
+                <h4 class="font-bold text-sm text-slate-900">Elderly Companion Care</h4>
+                <p class="text-[11px] text-slate-500 mt-1">12-hour or 24-hour trained attendant for senior mobility, feeding, and meds.</p>
+                <span class="inline-block mt-3 text-xs font-bold text-amber-700">₹1,200 / 12h Shift</span>
+            </div>
+
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm text-center">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-stethoscope"></i>
+                </div>
+                <h4 class="font-bold text-sm text-slate-900">Post-Discharge Recovery</h4>
+                <p class="text-[11px] text-slate-500 mt-1">Surgeon-coordinated wound checkups and telemetry monitoring at home.</p>
+                <span class="inline-block mt-3 text-xs font-bold text-indigo-700">₹950 / Visit</span>
+            </div>
+        </div>
+
+        <!-- ACTIVE BOOKINGS STREAM -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+            <h3 class="text-base font-black text-slate-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-check text-teal-600"></i> Scheduled Home Health Visits
+            </h3>
+
+            <div class="space-y-4">
+                <div th:each="b : ${bookings}" class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-4 text-xs">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-teal-100 text-teal-800 font-bold text-[10px] px-2 py-0.5 rounded uppercase" th:text="${b.serviceType}">PHYSIOTHERAPY</span>
+                            <h4 class="font-bold text-sm text-slate-900" th:text="${b.patientName}">Bichitra Sahoo</h4>
+                        </div>
+                        <p class="text-slate-600 mt-1" th:text="${'Needs: ' + b.clinicalNeeds}">Post-knee surgery mobility</p>
+                        <span class="text-slate-400 text-[11px] block mt-0.5" th:text="${'Scheduled: ' + b.scheduledDate + ' (' + b.preferredTimeSlot + ')'}">Tomorrow, 10:00 AM</span>
+                    </div>
+
+                    <div class="text-right">
+                        <strong class="text-slate-900 block" th:text="${b.professionalAssigned}">Dr. Soumya Mishra (PT)</strong>
+                        <span class="text-teal-700 font-mono text-[11px]" th:text="${b.professionalPhone}">+91 98765 88771</span>
+                        <div class="mt-2">
+                            <span class="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2 py-0.5 rounded" th:text="${b.status}">CONFIRMED</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Booking Modal -->
+    <div id="homecare-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-900">Book In-Home Healthcare</h3>
+                <button onclick="document.getElementById('homecare-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="homecare-form" onsubmit="submitHomeCare(event)" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Patient Name *</label>
+                    <input type="text" name="patientName" value="Bichitra Sahoo (Father)" required class="w-full border border-slate-300 rounded-lg p-2.5">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Contact Phone *</label>
+                    <input type="tel" name="contactPhone" value="+91 98765 43212" required class="w-full border border-slate-300 rounded-lg p-2.5">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Service Type *</label>
+                    <select name="serviceType" class="w-full border border-slate-300 rounded-lg p-2.5 font-bold">
+                        <option value="PHYSIOTHERAPY">In-Home Physiotherapy (₹850)</option>
+                        <option value="HOME_NURSE">Certified Clinical Nurse (₹600)</option>
+                        <option value="ELDERLY_CARE">Senior Attendant Care (₹1,200)</option>
+                        <option value="POST_OP_CARE">Post-Op Recovery & Dressing (₹950)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Address *</label>
+                    <input type="text" name="address" value="MG Road, Budge Budge, South 24 Parganas, Kolkata 700137" required class="w-full border border-slate-300 rounded-lg p-2.5">
+                </div>
+                <input type="hidden" name="city" value="Budge Budge">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Date *</label>
+                        <input type="date" name="scheduledDateStr" value="2026-09-19" required class="w-full border border-slate-300 rounded-lg p-2.5">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Time Slot</label>
+                        <select class="w-full border border-slate-300 rounded-lg p-2.5">
+                            <option>09:00 AM - 11:00 AM</option>
+                            <option>02:00 PM - 04:00 PM</option>
+                            <option>05:00 PM - 07:00 PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="document.getElementById('homecare-modal').classList.add('hidden')" class="px-4 py-2 text-slate-600">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-teal-600 text-white font-bold rounded-xl shadow">Confirm Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+
+    <script>
+        async function submitHomeCare(e) {
+            e.preventDefault();
+            const form = document.getElementById('homecare-form');
+            const formData = new FormData(form);
+
+            try {
+                const resp = await fetch('/api/homecare/book', { method: 'POST', body: formData });
+                const data = await resp.json();
+                if (data.status === 'SUCCESS') {
+                    alert(`✓ Home Health Visit Confirmed!\n\nBooking #${data.bookingId}\nAssigned Professional: ${data.assignedProfessional}\nContact: ${data.contactPhone}`);
+                    window.location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Error booking home care", "error");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+                    🧭 Module 38: Complete Connected Healthcare Journey
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    The Connected Care Journey
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    An orchestrated clinical continuum: AI Triage &rarr; Doctor & Hospital &rarr; E-Prescription &rarr; Medicine Timer &rarr; Recovery.
+                </p>
+            </div>
+            <a href="/medicine-timer" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                <i class="fa-solid fa-clock"></i> Active Medicine Timer
+            </a>
+        </div>
+
+        <!-- INTERACTIVE CONNECTED PIPELINE DIAGRAM -->
+        <div class="bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 text-white p-6 sm:p-10 rounded-3xl shadow-2xl border border-slate-800">
+            <div class="max-w-3xl mx-auto space-y-6 text-center">
+                
+                <!-- Stage 1: User & AI Assistant -->
+                <div class="inline-block bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-lg w-full max-w-sm">
+                    <span class="text-[10px] text-indigo-400 font-mono font-bold uppercase tracking-widest block mb-1">STAGE 1</span>
+                    <h3 class="text-base font-black text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-robot text-indigo-400"></i> AI Symptom Triage & Red-Flag Check
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Patient reports symptoms. AI checks red flags and suggests specialists.</p>
+                </div>
+
+                <div class="text-sky-400 text-xl font-bold flex justify-center"><i class="fa-solid fa-arrow-down"></i></div>
+
+                <!-- Stage 2: Doctor & Hospital Finder -->
+                <div class="inline-block bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-lg w-full max-w-sm">
+                    <span class="text-[10px] text-sky-400 font-mono font-bold uppercase tracking-widest block mb-1">STAGE 2</span>
+                    <h3 class="text-base font-black text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-hospital text-sky-400"></i> Location-Based Facility Search
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Haversine formula ranks closest doctors, available beds, and emergency units.</p>
+                </div>
+
+                <div class="text-sky-400 text-xl font-bold flex justify-center"><i class="fa-solid fa-arrow-down"></i></div>
+
+                <!-- Stage 3: Appointment & Consultation -->
+                <div class="inline-block bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-lg w-full max-w-sm">
+                    <span class="text-[10px] text-teal-400 font-mono font-bold uppercase tracking-widest block mb-1">STAGE 3</span>
+                    <h3 class="text-base font-black text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-calendar-check text-teal-400"></i> Token Booking & Consultation
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Instant queue token, AI pre-visit questionnaire, in-person or video consultation.</p>
+                </div>
+
+                <div class="text-sky-400 text-xl font-bold flex justify-center"><i class="fa-solid fa-arrow-down"></i></div>
+
+                <!-- Stage 4: Prescription Split -->
+                <div class="inline-block bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-lg w-full max-w-sm">
+                    <span class="text-[10px] text-purple-400 font-mono font-bold uppercase tracking-widest block mb-1">STAGE 4</span>
+                    <h3 class="text-base font-black text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-prescription text-purple-400"></i> Verified E-Prescription Issued
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Automated dispatch to Pharmacy and Diagnostic Laboratories.</p>
+                </div>
+
+                <!-- Parallel Branches: Pharmacy vs Lab -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto pt-2">
+                    
+                    <!-- Left: Pharmacy -> Medicine Timer -->
+                    <div class="bg-slate-800/80 border border-emerald-500/40 p-4 rounded-2xl text-left space-y-2">
+                        <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase">
+                            <i class="fa-solid fa-prescription-bottle-medical"></i> Pharmacy & Reminders
+                        </div>
+                        <h4 class="font-bold text-sm">Automated Medicine Timer</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Prescription automatically syncs with your sub-second countdown timer. Includes before/after food alerts, pill refill countdowns, and caregiver safety notifications.
+                        </p>
+                        <a href="/medicine-timer" class="inline-block text-xs font-bold text-emerald-400 hover:underline">
+                            Open Live Timer &rarr;
+                        </a>
+                    </div>
+
+                    <!-- Right: Lab -> AI Explanation -->
+                    <div class="bg-slate-800/80 border border-purple-500/40 p-4 rounded-2xl text-left space-y-2">
+                        <div class="flex items-center gap-2 text-purple-400 font-bold text-xs uppercase">
+                            <i class="fa-solid fa-vial"></i> Lab & Diagnostics
+                        </div>
+                        <h4 class="font-bold text-sm">Report Locker & AI Explanation</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Home phlebotomist collects blood samples. Lab uploads digital report into encrypted health locker. AI explains biomarker values in your native language.
+                        </p>
+                        <a href="/medical-records" class="inline-block text-xs font-bold text-purple-400 hover:underline">
+                            View Reports &rarr;
+                        </a>
+                    </div>
+
+                </div>
+
+                <div class="text-sky-400 text-xl font-bold flex justify-center pt-2"><i class="fa-solid fa-arrow-down"></i></div>
+
+                <!-- Stage 5: Health Record Timeline & Recovery -->
+                <div class="inline-block bg-slate-800 border border-slate-700 p-4 rounded-2xl shadow-lg w-full max-w-sm">
+                    <span class="text-[10px] text-amber-400 font-mono font-bold uppercase tracking-widest block mb-1">STAGE 5</span>
+                    <h3 class="text-base font-black text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-timeline text-amber-400"></i> Lifetime Health Record & Follow-up
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Chronological Health Timeline, Ask My Records Q&A, and recovery tracking.</p>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+</body>
+</html>

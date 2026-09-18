@@ -1,0 +1,13 @@
+﻿target/
+.tools/
+*.log
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+*.class
+scratch/
+.DS_Store
+Thumbs.db
+node_modules/

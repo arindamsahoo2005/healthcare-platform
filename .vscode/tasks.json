@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Spring Boot: Run Live Server",
+            "type": "shell",
+            "command": ".\\mvnw.cmd spring-boot:run",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Spring Boot: Clean Compile",
+            "type": "shell",
+            "command": ".\\mvnw.cmd clean compile",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Spring Boot: Package JAR",
+            "type": "shell",
+            "command": ".\\mvnw.cmd clean package -DskipTests",
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}

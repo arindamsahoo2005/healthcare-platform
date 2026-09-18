@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 pb-20 lg:pb-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+                    🩺 Module 3 & 4: Doctors, Specialists & Appointments
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Verified Doctors & Specialists
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Showing specialists near <strong th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your Area')}">Your Area</strong> ranked by distance. Book in-person or video consultations with instant tokens.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-full">
+                    ● Doctors Available Today
+                </span>
+            </div>
+        </div>
+
+        <!-- West Bengal & Regional Filter Tabs -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Region:</span>
+                <span class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-200"
+                      th:text="${selectedState == 'ALL' ? '🇮🇳 Nationwide (All India)' : '📍 ' + (selectedCity != null ? selectedCity + ' (' + selectedState + ')' : (selectedState != null ? selectedState : 'West Bengal'))}">📍 West Bengal</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                <a th:href="@{/doctors(state='West Bengal', specialty=${selectedSpecialty})}"
+                   th:class="${(selectedState == 'West Bengal' || selectedState == null) && selectedCity == null ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3.5 py-1.5 rounded-xl transition font-medium'">
+                    📍 West Bengal
+                </a>
+                <a th:href="@{/doctors(city='Kolkata', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Kolkata' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    Kolkata
+                </a>
+                <a th:href="@{/doctors(city='Budge Budge', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Budge Budge' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    Budge Budge
+                </a>
+                <a th:href="@{/doctors(city='Delhi', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Delhi' || selectedCity == 'New Delhi' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🏛️ Delhi / NCR
+                </a>
+                <a th:href="@{/doctors(city='Mumbai', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Mumbai' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🏙️ Mumbai
+                </a>
+                <a th:href="@{/doctors(city='Bengaluru', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Bengaluru' || selectedCity == 'Bangalore' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🌿 Bengaluru
+                </a>
+                <a th:href="@{/doctors(city='Hyderabad', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Hyderabad' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    💎 Hyderabad
+                </a>
+                <a th:href="@{/doctors(city='Chennai', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Chennai' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🌊 Chennai
+                </a>
+                <a th:href="@{/doctors(city='Bhubaneswar', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Bhubaneswar' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🏛️ Bhubaneswar
+                </a>
+                <a th:href="@{/doctors(city='Howrah', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Howrah' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    Howrah
+                </a>
+                <a th:href="@{/doctors(city='Siliguri', specialty=${selectedSpecialty})}"
+                   th:class="${selectedCity == 'Siliguri' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    Siliguri
+                </a>
+                <a th:href="@{/doctors(state='ALL', specialty=${selectedSpecialty})}"
+                   th:class="${selectedState == 'ALL' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                    🇮🇳 All India
+                </a>
+            </div>
+        </div>
+
+        <!-- Smart Symptom-to-Specialist Matcher (AI Tele-Triage Helper) -->
+        <div class="bg-gradient-to-r from-sky-900 via-indigo-900 to-slate-900 text-white p-5 rounded-2xl shadow-sm space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-300 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </span>
+                    <div>
+                        <h4 class="text-xs sm:text-sm font-black text-white">Smart Symptom-to-Specialist Matcher</h4>
+                        <p class="text-[11px] text-slate-300">Select or tap your primary symptom to instantly connect with the right West Bengal medical specialist:</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                <a th:href="@{/doctors(specialty='Cardiology', state=${selectedState}, city=${selectedCity})}" class="bg-white/10 hover:bg-white/20 text-sky-200 px-2.5 py-1 rounded-lg transition text-[11px]">
+                    🫀 Chest Pain / Palpitations → Cardiology
+                </a>
+                <a th:href="@{/doctors(specialty='Endocrinology', state=${selectedState}, city=${selectedCity})}" class="bg-white/10 hover:bg-white/20 text-sky-200 px-2.5 py-1 rounded-lg transition text-[11px]">
+                    🩸 High Blood Sugar / Thyroid → Endocrinology
+                </a>
+                <a th:href="@{/doctors(specialty='Gynecology', state=${selectedState}, city=${selectedCity})}" class="bg-white/10 hover:bg-white/20 text-sky-200 px-2.5 py-1 rounded-lg transition text-[11px]">
+                    🤰 Pregnancy / PCOD → Gynecology
+                </a>
+                <a th:href="@{/doctors(specialty='Dermatology', state=${selectedState}, city=${selectedCity})}" class="bg-white/10 hover:bg-white/20 text-sky-200 px-2.5 py-1 rounded-lg transition text-[11px]">
+                    ✨ Skin Allergy / Hair Fall → Dermatology
+                </a>
+                <a th:href="@{/doctors(specialty='Orthopedics', state=${selectedState}, city=${selectedCity})}" class="bg-white/10 hover:bg-white/20 text-sky-200 px-2.5 py-1 rounded-lg transition text-[11px]">
+                    🦴 Knee / Joint Pain → Orthopedics
+                </a>
+                <a th:href="@{/doctors(specialty='Pediatrics', state=${selectedState}, city=${selectedCity})}" class="bg-white/10 hover:bg-white/20 text-sky-200 px-2.5 py-1 rounded-lg transition text-[11px]">
+                    👶 Child Cough / Vaccination → Pediatrics
+                </a>
+                <a th:href="@{/doctors(specialty='Pulmonology', state=${selectedState}, city=${selectedCity})}" class="bg-white/10 hover:bg-white/20 text-sky-200 px-2.5 py-1 rounded-lg transition text-[11px]">
+                    🫁 Shortness of Breath / Asthma → Pulmonology
+                </a>
+                <a th:href="@{/doctors(specialty='ENT', state=${selectedState}, city=${selectedCity})}" class="bg-white/10 hover:bg-white/20 text-sky-200 px-2.5 py-1 rounded-lg transition text-[11px]">
+                    👂 Ear Ringing / Sinus → ENT
+                </a>
+                <a th:href="@{/doctors(specialty='Ophthalmology', state=${selectedState}, city=${selectedCity})}" class="bg-white/10 hover:bg-white/20 text-sky-200 px-2.5 py-1 rounded-lg transition text-[11px]">
+                    👁️ Blurry Vision / Cataract → Ophthalmology
+                </a>
+            </div>
+        </div>
+
+        <!-- Specialty Filter Buttons -->
+        <div class="flex flex-wrap items-center gap-1.5 text-xs">
+            <a th:href="@{/doctors(state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == null ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                All Specialties
+            </a>
+            <a th:href="@{/doctors(specialty='General Medicine', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'General Medicine' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🩺 General Medicine
+            </a>
+            <a th:href="@{/doctors(specialty='Cardiology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Cardiology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🫀 Cardiology
+            </a>
+            <a th:href="@{/doctors(specialty='Endocrinology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Endocrinology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🩸 Endocrinology / Diabetes
+            </a>
+            <a th:href="@{/doctors(specialty='Gynecology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Gynecology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🤰 Gynecology & Obs
+            </a>
+            <a th:href="@{/doctors(specialty='Dermatology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Dermatology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                ✨ Dermatology
+            </a>
+            <a th:href="@{/doctors(specialty='Neurology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Neurology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🧠 Neurology
+            </a>
+            <a th:href="@{/doctors(specialty='Orthopedics', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Orthopedics' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🦴 Orthopedics
+            </a>
+            <a th:href="@{/doctors(specialty='Pediatrics', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Pediatrics' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                👶 Pediatrics
+            </a>
+            <a th:href="@{/doctors(specialty='Pulmonology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Pulmonology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🫁 Pulmonology
+            </a>
+            <a th:href="@{/doctors(specialty='Gastroenterology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Gastroenterology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🔬 Gastroenterology
+            </a>
+            <a th:href="@{/doctors(specialty='Oncology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Oncology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🎗️ Oncology
+            </a>
+            <a th:href="@{/doctors(specialty='Nephrology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Nephrology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🧪 Nephrology
+            </a>
+            <a th:href="@{/doctors(specialty='Psychiatry', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Psychiatry' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🧠 Psychiatry
+            </a>
+            <a th:href="@{/doctors(specialty='ENT', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'ENT' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                👂 ENT
+            </a>
+            <a th:href="@{/doctors(specialty='Ophthalmology', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'Ophthalmology' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                👁️ Ophthalmology
+            </a>
+            <a th:href="@{/doctors(specialty='General Surgery', state=${selectedState}, city=${selectedCity})}" 
+               th:class="${selectedSpecialty == 'General Surgery' ? 'bg-sky-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
+                🔪 Surgery
+            </a>
+        </div>
+
+        <!-- Proximity / Fallback Notification Banner -->
+        <div th:if="${localityFallback}" class="bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-200 rounded-2xl p-4 flex items-center gap-3 text-xs text-sky-900 shadow-sm">
+            <div class="w-9 h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center text-base flex-shrink-0 shadow-sm">
+                <i class="fa-solid fa-user-doctor"></i>
+            </div>
+            <div>
+                <p class="font-bold text-slate-900">Showing Nearby Specialists Ranked by Distance from <span class="text-sky-700" th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your Location')}">Your Location</span></p>
+                <p class="text-slate-600 mt-0.5">Top-rated specialist doctors in <span th:text="${selectedState != null ? selectedState : 'your region'}">West Bengal</span> are sorted by live proximity from your coordinates for instant token reservation or video consultation.</p>
+            </div>
+        </div>
+
+        <!-- DOCTORS DIRECTORY GRID -->
+        <div th:if="${doctors.isEmpty()}" class="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm">
+            <div class="w-16 h-16 bg-sky-50 text-sky-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-user-doctor"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">No Doctors Found for this Filter</h3>
+            <p class="text-xs text-slate-500 max-w-md mx-auto mb-4">Try clearing the specialty filter to view all specialists available across <span th:text="${selectedState != null ? selectedState : 'your state'}">West Bengal</span>.</p>
+            <a th:href="@{/doctors(state=${selectedState != null ? selectedState : 'ALL'})}" class="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+                <i class="fa-solid fa-globe"></i> <span th:text="${'View All ' + (selectedState != null ? selectedState : 'All India') + ' Doctors'}">View All Doctors</span>
+            </a>
+        </div>
+
+        <!-- Facility & Chamber Category Filter Bar -->
+        <div th:unless="${doctors.isEmpty()}" class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm mb-6">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <i class="fa-solid fa-filter text-sky-600"></i> Facility &amp; Chamber Filter:
+                </span>
+                <span class="text-[11px] text-slate-500 font-bold bg-slate-100 px-2.5 py-0.5 rounded-full" id="doctors-count-badge" th:text="${doctors.size() + ' Specialists'}">12 Specialists</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5" id="doc-category-filters">
+                <button type="button" onclick="filterDoctorCategory('ALL', this)" class="doc-cat-btn px-3 py-1 rounded-xl text-xs font-black bg-slate-900 text-white transition shadow-sm cursor-pointer">
+                    👨‍⚕️ All Specialists
+                </button>
+                <button type="button" onclick="filterDoctorCategory('CHAMBER', this)" class="doc-cat-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                    🏠 Own Private Chamber
+                </button>
+                <button type="button" onclick="filterDoctorCategory('GOVERNMENT', this)" class="doc-cat-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                    🏛️ Govt Hospital Doctors
+                </button>
+                <button type="button" onclick="filterDoctorCategory('NURSING_HOME', this)" class="doc-cat-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                    🏡 Nursing Home Doctors
+                </button>
+                <button type="button" onclick="filterDoctorCategory('PRIVATE', this)" class="doc-cat-btn px-3 py-1 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                    🏨 Private Hospital Doctors
+                </button>
+            </div>
+        </div>
+
+        <div th:unless="${doctors.isEmpty()}" id="doctors-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="d : ${doctors}" 
+                 class="doctor-card bg-white rounded-3xl p-6 shadow-sm border border-slate-200 hover:border-sky-400 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+                 th:attr="data-category=${d.getHospitalCategory()}, data-nursing=${d.isNursingHome() ? 'true' : 'false'}, data-govt=${d.isGovernment() ? 'true' : 'false'}, data-chamber='true'">
+                <div>
+                    <!-- Category Badges & Rating -->
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span th:if="${d.isNursingHome()}" class="text-[9px] font-black uppercase tracking-wider text-rose-800 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <i class="fa-solid fa-house-chimney-medical text-rose-600"></i> Nursing Home OPD
+                            </span>
+                            <span th:if="${!d.isNursingHome() && d.isGovernment()}" class="text-[9px] font-black uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <i class="fa-solid fa-building-columns text-amber-600"></i> Govt Hospital OPD
+                            </span>
+                            <span th:if="${!d.isNursingHome() && !d.isGovernment()}" class="text-[9px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <i class="fa-solid fa-shield-halved text-emerald-600"></i> Private Hospital OPD
+                            </span>
+                            <span class="text-[9px] font-bold text-sky-800 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <i class="fa-solid fa-house-user text-sky-600"></i> Own Chamber
+                            </span>
+                        </div>
+                        <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold text-xs border border-amber-200">
+                            <i class="fa-solid fa-star text-amber-400"></i> <span th:text="${d.rating}">4.9</span>
+                            <span class="text-slate-400 text-[10px]" th:text="${'(' + d.reviewCount + ')'}">(180)</span>
+                        </span>
+                    </div>
+
+                    <!-- Profile Header -->
+                    <div class="flex items-start gap-3.5 mb-3.5">
+                        <div class="w-13 h-13 rounded-2xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-md">
+                            <i class="fa-solid fa-user-doctor"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 th:text="${d.name}" class="text-base font-black text-slate-900 leading-tight truncate">Dr. Rajesh Sharma</h3>
+                            <span th:text="${d.specialty}" class="text-xs font-bold text-sky-600 block mt-0.5">Endocrinology</span>
+                            <p class="text-[11px] text-slate-500 truncate" th:text="${d.credentials}">MBBS, MD, DM (AIIMS)</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">
+                                <i class="fa-solid fa-clock-rotate-left mr-0.5"></i> <span th:text="${d.experienceYears + ' yrs exp'}">16 yrs exp</span> • <span th:text="${d.languages}">English, Bengali</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Dual Details Box: Doctor's Own Private Chamber vs Hospital OPD Schedule -->
+                    <div class="space-y-2 mb-4">
+                        <!-- 1. Doctor's Dedicated Own Private Chamber (Direct Appointment) -->
+                        <div class="bg-gradient-to-br from-emerald-50/90 to-teal-50/60 p-3 rounded-2xl border border-emerald-200 text-xs space-y-1 shadow-xs">
+                            <div class="flex justify-between items-center pb-1 border-b border-emerald-200">
+                                <span class="font-black text-[11px] text-emerald-950 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-house-medical text-emerald-700"></i> Doctor's Own Chamber (Direct):
+                                </span>
+                                <span class="font-black text-xs text-emerald-800" th:text="${'₹' + d.privateChamberFee}">₹700</span>
+                            </div>
+                            <div class="text-[11px] text-slate-800 font-bold truncate" th:text="${d.privateChamberName}">Dr. Rajesh Sharma Clinic</div>
+                            <div class="text-[10px] text-slate-600 truncate flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-emerald-600"></i>
+                                <span th:text="${d.privateChamberAddress}">12, Main Road, Near Station</span>
+                            </div>
+                            <div class="flex justify-between items-center text-[10px] pt-0.5 text-emerald-950 font-bold">
+                                <span><i class="fa-solid fa-calendar-day text-emerald-600 mr-1"></i><span th:text="${d.privateChamberDays}">Mon to Sat</span></span>
+                                <span class="bg-emerald-100 text-emerald-900 px-1.5 py-0.5 rounded border border-emerald-300 font-mono" th:text="${d.privateChamberTimings}">05:30 PM - 08:30 PM</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. Hospital / Nursing Home Attending OPD Schedule -->
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs space-y-1">
+                            <div class="flex justify-between items-center pb-1 border-b border-slate-200">
+                                <span class="font-bold text-[11px] text-slate-700 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-hospital text-sky-600"></i> <span th:text="${d.getHospitalCategory()}">Govt Hospital</span> OPD:
+                                </span>
+                                <span class="font-bold text-[11px] text-slate-900" th:text="${'₹' + (d.opdFee != null ? d.opdFee : (d.isGovernment() ? 20.0 : 500.0))}">₹20</span>
+                            </div>
+                            <div class="text-[11px] text-slate-800 font-semibold truncate" th:text="${d.hospitalAffiliation}">ESI Hospital Budge Budge</div>
+                            <div class="flex justify-between items-center text-[10px] text-slate-600 pt-0.5">
+                                <span><i class="fa-solid fa-door-open text-slate-400 mr-1"></i>OPD Chamber: <span th:text="${d.opdRoomNumber != null ? d.opdRoomNumber : 'Chamber 102'}">Chamber 102</span></span>
+                                <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-700" th:text="${(d.opdScheduleDays != null ? d.opdScheduleDays : 'Mon-Fri') + ' • ' + (d.opdTimings != null ? d.opdTimings : '09:30 AM - 01:30 PM')}">Mon-Fri • 09:30 AM - 01:30 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Action Buttons -->
+                <div class="space-y-2 pt-2 border-t border-slate-100">
+                    <!-- Direct Appointment to Doctor's Own Private Chamber -->
+                    <button type="button"
+                            th:attr="data-id=${d.id}, data-name=${d.name}, data-specialty=${d.specialty}, data-chamber-name=${d.privateChamberName}, data-chamber-addr=${d.privateChamberAddress}, data-chamber-timings=${d.privateChamberTimings}, data-chamber-days=${d.privateChamberDays}, data-fee=${d.privateChamberFee}, data-slots=${d.availableTimeSlotsJoined}, data-phone=${d.privateChamberPhone}, data-hospital=${d.hospitalAffiliation}, data-city=${d.city}"
+                            onclick="openDoctorDirectBooking(this)"
+                            class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-house-medical text-xs"></i> <span>Direct Chamber Appointment (Pick Free Time)</span>
+                    </button>
+
+                    <!-- Hospital / Nursing Home OPD Seat Booking -->
+                    <button type="button"
+                            th:attr="data-id=${d.id}, data-name=${d.name}, data-specialty=${d.specialty}, data-hospital=${d.hospitalAffiliation}, data-chamber=${d.opdRoomNumber != null ? d.opdRoomNumber : 'Chamber 102'}, data-timings=${d.opdTimings != null ? d.opdTimings : '09:30 AM - 01:30 PM'}, data-fee=${d.opdFee != null ? d.opdFee : (d.isGovernment() ? 20.0 : 500.0)}, data-days=${d.opdScheduleDays != null ? d.opdScheduleDays : d.availableDays}"
+                            onclick="openBookOpdModalFromEl(this)"
+                            class="w-full py-2 px-3 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-chair text-xs"></i> <span>Book Outdoor Seat (OPD Token) - Hospital / Nursing Home</span>
+                    </button>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button th:attr="data-id=${d.id}, data-name=${d.name}, data-fee=${d.consultationFee}, data-hospital=${d.hospitalAffiliation}, data-city=${d.city}, data-chamber-name=${d.privateChamberName}, data-chamber-addr=${d.privateChamberAddress}, data-slots=${d.availableTimeSlotsJoined}, data-phone=${d.privateChamberPhone}" 
+                                onclick="openBookingFromEl(this, 'IN_PERSON')"
+                                class="py-2 px-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-hospital-user text-[11px]"></i> In-Person
+                        </button>
+                        <button th:attr="data-id=${d.id}, data-name=${d.name}, data-fee=${d.consultationFee}, data-hospital=${d.hospitalAffiliation}, data-city=${d.city}, data-chamber-name=${d.privateChamberName}, data-chamber-addr=${d.privateChamberAddress}, data-slots=${d.availableTimeSlotsJoined}, data-phone=${d.privateChamberPhone}" 
+                                onclick="openBookingFromEl(this, 'VIDEO')"
+                                class="py-2 px-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-video text-[11px]"></i> Video Call
+                        </button>
+                    </div>
+
+                    <!-- Directions to Doctor's Private Chamber & Clinic -->
+                    <button type="button"
+                            th:attr="data-name=${d.name + ' (' + d.privateChamberName + ')'}, data-address=${d.privateChamberAddress}, data-lat='null', data-lon='null', data-phone=${d.privateChamberPhone}"
+                            onclick="openFacilityNavigation(this.getAttribute('data-name'), this.getAttribute('data-address'), this.getAttribute('data-lat'), this.getAttribute('data-lon'), this.getAttribute('data-phone'))"
+                            class="w-full py-1.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-[11px] transition flex items-center justify-center gap-1 border border-slate-200 cursor-pointer">
+                        <i class="fa-solid fa-diamond-turn-right text-emerald-600"></i> Directions to Clinic &amp; Doctor's Chamber
+                    </button>
+                    <div class="text-center">
+                        <a th:href="${'tel:' + d.privateChamberPhone}" class="text-[11px] text-sky-700 hover:text-sky-900 font-bold inline-flex items-center gap-1">
+                            <i class="fa-solid fa-phone-volume text-[10px] text-emerald-600"></i> <span th:text="${'Direct Doctor Chamber: ' + d.privateChamberPhone}">Chamber Helpline</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Appointment Booking & Payment Checkout Modal -->
+    <div id="booking-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200" id="modal-badge-mode">
+                        🏠 Direct Doctor Chamber Appointment
+                    </span>
+                    <h3 class="text-lg font-black text-slate-900 mt-1" id="modal-doctor-name">Dr. Specialist</h3>
+                    <p class="text-xs text-slate-500" id="modal-doctor-sub">Specialty • Private Chamber &amp; Hospital OPD</p>
+                </div>
+                <button onclick="closeBookingModal()" class="text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="booking-form" onsubmit="submitAppointmentBooking(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="booking-doctor-id" name="doctorId">
+                <input type="hidden" id="booking-consult-type" name="consultationType" value="IN_PERSON">
+                <input type="hidden" id="booking-consult-mode" name="consultationMode" value="PRIVATE_CHAMBER">
+                <input type="hidden" id="booking-time-slot" name="timeSlot" value="06:00 PM">
+                <input type="hidden" id="booking-payment-amount" name="paymentAmount" value="700">
+
+                <!-- Consultation Mode Selection Tabs -->
+                <div>
+                    <label class="block font-black text-slate-800 uppercase text-[11px] mb-1.5">Select Consultation Mode *</label>
+                    <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200 text-center">
+                        <button type="button" id="mode-tab-chamber" onclick="setBookingMode('PRIVATE_CHAMBER')"
+                                class="py-2 px-1 rounded-xl font-black text-[11px] transition cursor-pointer bg-white text-emerald-900 shadow-sm border border-emerald-200">
+                            🏠 Own Chamber
+                        </button>
+                        <button type="button" id="mode-tab-opd" onclick="setBookingMode('HOSPITAL_OPD')"
+                                class="py-2 px-1 rounded-xl font-bold text-[11px] text-slate-600 transition cursor-pointer hover:bg-white/60">
+                            🏥 Hospital OPD
+                        </button>
+                        <button type="button" id="mode-tab-video" onclick="setBookingMode('VIDEO_TELEHEALTH')"
+                                class="py-2 px-1 rounded-xl font-bold text-[11px] text-slate-600 transition cursor-pointer hover:bg-white/60">
+                            🎥 Video Call
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1. Doctor's Private Chamber Details & Time Slots (Visible in PRIVATE_CHAMBER mode) -->
+                <div id="modal-chamber-panel" class="bg-gradient-to-br from-emerald-50/90 to-teal-50/60 border border-emerald-200 rounded-2xl p-3.5 space-y-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-bold text-emerald-800 uppercase block">Doctor's Dedicated Chamber:</span>
+                            <strong class="text-slate-900 text-xs font-black block" id="modal-chamber-name">Dr. Chamber Name</strong>
+                            <span class="text-[11px] text-slate-600 block mt-0.5" id="modal-chamber-addr">Main Road Address</span>
+                        </div>
+                        <span class="text-xs font-black text-emerald-800 bg-white px-2.5 py-1 rounded-lg border border-emerald-200" id="modal-chamber-fee-badge">₹700</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] pt-1.5 border-t border-emerald-200/70 text-emerald-950 font-semibold">
+                        <span><i class="fa-solid fa-calendar-week text-emerald-600 mr-1"></i><span id="modal-chamber-days">Mon to Sat</span></span>
+                        <span class="font-mono bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded" id="modal-chamber-hours">05:30 PM - 08:30 PM</span>
+                    </div>
+
+                    <!-- Free Time Slots Selection Grid -->
+                    <div class="pt-2 border-t border-emerald-200/70">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="font-black text-slate-900 uppercase text-[11px] flex items-center gap-1">
+                                <i class="fa-solid fa-clock text-emerald-700"></i> Select Doctor's Free Time Slot *
+                            </label>
+                            <span class="text-[10px] text-emerald-800 font-bold bg-white px-2 py-0.5 rounded border border-emerald-200" id="modal-selected-slot-badge">Selected: 06:00 PM</span>
+                        </div>
+                        <div class="grid grid-cols-4 sm:grid-cols-5 gap-1.5" id="modal-slots-grid">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <p class="text-[10px] text-emerald-800 font-medium mt-1">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mr-0.5"></i> Guaranteed private consultation at chosen time when doctor is free.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2. Hospital / Facility OPD Details (Visible in HOSPITAL_OPD mode) -->
+                <div id="modal-hospital-panel" class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3.5 space-y-2 hidden">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-[10px] font-bold text-amber-800 uppercase block">Attending Hospital / Facility:</span>
+                            <strong class="text-slate-900 text-xs font-black block" id="modal-hospital-name">Hospital Name</strong>
+                            <span class="text-[11px] text-slate-600 block mt-0.5" id="modal-hospital-room">Chamber 102</span>
+                        </div>
+                        <span class="text-xs font-black text-amber-800 bg-white px-2.5 py-1 rounded-lg border border-amber-200" id="modal-hospital-fee-badge">₹20</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] pt-1.5 border-t border-amber-200 text-amber-950 font-semibold">
+                        <span><i class="fa-solid fa-calendar-day text-amber-700 mr-1"></i><span id="modal-hospital-days">Mon-Fri</span></span>
+                        <span class="font-mono bg-amber-100 text-amber-900 px-2 py-0.5 rounded" id="modal-hospital-timings">09:30 AM - 01:30 PM</span>
+                    </div>
+                </div>
+
+                <!-- Preferred Date -->
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Appointment Date *</label>
+                    <input type="date" id="booking-date" name="visitDate" required class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-bold text-slate-800">
+                </div>
+
+                <!-- Patient Contact Details -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Patient Full Name *</label>
+                        <input type="text" name="patientName" th:value="${currentUser != null ? currentUser.fullName : ''}" placeholder="Patient Full Name" required class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Mobile Contact *</label>
+                        <input type="tel" name="patientPhone" th:value="${currentUser != null ? (currentUser.phone != null ? currentUser.phone : currentUser.phoneNumber) : ''}" placeholder="+91 98300 00000" required class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Chief Symptoms &amp; Clinical Reason</label>
+                    <textarea name="symptoms" rows="2" placeholder="Describe symptoms (e.g. Hypertension review, Routine follow-up, Chest discomfort)..." class="w-full border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Authentic Payment Method Selection -->
+                <div class="space-y-2 pt-2 border-t border-slate-100">
+                    <label class="block font-black text-slate-900 uppercase text-[11px]">Select Payment Method for Consultation *</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer hover:bg-slate-50 transition" id="pay-opt-upi">
+                            <input type="radio" name="paymentMethod" value="UPI" checked class="text-emerald-600 focus:ring-emerald-500">
+                            <div>
+                                <span class="font-bold text-slate-900 block text-xs">📱 Instant UPI / QR</span>
+                                <span class="text-[10px] text-slate-500">GPay, PhonePe, Paytm</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer hover:bg-slate-50 transition" id="pay-opt-card">
+                            <input type="radio" name="paymentMethod" value="CARD" class="text-emerald-600 focus:ring-emerald-500">
+                            <div>
+                                <span class="font-bold text-slate-900 block text-xs">💳 Debit / Credit Card</span>
+                                <span class="text-[10px] text-slate-500">Visa, RuPay, Master</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer hover:bg-slate-50 transition" id="pay-opt-net">
+                            <input type="radio" name="paymentMethod" value="NET_BANKING" class="text-emerald-600 focus:ring-emerald-500">
+                            <div>
+                                <span class="font-bold text-slate-900 block text-xs">🏛️ Net Banking</span>
+                                <span class="text-[10px] text-slate-500">SBI, HDFC, ICICI</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer hover:bg-slate-50 transition" id="pay-opt-cash">
+                            <input type="radio" name="paymentMethod" value="CASH" class="text-emerald-600 focus:ring-emerald-500">
+                            <div>
+                                <span class="font-bold text-slate-900 block text-xs">💵 Pay at Chamber / Desk</span>
+                                <span class="text-[10px] text-slate-500">Counter Token Registration</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Payment Summary Breakdown -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-1.5 text-[11px]">
+                    <div class="flex justify-between text-slate-600">
+                        <span>Consultation Fee:</span>
+                        <strong class="text-slate-900" id="summary-doc-fee">₹700.00</strong>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>Digital Platform &amp; Token Fee:</span>
+                        <span class="text-emerald-700 font-bold">₹0 (Free / Waived)</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-xs font-black">
+                        <span class="text-slate-900">Total Payable Amount:</span>
+                        <span class="text-base text-emerald-700" id="modal-fee">₹700</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeBookingModal()" class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer">Cancel</button>
+                    <button type="submit" id="booking-submit-btn" class="px-6 py-2.5 font-black bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/30 flex items-center gap-1.5 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-shield-check"></i>
+                        <span id="booking-btn-label">Pay ₹700 &amp; Generate Official Token</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Official Appointment Pass, Payment Receipt & Video Link Modal -->
+    <div id="booking-success-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 text-center space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto shadow-sm">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200" id="doc-slip-badge">
+                    Official Doctor Appointment Pass &amp; Verified Token
+                </span>
+                <h3 class="text-xl font-black text-slate-900 mt-2">Appointment Confirmed &amp; Payment Received</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Authentic information transmitted directly to the doctor's consultation desk.</p>
+            </div>
+
+            <!-- Digital Slip Box -->
+            <div class="bg-slate-50 rounded-2xl p-5 border-2 border-dashed border-emerald-300 text-left space-y-3 text-xs">
+                <div class="flex justify-between items-center pb-2.5 border-b border-slate-200">
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Appointment Token No.</span>
+                        <span id="doc-slip-token" class="text-2xl font-mono font-black text-emerald-600">TK-102</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Payment Status</span>
+                        <span id="doc-slip-payment" class="bg-emerald-100 text-emerald-800 text-[11px] font-black px-2.5 py-0.5 rounded-full inline-block">✓ ₹700 PAID</span>
+                        <span id="doc-slip-txn" class="text-[9px] text-slate-400 font-mono block mt-0.5">TXN-88910</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Attending Doctor:</span>
+                        <strong id="doc-slip-name" class="text-slate-900 font-bold block text-xs">Dr. Name</strong>
+                        <span id="doc-slip-specialty" class="text-[10px] text-sky-700 font-semibold block">Specialist</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Consultation Mode:</span>
+                        <span id="doc-slip-mode" class="text-emerald-700 font-bold block">🏠 DOCTOR'S PRIVATE CHAMBER</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Patient:</span>
+                        <strong id="doc-slip-patient" class="text-slate-900 font-bold block text-xs">Patient Name</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Confirmed Time Slot:</span>
+                        <span id="doc-slip-slot" class="font-mono font-black text-emerald-700 text-xs block">06:00 PM</span>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="text-[10px] text-slate-400 block font-medium">Venue / Clinic Address:</span>
+                        <strong id="doc-slip-venue" class="text-slate-900 block truncate">Main Road Clinic</strong>
+                    </div>
+                </div>
+
+                <!-- Direct Contact / Doctor Helpline -->
+                <div class="p-2.5 rounded-xl bg-sky-50 border border-sky-200 flex justify-between items-center text-[11px]">
+                    <span class="text-sky-800 font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-phone-volume text-sky-600"></i> Doctor's Direct Helpline:
+                    </span>
+                    <a id="doc-slip-phone-link" href="tel:+919830012345" class="font-mono font-bold text-sky-900 hover:underline">
+                        <span id="doc-slip-phone">+91 98300 12345</span>
+                    </a>
+                </div>
+
+                <!-- Next Instructions -->
+                <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-medium">
+                    <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i>
+                    <span id="doc-slip-instructions">Please arrive at the doctor's chamber at your designated time slot with your digital pass.</span>
+                </div>
+            </div>
+
+            <!-- Dynamic Action Hub: Video Join OR GPS Directions -->
+            <div class="space-y-2 pt-1">
+                <!-- Video Call Button (Visible for VIDEO consultations) -->
+                <a id="doc-slip-video-btn" href="#" target="_blank" rel="noopener noreferrer"
+                   class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2 hidden">
+                    <i class="fa-solid fa-video"></i>
+                    <span>🎥 Join Encrypted Telehealth Video Room Now</span>
+                </a>
+
+                <!-- GPS Navigation Button -->
+                <button type="button" id="doc-slip-directions-btn"
+                        class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-diamond-turn-right"></i>
+                    <span id="doc-slip-directions-label">🗺️ Start GPS Directions to Doctor's Chamber</span>
+                </button>
+
+                <!-- Hospital Portal Link -->
+                <a id="doc-slip-portal-btn" href="/portals?tab=patient" class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-hospital-user text-sky-400"></i>
+                    <span>View in Patient Health Locker (/portals)</span>
+                </a>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="window.print()" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-print"></i> Print Consultation Pass
+                    </button>
+                    <button type="button" onclick="closeBookingSuccessModal()" class="flex-1 py-2 px-3 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-semibold transition cursor-pointer">
+                        Done / Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outdoor Visit (OPD) Seat Booking Modal -->
+    <div id="opd-booking-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                        Outdoor Visit (OPD) Fast-Track Booking
+                    </span>
+                    <h3 class="text-lg font-black text-slate-900 mt-1" id="opd-modal-doc-name">Dr. Consultant</h3>
+                    <p class="text-xs text-slate-500" id="opd-modal-doc-details">Specialist • Hospital</p>
+                </div>
+                <button type="button" onclick="closeBookOpdModal()" class="text-slate-400 hover:text-slate-600 p-2 cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="opd-booking-form" onsubmit="submitOpdSeatBooking(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="opd-form-doctor-id" name="doctorId">
+                <input type="hidden" id="opd-form-hospital-name" name="hospitalName">
+
+                <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3 text-xs space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">Chamber Room:</span>
+                        <strong class="text-slate-800" id="opd-modal-chamber">Chamber 102</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">OPD Consultation Hours:</span>
+                        <strong class="text-slate-800 font-mono" id="opd-modal-timings">09:30 AM - 01:30 PM</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">Weekly Schedule:</span>
+                        <strong class="text-amber-800" id="opd-modal-days">Mon, Wed, Fri</strong>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Visit Day of Week *</label>
+                        <select id="opd-form-day" name="selectedDay" required class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Visit Date *</label>
+                        <input type="date" id="opd-form-date" name="visitDate" required class="w-full border border-slate-300 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Patient Full Name *</label>
+                    <input type="text" id="opd-form-patient-name" name="patientName" th:value="${currentUser != null ? currentUser.fullName : ''}" placeholder="Patient Full Name" required class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-1">
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Age *</label>
+                        <input type="number" id="opd-form-age" name="patientAge" value="32" min="1" max="120" required class="w-full border border-slate-300 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Gender *</label>
+                        <select id="opd-form-gender" name="patientGender" class="w-full border border-slate-300 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Contact Phone *</label>
+                        <input type="tel" id="opd-form-phone" name="patientPhone" th:value="${currentUser != null ? currentUser.phoneNumber : '+91 98300 12345'}" required class="w-full border border-slate-300 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Outdoor Visit Category</label>
+                    <select id="opd-form-category" name="opdCategory" class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <option value="General Outdoor">General Outdoor (Regular Triage)</option>
+                        <option value="Senior Citizen Priority (60+ yrs)">Senior Citizen Priority Queue (60+ yrs)</option>
+                        <option value="Mother & Child Care">Mother &amp; Child Health Clinic</option>
+                        <option value="Emergency Fast-Track OPD">Emergency Fast-Track OPD</option>
+                    </select>
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="text-slate-500 block">Registration Fee:</span>
+                        <span class="text-[10px] text-emerald-700 font-bold">✓ Confirmed Seat Quota Applied</span>
+                    </div>
+                    <strong class="text-base font-black text-emerald-800" id="opd-modal-fee-display">₹20</strong>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeBookOpdModal()" class="px-4 py-2 font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer">Cancel</button>
+                    <button type="submit" id="opd-submit-btn" class="px-6 py-2.5 font-black bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-ticket"></i> Confirm Seat &amp; Generate Digital OPD Pass
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Digital OPD Seat Pass & Token Slip Modal -->
+    <div id="opd-success-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 text-center space-y-5 max-h-[95vh] overflow-y-auto">
+            <div class="w-16 h-16 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center text-3xl mx-auto shadow-sm">
+                <i class="fa-solid fa-ticket"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                    Official Outdoor (OPD) Digital Seat Pass
+                </span>
+                <h3 class="text-xl font-black text-slate-900 mt-2">Outdoor Consultation Seat Confirmed</h3>
+                <p class="text-xs text-slate-500 mt-1">Guaranteed entry token allocated with attending specialist chamber.</p>
+            </div>
+
+            <!-- Digital Pass Card -->
+            <div class="bg-gradient-to-b from-amber-50/50 to-white rounded-2xl p-5 border-2 border-dashed border-amber-400 text-left space-y-3.5 text-xs shadow-sm">
+                <div class="flex justify-between items-center pb-2.5 border-b border-amber-200">
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">OPD Token Number</span>
+                        <span id="opd-slip-token" class="text-2xl font-mono font-black text-amber-600">OPD-TK-108</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Reserved Seat</span>
+                        <span id="opd-slip-seat" class="text-sm font-mono font-black text-white bg-amber-600 px-3 py-1 rounded-lg inline-block shadow-sm">Seat #14</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Attending Doctor:</span>
+                        <strong id="opd-slip-doctor" class="text-slate-900 font-bold block text-sm">Dr. Soumen Roy</strong>
+                        <span id="opd-slip-specialty" class="text-[10px] text-sky-700 font-semibold block">General Medicine</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Hospital Facility:</span>
+                        <strong id="opd-slip-hospital" class="text-slate-900 font-bold block">ESI Hospital Budge Budge</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Chamber Room:</span>
+                        <span id="opd-slip-chamber" class="text-amber-900 font-black block">Chamber 102 (Ground Floor)</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">OPD Consultation Hours:</span>
+                        <span id="opd-slip-timings" class="text-slate-700 font-mono font-bold block">09:30 AM - 01:30 PM</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Visit Day &amp; Date:</span>
+                        <span id="opd-slip-day" class="text-slate-800 font-bold block">Monday (22 Sep 2026)</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Reporting Time:</span>
+                        <span id="opd-slip-reporting" class="text-red-700 font-bold block">09:00 AM (30 min prior)</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-2.5 rounded-xl border border-amber-200 text-[11px] text-slate-700 space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Patient:</span>
+                        <strong id="opd-slip-patient" class="text-slate-900">Patient Name</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Category:</span>
+                        <span id="opd-slip-category" class="font-bold text-amber-800">General Outdoor</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Registration Fee:</span>
+                        <span id="opd-slip-fee" class="font-black text-emerald-700">₹20 (Confirmed)</span>
+                    </div>
+                </div>
+
+                <!-- Barcode Simulation -->
+                <div class="text-center pt-1 border-t border-dashed border-slate-200">
+                    <div class="inline-block tracking-[6px] font-mono text-slate-400 text-lg font-black select-none">
+                        ||||| | |||| ||| |||| | ||||| || |||
+                    </div>
+                    <span class="text-[9px] text-slate-400 font-mono block">SCAN AT OPD GATE / HOSPITAL DESK</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="space-y-2 pt-1">
+                <a id="opd-slip-navigation" href="https://maps.google.com" target="_blank"
+                   class="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-black rounded-2xl text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-diamond-turn-right"></i>
+                    <span>🗺️ Start GPS Directions to Hospital OPD Gate</span>
+                </a>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <a id="opd-slip-portal-btn" href="/portals?tab=patient" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-hospital-user"></i>
+                        <span>My Patient Portal</span>
+                    </a>
+                    <a id="opd-slip-hospital-portal-btn" href="/portals?tab=hospital" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-clipboard-user"></i>
+                        <span>Hospital OPD Queue</span>
+                    </a>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="window.print()" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-print"></i> Print OPD Pass
+                    </button>
+                    <button type="button" onclick="closeOpdSuccessModal()" class="flex-1 py-2 px-3 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-semibold transition cursor-pointer">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+
+    <script>
+        let currentBookingDoctor = {
+            id: '',
+            name: '',
+            specialty: '',
+            fee: '700',
+            hospital: '',
+            city: '',
+            chamberName: '',
+            chamberAddress: '',
+            chamberTimings: '',
+            chamberDays: '',
+            phone: '',
+            slots: [],
+            selectedSlot: '',
+            mode: 'PRIVATE_CHAMBER'
+        };
+
+        function filterDoctorCategory(category, btnEl) {
+            document.querySelectorAll('.doc-cat-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-900', 'text-white', 'font-black', 'shadow-sm');
+                btn.classList.add('bg-slate-100', 'text-slate-700', 'font-bold');
+            });
+            btnEl.classList.remove('bg-slate-100', 'text-slate-700', 'font-bold');
+            btnEl.classList.add('bg-slate-900', 'text-white', 'font-black', 'shadow-sm');
+
+            const cards = document.querySelectorAll('.doctor-card');
+            let visibleCount = 0;
+            cards.forEach(card => {
+                const cat = card.getAttribute('data-category') || '';
+                const isNursing = card.getAttribute('data-nursing') === 'true';
+                const isGovt = card.getAttribute('data-govt') === 'true';
+
+                let show = false;
+                if (category === 'ALL' || category === 'CHAMBER') {
+                    show = true;
+                } else if (category === 'GOVERNMENT') {
+                    show = isGovt && !isNursing;
+                } else if (category === 'NURSING_HOME') {
+                    show = isNursing;
+                } else if (category === 'PRIVATE') {
+                    show = !isGovt && !isNursing;
+                }
+
+                if (show) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            const badge = document.getElementById('doctors-count-badge');
+            if (badge) badge.innerText = `${visibleCount} Specialists`;
+        }
+
+        function openDoctorDirectBooking(el) {
+            const docId = el.getAttribute('data-id');
+            const docName = el.getAttribute('data-name');
+            const specialty = el.getAttribute('data-specialty') || 'Specialist';
+            const chamberName = el.getAttribute('data-chamber-name') || (docName + "'s Clinic");
+            const chamberAddr = el.getAttribute('data-chamber-addr') || 'Main Road Chamber';
+            const chamberTimings = el.getAttribute('data-chamber-timings') || '05:30 PM - 08:30 PM';
+            const chamberDays = el.getAttribute('data-chamber-days') || 'Mon to Sat';
+            const fee = el.getAttribute('data-fee') || '700';
+            const slotsStr = el.getAttribute('data-slots') || '05:30 PM,06:00 PM,06:30 PM,07:00 PM,07:30 PM,08:00 PM';
+            const phone = el.getAttribute('data-phone') || '+91 98300 12345';
+            const hospital = el.getAttribute('data-hospital') || 'Associated Hospital';
+            const city = el.getAttribute('data-city') || 'Kolkata';
+
+            openBookingModalAdvanced({
+                id: docId,
+                name: docName,
+                specialty: specialty,
+                chamberName: chamberName,
+                chamberAddress: chamberAddr,
+                chamberTimings: chamberTimings,
+                chamberDays: chamberDays,
+                fee: fee,
+                slots: slotsStr.split(',').map(s => s.trim()).filter(Boolean),
+                phone: phone,
+                hospital: hospital,
+                city: city,
+                mode: 'PRIVATE_CHAMBER'
+            });
+        }
+
+        function openBookingFromEl(el, type) {
+            const docId = el.getAttribute('data-id');
+            const docName = el.getAttribute('data-name');
+            const fee = el.getAttribute('data-fee') || '700';
+            const hospital = el.getAttribute('data-hospital') || 'Associated Hospital';
+            const city = el.getAttribute('data-city') || 'Kolkata';
+            const chamberName = el.getAttribute('data-chamber-name') || (docName + "'s Specialist Clinic");
+            const chamberAddr = el.getAttribute('data-chamber-addr') || 'Main Road Medical Chamber';
+            const slotsStr = el.getAttribute('data-slots') || '05:30 PM,06:00 PM,06:30 PM,07:00 PM,07:30 PM,08:00 PM';
+            const phone = el.getAttribute('data-phone') || '+91 98300 12345';
+
+            openBookingModalAdvanced({
+                id: docId,
+                name: docName,
+                specialty: 'Specialist',
+                chamberName: chamberName,
+                chamberAddress: chamberAddr,
+                chamberTimings: '05:30 PM - 08:30 PM',
+                chamberDays: 'Mon to Sat',
+                fee: fee,
+                slots: slotsStr.split(',').map(s => s.trim()).filter(Boolean),
+                phone: phone,
+                hospital: hospital,
+                city: city,
+                mode: type === 'VIDEO' ? 'VIDEO_TELEHEALTH' : 'IN_PERSON'
+            });
+        }
+
+        function openBookingModalAdvanced(cfg) {
+            currentBookingDoctor = cfg;
+            document.getElementById('booking-doctor-id').value = cfg.id;
+            document.getElementById('modal-doctor-name').innerText = cfg.name;
+            document.getElementById('modal-doctor-sub').innerText = (cfg.specialty || 'Specialist') + ' • ' + (cfg.hospital || 'Hospital');
+            document.getElementById('modal-chamber-name').innerText = cfg.chamberName || (cfg.name + "'s Specialist Chamber");
+            document.getElementById('modal-chamber-addr').innerText = cfg.chamberAddress || 'Main Road Chamber';
+            document.getElementById('modal-chamber-days').innerText = cfg.chamberDays || 'Mon to Sat';
+            document.getElementById('modal-chamber-hours').innerText = cfg.chamberTimings || '05:30 PM - 08:30 PM';
+            document.getElementById('modal-chamber-fee-badge').innerText = '₹' + cfg.fee;
+
+            document.getElementById('modal-hospital-name').innerText = cfg.hospital || 'Associated Hospital';
+            document.getElementById('modal-hospital-room').innerText = 'Chamber 102';
+            document.getElementById('modal-hospital-days').innerText = 'Mon-Fri';
+            document.getElementById('modal-hospital-timings').innerText = '09:30 AM - 01:30 PM';
+
+            // Populate Free Time Slots Grid
+            const slotsGrid = document.getElementById('modal-slots-grid');
+            slotsGrid.innerHTML = '';
+            const slots = (cfg.slots && cfg.slots.length > 0) ? cfg.slots : ['05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM', '08:00 PM'];
+            const defaultSlot = slots[0];
+            document.getElementById('booking-time-slot').value = defaultSlot;
+            document.getElementById('modal-selected-slot-badge').innerText = 'Selected: ' + defaultSlot;
+
+            slots.forEach((slot, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `slot-btn py-1.5 px-2 rounded-xl font-mono text-[11px] font-bold border transition cursor-pointer ${idx === 0 ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-400'}`;
+                btn.innerText = slot;
+                btn.onclick = () => selectFreeTimeSlot(btn, slot);
+                slotsGrid.appendChild(btn);
+            });
+
+            // Date picker setup
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateStr = tomorrow.toISOString().split('T')[0];
+            const dateInput = document.getElementById('booking-date');
+            if (dateInput) {
+                dateInput.value = dateStr;
+                dateInput.min = new Date().toISOString().split('T')[0];
+            }
+
+            setBookingMode(cfg.mode || 'PRIVATE_CHAMBER');
+            document.getElementById('booking-modal').classList.remove('hidden');
+        }
+
+        function selectFreeTimeSlot(btnEl, slot) {
+            document.querySelectorAll('.slot-btn').forEach(b => {
+                b.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600', 'shadow-sm');
+                b.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+            });
+            btnEl.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+            btnEl.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600', 'shadow-sm');
+
+            document.getElementById('booking-time-slot').value = slot;
+            document.getElementById('modal-selected-slot-badge').innerText = 'Selected: ' + slot;
+        }
+
+        function setBookingMode(mode) {
+            currentBookingDoctor.mode = mode;
+            document.getElementById('booking-consult-mode').value = mode;
+
+            const tabChamber = document.getElementById('mode-tab-chamber');
+            const tabOpd = document.getElementById('mode-tab-opd');
+            const tabVideo = document.getElementById('mode-tab-video');
+            const chamberPanel = document.getElementById('modal-chamber-panel');
+            const hospitalPanel = document.getElementById('modal-hospital-panel');
+            const badgeMode = document.getElementById('modal-badge-mode');
+
+            // Reset tab styles
+            [tabChamber, tabOpd, tabVideo].forEach(t => {
+                if (t) {
+                    t.className = 'py-2 px-1 rounded-xl font-bold text-[11px] text-slate-600 transition cursor-pointer hover:bg-white/60';
+                }
+            });
+
+            let activeFee = currentBookingDoctor.fee || '700';
+
+            if (mode === 'PRIVATE_CHAMBER') {
+                document.getElementById('booking-consult-type').value = 'IN_PERSON';
+                if (tabChamber) tabChamber.className = 'py-2 px-1 rounded-xl font-black text-[11px] transition cursor-pointer bg-white text-emerald-900 shadow-sm border border-emerald-200';
+                if (chamberPanel) chamberPanel.classList.remove('hidden');
+                if (hospitalPanel) hospitalPanel.classList.add('hidden');
+                if (badgeMode) badgeMode.innerText = '🏠 Direct Doctor Chamber Appointment';
+                activeFee = currentBookingDoctor.fee || '700';
+            } else if (mode === 'HOSPITAL_OPD') {
+                document.getElementById('booking-consult-type').value = 'IN_PERSON';
+                if (tabOpd) tabOpd.className = 'py-2 px-1 rounded-xl font-black text-[11px] transition cursor-pointer bg-white text-amber-900 shadow-sm border border-amber-200';
+                if (chamberPanel) chamberPanel.classList.add('hidden');
+                if (hospitalPanel) hospitalPanel.classList.remove('hidden');
+                if (badgeMode) badgeMode.innerText = '🏥 Hospital / Nursing Home OPD Visit';
+                activeFee = '20';
+            } else {
+                // VIDEO_TELEHEALTH
+                document.getElementById('booking-consult-type').value = 'VIDEO';
+                if (tabVideo) tabVideo.className = 'py-2 px-1 rounded-xl font-black text-[11px] transition cursor-pointer bg-white text-indigo-900 shadow-sm border border-indigo-200';
+                if (chamberPanel) chamberPanel.classList.remove('hidden');
+                if (hospitalPanel) hospitalPanel.classList.add('hidden');
+                if (badgeMode) badgeMode.innerText = '🎥 Encrypted Telehealth Video Call';
+                activeFee = currentBookingDoctor.fee || '700';
+            }
+
+            document.getElementById('booking-payment-amount').value = activeFee;
+            document.getElementById('summary-doc-fee').innerText = '₹' + activeFee;
+            document.getElementById('modal-fee').innerText = '₹' + activeFee;
+            document.getElementById('booking-btn-label').innerText = 'Pay ₹' + activeFee + ' & Generate Official Token';
+        }
+
+        function closeBookingModal() {
+            document.getElementById('booking-modal').classList.add('hidden');
+        }
+
+        function showBookingSuccessSlip(data, patientName, doctorName, consultType) {
+            const token = data.tokenNumber || ('TK-' + Math.floor(100 + Math.random() * 900));
+            document.getElementById('doc-slip-token').innerText = token;
+
+            const mode = data.consultationMode || currentBookingDoctor.mode || 'PRIVATE_CHAMBER';
+            const payStatusEl = document.getElementById('doc-slip-payment');
+            if (payStatusEl) {
+                payStatusEl.innerText = `✓ ₹${data.consultationFee || currentBookingDoctor.fee || '700'} ${data.paymentStatus || 'PAID'}`;
+            }
+            const txnEl = document.getElementById('doc-slip-txn');
+            if (txnEl) {
+                txnEl.innerText = data.transactionId || ('TXN-' + Math.floor(100000 + Math.random() * 900000));
+            }
+
+            document.getElementById('doc-slip-name').innerText = data.doctorName || doctorName || currentBookingDoctor.name || 'Selected Specialist';
+            document.getElementById('doc-slip-specialty').innerText = data.doctorSpecialty || currentBookingDoctor.specialty || 'Specialist Consultation';
+            document.getElementById('doc-slip-patient').innerText = patientName || 'Verified Patient';
+
+            const modeBadgeEl = document.getElementById('doc-slip-mode');
+            if (modeBadgeEl) {
+                if (mode === 'PRIVATE_CHAMBER') {
+                    modeBadgeEl.innerText = '🏠 DOCTOR\'S OWN PRIVATE CHAMBER';
+                    modeBadgeEl.className = 'text-emerald-700 font-bold block';
+                } else if (mode === 'HOSPITAL_OPD') {
+                    modeBadgeEl.innerText = '🏥 HOSPITAL OPD CONSULTATION';
+                    modeBadgeEl.className = 'text-amber-700 font-bold block';
+                } else {
+                    modeBadgeEl.innerText = '🎥 VIDEO TELEHEALTH';
+                    modeBadgeEl.className = 'text-indigo-700 font-bold block';
+                }
+            }
+
+            const slotEl = document.getElementById('doc-slip-slot');
+            if (slotEl) {
+                slotEl.innerText = (data.timeSlot || document.getElementById('booking-time-slot').value || '06:00 PM') + ' (Doctor Free Time)';
+            }
+
+            const venueEl = document.getElementById('doc-slip-venue');
+            if (venueEl) {
+                venueEl.innerText = mode === 'PRIVATE_CHAMBER'
+                    ? (data.privateChamberName ? `${data.privateChamberName}, ${data.privateChamberAddress || ''}` : (currentBookingDoctor.chamberName || 'Doctor Private Chamber'))
+                    : (data.hospitalName || currentBookingDoctor.hospital || 'Hospital OPD Complex');
+            }
+
+            const phoneEl = document.getElementById('doc-slip-phone');
+            const phoneLinkEl = document.getElementById('doc-slip-phone-link');
+            const docPhone = data.doctorPhone || currentBookingDoctor.phone || '033-24821245';
+            if (phoneEl) phoneEl.innerText = docPhone;
+            if (phoneLinkEl) phoneLinkEl.href = 'tel:' + docPhone;
+
+            const instEl = document.getElementById('doc-slip-instructions');
+            if (instEl && data.instructions) {
+                instEl.innerText = data.instructions;
+            }
+
+            const videoBtn = document.getElementById('doc-slip-video-btn');
+            const dirBtn = document.getElementById('doc-slip-directions-btn');
+            const dirLabel = document.getElementById('doc-slip-directions-label');
+
+            if (consultType === 'VIDEO' || mode === 'VIDEO_TELEHEALTH') {
+                if (videoBtn) {
+                    videoBtn.href = data.videoMeetingUrl || ('https://meet.jit.si/CarePulse-' + token);
+                    videoBtn.classList.remove('hidden');
+                }
+                if (dirBtn) dirBtn.classList.add('hidden');
+            } else {
+                if (videoBtn) videoBtn.classList.add('hidden');
+                if (dirBtn) {
+                    dirBtn.classList.remove('hidden');
+                    if (dirLabel) {
+                        dirLabel.innerText = mode === 'PRIVATE_CHAMBER' ? "🗺️ Start GPS Directions to Doctor's Chamber" : "🗺️ Start GPS Directions to Hospital OPD";
+                    }
+                    dirBtn.onclick = function() {
+                        const targetChamber = data.privateChamberName || currentBookingDoctor.chamberName || currentBookingDoctor.name;
+                        const targetAddr = data.privateChamberAddress || currentBookingDoctor.chamberAddress || currentBookingDoctor.city;
+                        openFacilityNavigation(targetChamber, targetAddr, null, null, docPhone);
+                    };
+                }
+            }
+
+            const portalBtn = document.getElementById('doc-slip-portal-btn');
+            if (portalBtn && data.portalUrl) {
+                portalBtn.href = data.portalUrl;
+            }
+
+            document.getElementById('booking-success-modal').classList.remove('hidden');
+        }
+
+        function closeBookingSuccessModal() {
+            document.getElementById('booking-success-modal').classList.add('hidden');
+            window.location.reload();
+        }
+
+        async function submitAppointmentBooking(e) {
+            e.preventDefault();
+            const form = document.getElementById('booking-form');
+            const submitBtn = document.getElementById('booking-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming with Doctor Desk...';
+            }
+
+            const formData = new FormData(form);
+            const patientName = formData.get('patientName');
+            const consultType = formData.get('consultationType');
+
+            // Format dateTimeStr from date and slot
+            const dateVal = document.getElementById('booking-date').value;
+            const slotVal = document.getElementById('booking-time-slot').value;
+            if (dateVal && slotVal) {
+                formData.set('dateTimeStr', `${dateVal}T18:00:00`);
+            }
+
+            try {
+                const resp = await fetch('/api/appointments/book', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                if (data.status === 'SUCCESS' || data.success) {
+                    closeBookingModal();
+                    showBookingSuccessSlip(data, patientName, currentBookingDoctor.name, consultType);
+                } else {
+                    alert(data.message || 'Could not confirm appointment.');
+                }
+            } catch (err) {
+                console.error(err);
+                if (typeof showToast === 'function') showToast('Error booking appointment', 'error');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> <span>' + document.getElementById('booking-btn-label').innerText + '</span>';
+                }
+            }
+        }
+
+        // --- OUTDOOR VISIT (OPD) SEAT BOOKING FOR DOCTORS PAGE ---
+        function openBookOpdModalFromEl(el) {
+            const docId = el.getAttribute('data-id');
+            const docName = el.getAttribute('data-name');
+            const specialty = el.getAttribute('data-specialty');
+            const hospital = el.getAttribute('data-hospital');
+            const chamber = el.getAttribute('data-chamber');
+            const timings = el.getAttribute('data-timings');
+            const fee = el.getAttribute('data-fee') || '20';
+            const days = el.getAttribute('data-days') || 'Mon, Wed, Fri';
+
+            document.getElementById('opd-form-doctor-id').value = docId;
+            document.getElementById('opd-form-hospital-name').value = hospital;
+            document.getElementById('opd-modal-doc-name').innerText = docName;
+            document.getElementById('opd-modal-doc-details').innerText = specialty + ' • ' + hospital;
+            document.getElementById('opd-modal-chamber').innerText = chamber;
+            document.getElementById('opd-modal-timings').innerText = timings;
+            document.getElementById('opd-modal-days').innerText = days;
+            document.getElementById('opd-modal-fee-display').innerText = '₹' + parseFloat(fee).toFixed(0);
+
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateStr = tomorrow.toISOString().split('T')[0];
+            const dateInput = document.getElementById('opd-form-date');
+            if (dateInput) {
+                dateInput.value = dateStr;
+                dateInput.min = new Date().toISOString().split('T')[0];
+            }
+
+            const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const tomDay = daysOfWeek[tomorrow.getDay()];
+            const daySelect = document.getElementById('opd-form-day');
+            if (daySelect) daySelect.value = tomDay;
+
+            document.getElementById('opd-booking-modal').classList.remove('hidden');
+        }
+
+        function closeBookOpdModal() {
+            document.getElementById('opd-booking-modal').classList.add('hidden');
+        }
+
+        async function submitOpdSeatBooking(event) {
+            event.preventDefault();
+            const form = event.target;
+            const submitBtn = document.getElementById('opd-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Allocating Seat & Generating Token...';
+            }
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+
+            try {
+                const resp = await fetch('/api/opd/book-seat', {
+                    method: 'POST',
+                    body: params
+                });
+                const res = await resp.json();
+                if (res.status === 'SUCCESS' || res.success) {
+                    closeBookOpdModal();
+                    showOpdSuccessPass(res);
+                } else {
+                    alert('Notice: ' + (res.message || 'Unable to allocate OPD seat.'));
+                }
+            } catch (err) {
+                console.error('OPD booking error:', err);
+                alert('Connection error while booking outdoor seat. Please retry.');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-ticket"></i> Confirm Seat & Generate Digital OPD Pass';
+                }
+            }
+        }
+
+        function showOpdSuccessPass(data) {
+            document.getElementById('opd-slip-token').innerText = data.tokenNumber || 'OPD-TK-101';
+            document.getElementById('opd-slip-seat').innerText = 'Seat #' + (data.seatNumber || '1');
+            document.getElementById('opd-slip-doctor').innerText = data.doctorName || 'Attending Specialist';
+            document.getElementById('opd-slip-specialty').innerText = data.doctorSpecialty || 'Specialist Consultation';
+            document.getElementById('opd-slip-hospital').innerText = data.hospitalName || 'Hospital OPD Complex';
+            document.getElementById('opd-slip-chamber').innerText = data.chamberRoom || 'Chamber 102';
+            document.getElementById('opd-slip-timings').innerText = data.opdTimings || '09:30 AM - 01:30 PM';
+            document.getElementById('opd-slip-day').innerText = (data.selectedDay || 'Today') + ' (' + (data.visitDate || '') + ')';
+            document.getElementById('opd-slip-reporting').innerText = data.reportingTime || '09:00 AM (30 min prior)';
+            document.getElementById('opd-slip-patient').innerText = data.patientName || 'Verified Patient';
+            document.getElementById('opd-slip-category').innerText = data.opdCategory || 'General Outdoor';
+            document.getElementById('opd-slip-fee').innerText = '₹' + (data.opdFee != null ? data.opdFee : '20') + ' (Confirmed)';
+
+            const navBtn = document.getElementById('opd-slip-navigation');
+            if (navBtn) {
+                navBtn.href = data.navigationUrl || ('https://maps.google.com/?q=' + encodeURIComponent(data.hospitalName + ' OPD Gate'));
+            }
+
+            const patPortalBtn = document.getElementById('opd-slip-portal-btn');
+            if (patPortalBtn) patPortalBtn.href = data.portalUrl || '/portals?tab=patient';
+
+            const hospPortalBtn = document.getElementById('opd-slip-hospital-portal-btn');
+            if (hospPortalBtn) hospPortalBtn.href = data.hospitalPortalUrl || '/portals?tab=hospital';
+
+            document.getElementById('opd-success-modal').classList.remove('hidden');
+        }
+
+        function closeOpdSuccessModal() {
+            document.getElementById('opd-success-modal').classList.add('hidden');
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>

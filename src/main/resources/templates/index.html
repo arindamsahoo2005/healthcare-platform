@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation from Main Layout -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+    <div th:replace="~{layout/main :: #smart-reminder-banner}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-20 lg:pb-0 w-full space-y-5 sm:space-y-8 overflow-x-hidden">
+        
+        <!-- 1. 24x7 Critical Emergency Alert & Quick Command Bar -->
+        <div class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-md border border-red-500/50 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 sm:gap-3">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping shrink-0"></span>
+                <div class="flex items-center gap-1.5 min-w-0">
+                    <span class="text-[10px] font-black uppercase tracking-wider bg-red-800/80 px-2 py-0.5 rounded-full border border-red-400/40 shrink-0">24x7 Emergency Care</span>
+                    <span class="text-xs sm:text-sm font-bold truncate">Immediate ICU &amp; Ambulance</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 sm:flex items-center gap-2 shrink-0">
+                <a href="tel:108" class="bg-white hover:bg-red-50 text-red-700 font-black text-xs py-2 px-3 sm:px-3.5 sm:py-1.5 rounded-xl shadow transition flex items-center justify-center gap-1.5 active:scale-95 text-center">
+                    <i class="fa-solid fa-phone-volume"></i> <span>Dial 108</span>
+                </a>
+                <a href="/emergency" class="bg-slate-950/80 hover:bg-slate-950 text-white font-bold text-xs py-2 px-3 sm:px-3.5 sm:py-1.5 rounded-xl border border-white/20 transition flex items-center justify-center gap-1.5 text-center">
+                    <i class="fa-solid fa-truck-medical text-red-400"></i> <span>Live Ambulance</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- MOBILE QUICK-ACCESS FEATURE GRID (Immediately accessible above the fold on mobile inspect) -->
+        <section class="lg:hidden bg-white p-3 sm:p-3.5 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-2.5 px-0.5">
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-grid-2 text-sky-600"></i> Quick Healthcare Access
+                </span>
+                <button type="button" onclick="toggleMobileNavDrawer()" class="text-[11px] font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1 cursor-pointer">
+                    <span>All 16+ Services</span> &rarr;
+                </button>
+            </div>
+            <div class="grid grid-cols-4 gap-1.5 sm:gap-2 text-center">
+                <!-- Doctors -->
+                <a href="/doctors" class="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-100 transition active:scale-95">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center text-xs sm:text-sm shadow-sm mb-1">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-900 leading-tight">Doctors</span>
+                    <span class="text-[8px] text-sky-700 font-semibold">Tokens</span>
+                </a>
+                <!-- Hospitals -->
+                <a href="/hospitals" class="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 transition active:scale-95">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs sm:text-sm shadow-sm mb-1">
+                        <i class="fa-solid fa-hospital"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-900 leading-tight">Hospitals</span>
+                    <span class="text-[8px] text-emerald-700 font-semibold">ICU Beds</span>
+                </a>
+                <!-- Pharmacy -->
+                <a href="/pharmacy" class="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-100 transition active:scale-95">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center text-xs sm:text-sm shadow-sm mb-1">
+                        <i class="fa-solid fa-pills"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-900 leading-tight">Pharmacy</span>
+                    <span class="text-[8px] text-teal-700 font-semibold">50+ Meds</span>
+                </a>
+                <!-- Emergency -->
+                <a href="/emergency" class="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-red-50 hover:bg-red-100 border border-red-100 transition active:scale-95">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-red-600 text-white flex items-center justify-center text-xs sm:text-sm shadow-sm mb-1">
+                        <i class="fa-solid fa-truck-medical"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-900 leading-tight">Emergency</span>
+                    <span class="text-[8px] text-red-700 font-semibold">108 SOS</span>
+                </a>
+                <!-- Diagnostic Labs -->
+                <a href="/diagnostics" class="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-100 transition active:scale-95">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center text-xs sm:text-sm shadow-sm mb-1">
+                        <i class="fa-solid fa-vial"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-900 leading-tight">Diagnostics</span>
+                    <span class="text-[8px] text-purple-700 font-semibold">Lab Tests</span>
+                </a>
+                <!-- Blood Bank -->
+                <a href="/blood-bank" class="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-100 transition active:scale-95">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xs sm:text-sm shadow-sm mb-1">
+                        <i class="fa-solid fa-droplet"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-900 leading-tight">Blood Bank</span>
+                    <span class="text-[8px] text-rose-700 font-semibold">Live Stock</span>
+                </a>
+                <!-- Medicine Timer -->
+                <a href="/medicine-timer" class="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition active:scale-95">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs sm:text-sm shadow-sm mb-1">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-900 leading-tight">Dose Timer</span>
+                    <span class="text-[8px] text-indigo-700 font-semibold">Alerts</span>
+                </a>
+                <!-- Vitals & Wearables -->
+                <a href="/vitals-wellness" class="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-100 transition active:scale-95">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center text-xs sm:text-sm shadow-sm mb-1">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-900 leading-tight">Vitals</span>
+                    <span class="text-[8px] text-amber-700 font-semibold">Sensors</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- 2. GRAND ULTRA-PREMIUM HEALTHCARE HERO SECTION -->
+        <section class="relative bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-4 sm:p-8 lg:p-12 shadow-2xl border border-slate-800 overflow-hidden">
+            <!-- Ambient Glow Accents -->
+            <div class="absolute -right-16 -top-16 w-80 h-80 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-16 -bottom-16 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 max-w-4xl mx-auto text-center space-y-4 sm:space-y-6">
+                <!-- Platform Trust Badge -->
+                <div class="inline-flex items-center gap-1.5 sm:gap-2 bg-slate-800/90 border border-slate-700/80 text-cyan-300 text-[10px] sm:text-xs font-bold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full shadow-inner">
+                    <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span class="hidden sm:inline">100% Verified Healthcare Network • </span><span>Authentic Doctors, Beds &amp; Medicines</span>
+                </div>
+
+                <!-- Grand Headline -->
+                <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
+                    Your Complete Digital <br class="hidden sm:inline">
+                    <span class="bg-gradient-to-r from-sky-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
+                        Healthcare &amp; Emergency
+                    </span> Ecosystem
+                </h1>
+
+                <!-- Subheadline -->
+                <p class="text-xs sm:text-base lg:text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto">
+                    Connect directly with certified specialist doctors, check verified real-time ICU hospital beds, order 50+ genuine medicines with doorstep delivery, and launch turn-by-turn GPS navigation near
+                    <strong class="text-white underline decoration-sky-400" th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your City')}">Your Location</strong>.
+                </p>
+
+                <!-- Universal Omnisearch Bar -->
+                <div class="bg-white/10 backdrop-blur-md p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl border border-white/20 shadow-2xl max-w-3xl mx-auto">
+                    <form action="/doctors" method="get" class="flex flex-col sm:flex-row items-center gap-2">
+                        <div class="relative flex-grow w-full">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 sm:top-3.5 text-slate-400 text-xs sm:text-sm"></i>
+                            <input type="text" name="specialty" id="universal-omni-input"
+                                   placeholder="Search doctors, hospitals, medicines, ICU beds..."
+                                   class="w-full pl-10 pr-3 py-2.5 sm:py-3 bg-white text-slate-900 placeholder-slate-400 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-inner">
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button type="submit" class="w-full sm:w-auto px-5 py-2.5 sm:py-3 bg-sky-600 hover:bg-sky-500 text-white font-black rounded-xl sm:rounded-2xl transition shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2 text-xs sm:text-sm whitespace-nowrap cursor-pointer active:scale-95">
+                                <i class="fa-solid fa-search"></i>
+                                <span>Find Care</span>
+                            </button>
+                            <a href="/pharmacy#medicine-catalog" class="hidden md:flex px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl sm:rounded-2xl transition items-center gap-1.5 text-xs whitespace-nowrap">
+                                <i class="fa-solid fa-pills"></i>
+                                <span>50+ Meds</span>
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <!-- Popular Quick Search Tags -->
+                    <div class="flex flex-wrap items-center justify-center gap-1.5 pt-3 pb-1 text-[11px] text-slate-300">
+                        <span class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Popular:</span>
+                        <a href="/doctors?specialty=Cardiology" class="bg-white/10 hover:bg-white/20 px-2.5 py-0.5 rounded-lg transition text-slate-200">🫀 Cardiology</a>
+                        <a href="/hospitals" class="bg-white/10 hover:bg-white/20 px-2.5 py-0.5 rounded-lg transition text-slate-200">🏥 ICU Beds</a>
+                        <a href="/pharmacy#medicine-catalog" class="bg-white/10 hover:bg-white/20 px-2.5 py-0.5 rounded-lg transition text-slate-200">💊 50+ Medicines</a>
+                        <a href="/blood-bank" class="bg-white/10 hover:bg-white/20 px-2.5 py-0.5 rounded-lg transition text-slate-200">🩸 Blood Bank</a>
+                        <a href="/doctors?specialty=General+Medicine" class="bg-white/10 hover:bg-white/20 px-2.5 py-0.5 rounded-lg transition text-slate-200">🩺 General Physician</a>
+                        <a href="/emergency" class="bg-rose-500/30 hover:bg-rose-500/40 text-rose-200 border border-rose-500/30 px-2.5 py-0.5 rounded-lg transition font-bold">🚨 24x7 Ambulance</a>
+                    </div>
+                </div>
+
+                <!-- 4 Verified Key Metrics (NO EMPTY DASHES) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 pt-4 text-center">
+                    <div class="bg-slate-900/80 border border-slate-800 p-3.5 sm:p-4 rounded-2xl backdrop-blur-sm">
+                        <div class="text-2xl sm:text-3xl font-black text-sky-400 font-mono">500+</div>
+                        <div class="text-[11px] sm:text-xs font-bold text-slate-200 mt-0.5">Verified Doctors</div>
+                        <div class="text-[10px] text-slate-400">In-Person &amp; Video OPD</div>
+                    </div>
+                    <div class="bg-slate-900/80 border border-slate-800 p-3.5 sm:p-4 rounded-2xl backdrop-blur-sm">
+                        <div class="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">120+</div>
+                        <div class="text-[11px] sm:text-xs font-bold text-slate-200 mt-0.5">Partner Hospitals</div>
+                        <div class="text-[10px] text-slate-400">Real-Time Bed &amp; ICU Feeds</div>
+                    </div>
+                    <div class="bg-slate-900/80 border border-slate-800 p-3.5 sm:p-4 rounded-2xl backdrop-blur-sm">
+                        <div class="text-2xl sm:text-3xl font-black text-teal-300 font-mono">50+</div>
+                        <div class="text-[11px] sm:text-xs font-bold text-slate-200 mt-0.5">Authentic Medicines</div>
+                        <div class="text-[10px] text-slate-400">Jan Aushadhi Generic Savings</div>
+                    </div>
+                    <div class="bg-slate-900/80 border border-slate-800 p-3.5 sm:p-4 rounded-2xl backdrop-blur-sm">
+                        <div class="text-2xl sm:text-3xl font-black text-rose-400 font-mono">&lt;15 Mins</div>
+                        <div class="text-[11px] sm:text-xs font-bold text-slate-200 mt-0.5">Emergency Response</div>
+                        <div class="text-[10px] text-slate-400">GPS Ambulance Dispatch</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. CORE HEALTHCARE ACTION TILES (Responsive Grid) -->
+        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            <!-- 1. Doctors -->
+            <a href="/doctors" class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-sky-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="w-11 h-11 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition">
+                    <i class="fa-solid fa-user-doctor"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-sky-600 transition">Doctors &amp; OPD</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Book tokens, video consults &amp; clinic appointments</p>
+                </div>
+                <div class="mt-2 text-[10px] font-bold text-sky-600 flex items-center gap-1">
+                    <span>Consult Now</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                </div>
+            </a>
+
+            <!-- 2. Hospitals -->
+            <a href="/hospitals" class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition">
+                    <i class="fa-solid fa-hospital"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-emerald-600 transition">Hospitals &amp; Beds</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Live ICU beds &amp; verified digital admission slips</p>
+                </div>
+                <div class="mt-2 text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                    <span>Find Beds</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                </div>
+            </a>
+
+            <!-- 3. Pharmacy 50+ Meds -->
+            <a href="/pharmacy" class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-teal-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="w-11 h-11 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition">
+                    <i class="fa-solid fa-pills"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-teal-600 transition">Pharmacy &amp; Delivery</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">50+ medicines, vaccines &amp; 20-min home delivery</p>
+                </div>
+                <div class="mt-2 text-[10px] font-bold text-teal-600 flex items-center gap-1">
+                    <span>Order Meds</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                </div>
+            </a>
+
+            <!-- 4. Emergency & Ambulance -->
+            <a href="/emergency" class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-rose-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="w-11 h-11 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition">
+                    <i class="fa-solid fa-truck-medical"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-rose-600 transition">Emergency SOS</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Instant GPS ambulance dispatch &amp; trauma triage</p>
+                </div>
+                <div class="mt-2 text-[10px] font-bold text-rose-600 flex items-center gap-1">
+                    <span>Call 108 SOS</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                </div>
+            </a>
+
+            <!-- 5. Blood Bank & Labs -->
+            <a href="/blood-bank" class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-purple-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="w-11 h-11 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition">
+                    <i class="fa-solid fa-droplet"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-purple-600 transition">Blood Bank &amp; Labs</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Real-time blood stock units &amp; lab bookings</p>
+                </div>
+                <div class="mt-2 text-[10px] font-bold text-purple-600 flex items-center gap-1">
+                    <span>View Units</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                </div>
+            </a>
+
+            <!-- 6. Health Locker & QR -->
+            <a href="/health-passport" class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-amber-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg mb-3 group-hover:scale-110 transition">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-amber-600 transition">Health Passport QR</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Encrypted emergency QR badge &amp; digital records</p>
+                </div>
+                <div class="mt-2 text-[10px] font-bold text-amber-600 flex items-center gap-1">
+                    <span>My QR Pass</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                </div>
+            </a>
+        </section>
+
+        <!-- 4. ACTIVE DOSE RADAR & CARE PROGRESS COCKPIT -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            <!-- SMART MEDICINE COCKPIT (5 cols) -->
+            <div class="lg:col-span-5 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white p-5 sm:p-6 rounded-3xl shadow-xl border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute -right-8 -top-8 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span> REAL-TIME DOSE RADAR
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] bg-slate-800/90 border border-slate-700 text-slate-300 font-mono px-2.5 py-0.5 rounded-lg flex items-center gap-1">
+                                <i class="fa-regular fa-clock text-cyan-400"></i>
+                                <span th:text="${nextDose != null ? nextDose.formattedTime : 'Active'}">Active</span>
+                            </span>
+                            <a href="/medicine-timer" class="text-[11px] text-slate-400 hover:text-cyan-300 flex items-center gap-1 transition">
+                                <span>Schedule</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- IF ACTIVE DOSE EXISTS -->
+                    <div th:if="${nextDose != null}" class="mt-1 space-y-3">
+                        <div class="flex items-baseline justify-between gap-2">
+                            <div class="flex items-baseline gap-2 truncate">
+                                <h2 id="next-med-name" class="text-xl sm:text-2xl font-black tracking-tight text-white truncate" th:text="${nextDose.medicineName}">Metformin</h2>
+                                <span id="next-med-dosage" class="text-xs font-bold text-cyan-300 bg-cyan-950/70 border border-cyan-800/80 px-2 py-0.5 rounded-md shrink-0" th:text="${nextDose.dosage}">500 mg</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-amber-300 bg-amber-950/60 border border-amber-700/60 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0">
+                                <i class="fa-solid fa-utensils text-[9px]"></i>
+                                <span id="next-med-food" th:text="${nextDose.foodRelation == 'AFTER_FOOD' ? 'After Meal' : (nextDose.foodRelation == 'BEFORE_FOOD' ? 'Before Food' : 'With Food')}">After Meal</span>
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 italic truncate" th:text="${nextDose.foodAdvice}">Take with water as prescribed by physician</p>
+
+                        <!-- Digital Countdown Display -->
+                        <div class="bg-slate-950/90 border border-cyan-500/20 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 block">Dose Countdown</span>
+                                <span class="text-[10px] text-emerald-400 flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Proactive Safety Guard
+                                </span>
+                            </div>
+                            <div class="medicine-countdown-clock text-3xl sm:text-4xl font-black font-mono tracking-wider text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.35)]">
+                                00:24:18
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IF NO ACTIVE DOSE (NO DASHES, INFORMATIVE & ATTRACTIVE) -->
+                    <div th:if="${nextDose == null}" class="mt-1 p-4 rounded-2xl bg-slate-900/80 border border-slate-800 text-center space-y-2">
+                        <div class="w-10 h-10 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg mx-auto">
+                            <i class="fa-solid fa-heart-circle-check"></i>
+                        </div>
+                        <h4 class="text-sm font-black text-white">All Doses Up-to-Date!</h4>
+                        <p class="text-xs text-slate-400">No pending medicine alerts right now. Your personalized adherence score is 100%.</p>
+                        <a href="/medicine-timer" class="inline-flex items-center gap-1 text-xs font-bold text-cyan-400 hover:text-cyan-300 pt-1">
+                            <span>Manage Schedules &amp; Reminders</span> &rarr;
+                        </a>
+                    </div>
+
+                    <!-- Voice Sound Alert Controller -->
+                    <div class="flex items-center justify-between bg-slate-800/50 border border-slate-700/60 rounded-xl px-3 py-1.5 mt-3 text-[11px]">
+                        <span class="text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-waveform-lines text-cyan-400"></i> Audio &amp; Voice Alert
+                        </span>
+                        <button type="button" onclick="testMedicineAlert()" class="text-cyan-300 hover:text-white font-bold flex items-center gap-1 bg-cyan-950/80 border border-cyan-700/70 hover:bg-cyan-900 px-2.5 py-1 rounded-lg transition active:scale-95 cursor-pointer shadow-sm">
+                            <i class="fa-solid fa-volume-high text-cyan-400"></i> <span>Test Sound</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons: Taken, Snooze, Skip (when nextDose != null) -->
+                <div class="grid grid-cols-3 gap-2 pt-3 mt-3 border-t border-slate-800/80" th:if="${nextDose != null}">
+                    <button th:attr="data-id=${nextDose.scheduleId}" onclick="takeMedicine(this.getAttribute('data-id'))" class="py-2 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl shadow-lg shadow-emerald-600/30 transition text-xs flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-check"></i> <span>TAKEN</span>
+                    </button>
+                    <button th:attr="data-id=${nextDose.scheduleId}" onclick="snoozeMedicine(this.getAttribute('data-id'), 10)" class="py-2 px-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-xl border border-slate-700 transition text-xs flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-bell"></i> <span>SNOOZE</span>
+                    </button>
+                    <button th:attr="data-id=${nextDose.scheduleId}" onclick="openSkipModal(this.getAttribute('data-id'))" class="py-2 px-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 font-medium rounded-xl border border-slate-700 transition text-xs flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-forward"></i> <span>SKIP</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- "WHAT SHOULD I DO NEXT?" (High-Density Action Grid - 7 cols) -->
+            <div class="lg:col-span-7 bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">✨</span>
+                            <h3 class="text-base font-black text-slate-900 tracking-tight">What Should I Do Next?</h3>
+                        </div>
+                        <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Automated Care Feed</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <!-- Action 1: Browse 50+ Medicines -->
+                        <div class="p-3 rounded-2xl border border-sky-100 bg-sky-50/60 hover:bg-sky-50 transition flex items-center justify-between gap-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center text-sm shrink-0">
+                                    <i class="fa-solid fa-pills"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-slate-900 truncate">50+ Medicines Catalog</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Jan Aushadhi Generic Savings</p>
+                                </div>
+                            </div>
+                            <a href="/pharmacy" class="text-[11px] font-bold bg-sky-600 hover:bg-sky-700 text-white px-2.5 py-1 rounded-lg transition shadow-sm shrink-0">
+                                Order Meds
+                            </a>
+                        </div>
+
+                        <!-- Action 2: Specialist Doctor Consultation -->
+                        <div class="p-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 hover:bg-indigo-50 transition flex items-center justify-between gap-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm shrink-0">
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-slate-900 truncate">Specialist Doctors</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">In-Person / Encrypted Video OPD</p>
+                                </div>
+                            </div>
+                            <a href="/doctors" class="text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-lg transition shadow-sm shrink-0">
+                                Book Token
+                            </a>
+                        </div>
+
+                        <!-- Action 3: Hospital & ICU Bed Admission -->
+                        <div class="p-3 rounded-2xl border border-emerald-100 bg-emerald-50/60 hover:bg-emerald-50 transition flex items-center justify-between gap-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm shrink-0">
+                                    <i class="fa-solid fa-bed-pulse"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-slate-900 truncate">ICU &amp; Hospital Admission</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Official Verified Certificate</p>
+                                </div>
+                            </div>
+                            <a href="/hospitals" class="text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg transition shadow-sm shrink-0">
+                                Bed Hold
+                            </a>
+                        </div>
+
+                        <!-- Action 4: Encrypted Records Locker -->
+                        <div class="p-3 rounded-2xl border border-purple-100 bg-purple-50/60 hover:bg-purple-50 transition flex items-center justify-between gap-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-sm shrink-0">
+                                    <i class="fa-solid fa-file-shield"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-slate-900 truncate">Health Locker &amp; QR</h4>
+                                    <p class="text-[10px] text-slate-500 truncate">Prescriptions &amp; Lab Reports</p>
+                                </div>
+                            </div>
+                            <a href="/medical-records" class="text-[11px] font-bold bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-1 rounded-lg transition shadow-sm shrink-0">
+                                Open Vault
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 pt-2.5 border-t border-slate-100 flex justify-between items-center text-[11px] text-slate-500">
+                    <span class="flex items-center gap-1 text-emerald-700 font-medium">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i> Connected Health Sync Active
+                    </span>
+                    <a href="/journey" class="text-sky-600 font-bold hover:underline flex items-center gap-1">
+                        <span>Interactive Care Journey</span> <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOCATION-BASED PROXIMITY FACILITIES -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Nearby Hospitals & Beds -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-hospital text-sky-600"></i> Nearby Hospitals & Admissions
+                        </h3>
+                        <p class="text-xs text-slate-500">Ranked by Haversine distance from your location</p>
+                    </div>
+                    <a href="/hospitals" class="text-xs font-bold text-sky-600 hover:underline">View All</a>
+                </div>
+
+                <div class="space-y-3">
+                    <div th:each="h : ${nearbyHospitals}" class="p-3.5 rounded-2xl border border-slate-200 hover:border-sky-400 transition bg-slate-50 hover:bg-white flex justify-between items-center">
+                        <div>
+                            <h4 th:text="${h.name}" class="text-sm font-bold text-slate-900">AIIMS</h4>
+                            <p class="text-xs text-slate-500" th:text="${h.address}">Hospital Address</p>
+                            <div class="flex items-center gap-3 mt-2 text-xs">
+                                <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded" th:text="${h.icuBedsAvailable + ' ICU Beds Open'}">12 ICU Beds Open</span>
+                                <span class="text-slate-500 flex items-center gap-1">
+                                    <i class="fa-solid fa-star text-amber-400 text-[10px]"></i> <span th:text="${h.rating}">4.8</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-right flex flex-col items-end gap-1">
+                            <span class="inline-block bg-sky-100 text-sky-800 font-mono font-bold text-xs px-2.5 py-1 rounded-full">
+                                <i class="fa-solid fa-location-arrow text-[10px]"></i> <span th:text="${h.distanceKm != null ? h.distanceKm + ' km' : 'Verified'}">2.4 km</span>
+                            </span>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <button type="button" th:attr="data-name=${h.name}, data-address=${h.address}, data-lat=${h.latitude}, data-lon=${h.longitude}, data-phone=${h.phone != null ? h.phone : h.emergencyHelpline}"
+                                        onclick="openFacilityNavigation(this.getAttribute('data-name'), this.getAttribute('data-address'), this.getAttribute('data-lat'), this.getAttribute('data-lon'), this.getAttribute('data-phone'))"
+                                        class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg text-[10px] border border-emerald-200 transition flex items-center gap-1 cursor-pointer">
+                                    <i class="fa-solid fa-diamond-turn-right text-emerald-600"></i> Directions
+                                </button>
+                                <button type="button" th:attr="data-id=${h.id}, data-name=${h.name}, data-address=${h.address}, data-phone=${h.phone != null ? h.phone : h.emergencyHelpline}, data-icu=${h.icuBedsAvailable}"
+                                        onclick="openHomeAdmissionFromEl(this)"
+                                        class="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg text-[10px] transition cursor-pointer flex items-center gap-1">
+                                    <i class="fa-solid fa-bed"></i> <span>Admit &rarr;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nearby Doctors & Specialists -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-user-doctor text-sky-600"></i> Verified Doctors Near You
+                        </h3>
+                        <p class="text-xs text-slate-500">Specialists available for in-person or video consultation</p>
+                    </div>
+                    <a href="/doctors" class="text-xs font-bold text-sky-600 hover:underline">View All</a>
+                </div>
+
+                <div class="space-y-3">
+                    <div th:each="d : ${nearbyDoctors}" class="p-3.5 rounded-2xl border border-slate-200 hover:border-sky-400 transition bg-slate-50 hover:bg-white flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-sky-100 text-sky-700 font-bold flex items-center justify-center text-sm">
+                                Dr
+                            </div>
+                            <div>
+                                <h4 th:text="${d.name}" class="text-sm font-bold text-slate-900">Doctor Name</h4>
+                                <p class="text-xs text-slate-600 font-medium" th:text="${d.specialty}">Specialty</p>
+                                <p class="text-[11px] text-slate-400" th:text="${d.hospitalAffiliation}">Hospital</p>
+                            </div>
+                        </div>
+                        <div class="text-right flex flex-col items-end gap-1">
+                            <span class="inline-block bg-sky-100 text-sky-800 font-mono font-bold text-xs px-2.5 py-1 rounded-full">
+                                <i class="fa-solid fa-location-arrow text-[10px]"></i> <span th:text="${d.distanceKm != null ? d.distanceKm + ' km' : 'Available'}">1.8 km</span>
+                            </span>
+                            <div class="text-xs font-bold text-slate-800" th:text="${'₹' + d.consultationFee}">₹900</div>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <button type="button" th:attr="data-name=${d.name + ' (' + d.hospitalAffiliation + ')'}, data-address=${d.hospitalAffiliation + ', ' + d.city}, data-lat='null', data-lon='null', data-phone='03324821245'"
+                                        onclick="openFacilityNavigation(this.getAttribute('data-name'), this.getAttribute('data-address'), this.getAttribute('data-lat'), this.getAttribute('data-lon'), this.getAttribute('data-phone'))"
+                                        class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-[10px] border border-slate-200 transition flex items-center gap-1 cursor-pointer">
+                                    <i class="fa-solid fa-diamond-turn-right text-slate-600"></i> Directions
+                                </button>
+                                <button type="button" th:attr="data-id=${d.id}, data-name=${d.name}, data-fee=${d.consultationFee}, data-hospital=${d.hospitalAffiliation}, data-city=${d.city}, data-specialty=${d.specialty}"
+                                        onclick="openHomeBookingFromEl(this)"
+                                        class="px-2 py-1 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg text-[10px] transition cursor-pointer flex items-center gap-1">
+                                    <i class="fa-regular fa-calendar-check"></i> <span>Book &rarr;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEDICATED WEST BENGAL REGIONAL HEALTHCARE NETWORK SECTION -->
+        <section id="wb-healthcare-section" class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-6">
+            <!-- Section Header -->
+            <div class="flex flex-wrap justify-between items-end gap-4 border-b border-slate-100 pb-5">
+                <div>
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-sky-700 bg-sky-50 border border-sky-200 px-3 py-1 rounded-full flex items-center gap-1.5">
+                            <i class="fa-solid fa-map-pin text-sky-600"></i> Regional Healthcare Network • <span th:text="${selectedCity != null ? selectedCity : (selectedState != null ? selectedState : 'West Bengal')}">Selected Location</span>
+                        </span>
+                        <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> 100% Verified
+                        </span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight" th:text="${'Top Specialist Doctors & Hospitals in ' + (selectedCity != null ? selectedCity : (selectedState != null ? selectedState : 'West Bengal'))}">
+                        All Specialist Doctors &amp; Hospitals
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                        Complete directory of premier medical institutions, emergency trauma centers, and top medical specialists in your selected location.
+                    </p>
+                </div>
+
+                <!-- View Switcher (Doctors / Hospitals) -->
+                <div class="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold">
+                    <button type="button" id="wb-tab-btn-doctors" onclick="switchWbSectionTab('doctors')"
+                            class="px-4 py-2 rounded-xl transition bg-white text-sky-700 shadow-sm flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-user-doctor"></i>
+                        <span>Specialist Doctors (<span th:text="${allWbDoctors != null ? allWbDoctors.size() : 15}">15</span>)</span>
+                    </button>
+                    <button type="button" id="wb-tab-btn-hospitals" onclick="switchWbSectionTab('hospitals')"
+                            class="px-4 py-2 rounded-xl transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-hospital"></i>
+                        <span>Hospitals & Admissions (<span th:text="${allWbHospitals != null ? allWbHospitals.size() : 18}">18</span>)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Category & Locality Filter Chips -->
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1"><i class="fa-solid fa-filter text-sky-500"></i> Filter:</span>
+                
+                <!-- 1. All Facilities in Selected Location -->
+                <button type="button" onclick="filterWbCards('ALL', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-sky-600 text-white shadow-sm transition cursor-pointer">
+                    <span th:text="${'All ' + (selectedCity != null ? selectedCity : (selectedState != null ? selectedState : 'Network'))}">All Facilities</span>
+                </button>
+
+                <!-- 2. Government Institutions Filter -->
+                <button type="button" onclick="filterWbCards('GOVERNMENT', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition cursor-pointer flex items-center gap-1.5">
+                    <i class="fa-solid fa-building-columns text-amber-600"></i>
+                    <span>Government Hospitals &amp; Colleges</span>
+                </button>
+
+                <!-- 3. Premier Private Hospitals Filter -->
+                <button type="button" onclick="filterWbCards('PRIVATE', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition cursor-pointer flex items-center gap-1.5">
+                    <i class="fa-solid fa-hospital text-emerald-600"></i>
+                    <span>Premier Private Hospitals</span>
+                </button>
+
+                <!-- 4. Dynamic Area / Locality Chips for HYDERABAD -->
+                <th:block th:if="${selectedCity == 'Hyderabad' || selectedState == 'Telangana'}">
+                    <button type="button" onclick="filterWbCards('Somajiguda', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏛️ Somajiguda &amp; Punjagutta (NIMS, Yashoda)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Afzal Gunj', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏥 Afzal Gunj &amp; Nayapul (Osmania, Maternity)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Secunderabad', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🩺 Secunderabad &amp; Begumpet (Gandhi, KIMS)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Gachibowli', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🌟 Gachibowli &amp; Fin District (AIG, Continental)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Banjara', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🌳 Jubilee &amp; Banjara Hills (Apollo, Care, Rainbow)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Lakdikapul', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🎗️ Red Hills (MNJ Cancer Hospital)
+                    </button>
+                </th:block>
+
+                <!-- 4b. Dynamic Area / Locality Chips for CHENNAI -->
+                <th:block th:if="${selectedCity == 'Chennai' || selectedCity == 'Madras' || selectedState == 'Tamil Nadu'}">
+                    <button type="button" onclick="filterWbCards('Park Town', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏛️ Park Town &amp; Anna Salai (Rajiv Gandhi Govt, Omandurar)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Greams', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏥 Greams Road &amp; Thousand Lights (Apollo)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Vadapalani', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🩺 Vadapalani &amp; Aminjikarai (SIMS, MGM)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Manapakkam', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🌟 Manapakkam &amp; Perumbakkam (MIOT, Gleneagles)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Royapuram', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🌳 Royapuram &amp; Egmore (Stanley, Maternity)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Chromepet', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🎗️ Chromepet &amp; Velachery (Dr. Rela, Prashanth)
+                    </button>
+                </th:block>
+
+                <!-- 5. Dynamic Area / Locality Chips for BENGALURU -->
+                <th:block th:if="${selectedCity == 'Bengaluru' || selectedCity == 'Bangalore' || selectedState == 'Karnataka'}">
+                    <button type="button" onclick="filterWbCards('Old Airport', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        ✈️ Old Airport Rd &amp; Kodihalli (Manipal)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Bommasandra', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏥 Bommasandra Health City (Narayana)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Bannerghatta', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏢 Bannerghatta &amp; Hebbal (Fortis, Aster CMI)
+                    </button>
+                </th:block>
+
+                <!-- 6. Dynamic Area / Locality Chips for MUMBAI -->
+                <th:block th:if="${selectedCity == 'Mumbai' || selectedCity == 'Pune' || selectedState == 'Maharashtra'}">
+                    <button type="button" onclick="filterWbCards('Parel', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏛️ Parel &amp; Girgaon (KEM, Sir HN Reliance)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Breach Candy', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏥 South Mumbai (Breach Candy)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Mulund', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏢 Mulund (Fortis Hospital)
+                    </button>
+                </th:block>
+
+                <!-- 7. Dynamic Area / Locality Chips for DELHI -->
+                <th:block th:if="${selectedCity == 'Delhi' || selectedCity == 'New Delhi' || selectedState == 'Delhi'}">
+                    <button type="button" onclick="filterWbCards('Ansari Nagar', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏛️ Ansari Nagar (AIIMS New Delhi)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Sarita Vihar', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏥 Sarita Vihar &amp; Okhla (Apollo, Fortis)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Dwarka', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏢 Dwarka (Manipal Hospital)
+                    </button>
+                </th:block>
+
+                <!-- 8. Dynamic Area / Locality Chips for BHUBANESWAR -->
+                <th:block th:if="${selectedCity == 'Bhubaneswar' || selectedState == 'Odisha'}">
+                    <button type="button" onclick="filterWbCards('Patrapada', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏛️ Patrapada (AIIMS Bhubaneswar)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Sainik School', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏥 Sainik School Road (Apollo)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Patia', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏢 Patia &amp; Ghatikia (KIMS, SUM Ultimate)
+                    </button>
+                </th:block>
+
+                <!-- 9. Dynamic Area / Locality Chips for WEST BENGAL (Default) -->
+                <th:block th:if="${selectedState == 'West Bengal' || (selectedCity == null && selectedState == null)}">
+                    <button type="button" onclick="filterWbCards('Kolkata', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        📍 Kolkata (Bhowanipore, Anandapur, Alipore)
+                    </button>
+                    <button type="button" onclick="filterWbCards('Salt Lake', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🏢 Salt Lake &amp; New Town
+                    </button>
+                    <button type="button" onclick="filterWbCards('Howrah', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        🌉 Howrah
+                    </button>
+                    <button type="button" onclick="filterWbCards('North Bengal', this)" class="wb-region-chip px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer">
+                        ⛰️ Siliguri &amp; Durgapur
+                    </button>
+                </th:block>
+            </div>
+
+            <!-- SUBVIEW 1: All Specialist Doctors -->
+            <div id="wb-doctors-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div th:each="d : ${allWbDoctors}" 
+                     th:attr="data-city=${d.city}, data-specialty=${d.specialty}, data-sector=${d.isGovernment() ? 'GOVERNMENT' : 'PRIVATE'}, data-hospital=${d.hospitalAffiliation}"
+                     class="wb-doctor-card bg-slate-50 hover:bg-white p-5 rounded-2xl border border-slate-200 hover:border-sky-400 hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                    <div>
+                        <!-- Header: Avatar & City/Sector Badge -->
+                        <div class="flex justify-between items-start gap-2 mb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-teal-500 text-white font-black flex items-center justify-center text-sm shadow-sm">
+                                    <span th:text="${d.name.replace('Dr. ', '').trim().substring(0, 1)}">D</span>
+                                </div>
+                                <div>
+                                    <h3 th:text="${d.name}" class="font-bold text-slate-900 text-sm">Dr. Name</h3>
+                                    <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-sky-800 bg-sky-100 px-2 py-0.5 rounded-md" th:text="${d.specialty}">Cardiology</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end gap-1 shrink-0">
+                                <span class="text-[10px] font-bold bg-slate-200/80 text-slate-700 px-2 py-0.5 rounded-full" th:text="${'📍 ' + d.city}">📍 Kolkata</span>
+                                <span th:if="${d.isGovernment()}" class="text-[9px] font-black uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                    <i class="fa-solid fa-building-columns text-amber-600"></i> Govt
+                                </span>
+                                <span th:if="${!d.isGovernment()}" class="text-[9px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                    <i class="fa-solid fa-shield-halved text-emerald-600"></i> Private
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Subspecialty & Qualifications -->
+                        <div class="text-xs space-y-1 text-slate-600 mb-3">
+                            <p class="font-semibold text-slate-800" th:text="${d.subSpecialty}">Specialty detail</p>
+                            <p class="text-[11px] text-slate-500" th:text="${d.credentials != null ? d.credentials : ''}">Qualifications</p>
+                        </div>
+
+                        <!-- Hospital Affiliation -->
+                        <div class="p-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-600 flex items-center gap-2 mb-3">
+                            <i th:class="${d.isGovernment() ? 'fa-solid fa-building-columns text-amber-600' : 'fa-solid fa-hospital text-slate-400'} + ' text-xs shrink-0'"></i>
+                            <span class="truncate font-medium text-slate-700" th:text="${d.hospitalAffiliation}">Hospital</span>
+                        </div>
+
+                        <!-- Details row: Experience & Fee -->
+                        <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-200/70 text-slate-500">
+                            <span><i class="fa-regular fa-clock text-sky-500"></i> <span th:text="${d.experienceYears + ' yrs exp'}">26 yrs exp</span></span>
+                            <span class="font-bold text-slate-900 text-sm" th:text="${'₹' + d.consultationFee}">₹1200</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="mt-4 pt-3 border-t border-slate-200/70 flex gap-2">
+                        <button type="button" th:attr="data-id=${d.id}, data-name=${d.name}, data-fee=${d.consultationFee}, data-hospital=${d.hospitalAffiliation}, data-city=${d.city}, data-specialty=${d.specialty}"
+                                onclick="openHomeBookingFromEl(this)"
+                                class="flex-1 text-center bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-3 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-regular fa-calendar-check"></i> <span>Book Token / Consult</span>
+                        </button>
+                        <a href="/ai-assistant" title="Prepare consultation questions with AI"
+                           class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 p-2 rounded-xl text-xs border border-indigo-200 transition flex items-center justify-center">
+                            <i class="fa-solid fa-sparkles"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBVIEW 2: All Hospitals & Bed Admissions -->
+            <div id="wb-hospitals-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 hidden">
+                <div th:each="h : ${allWbHospitals}" 
+                     th:attr="data-city=${h.city}, data-sector=${h.isGovernment() ? 'GOVERNMENT' : 'PRIVATE'}, data-name=${h.name}, data-address=${h.address}"
+                     class="wb-hospital-card bg-slate-50 hover:bg-white p-5 rounded-2xl border border-slate-200 hover:border-sky-400 hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+                    <div>
+                        <!-- Header: Name & Type / Sector -->
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <div>
+                                <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                                    <span th:if="${h.isGovernment()}" class="text-[10px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-building-columns text-amber-600"></i> Government
+                                    </span>
+                                    <span th:if="${!h.isGovernment()}" class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-shield-halved text-emerald-600"></i> Private
+                                    </span>
+                                    <span class="text-[10px] font-medium text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded-md inline-block truncate max-w-[180px]" th:text="${h.type}">Super-Speciality</span>
+                                </div>
+                                <h3 th:text="${h.name}" class="font-bold text-slate-900 text-sm leading-snug">Hospital Name</h3>
+                            </div>
+                            <span class="text-[10px] font-bold bg-slate-200/80 text-slate-700 px-2 py-0.5 rounded-full shrink-0" th:text="${'📍 ' + h.city}">📍 Kolkata</span>
+                        </div>
+
+                        <!-- Address -->
+                        <p class="text-xs text-slate-500 line-clamp-2 mb-3" th:text="${h.address}">Address</p>
+
+                        <!-- Bed Availability Matrix -->
+                        <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+                            <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+                                <span class="text-[10px] uppercase font-bold text-emerald-700 block">ICU Beds</span>
+                                <span class="text-base font-black text-emerald-800" th:text="${h.icuBedsAvailable}">24</span>
+                                <span class="text-[10px] text-emerald-600 block">Available</span>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-sky-50 border border-sky-200 text-center">
+                                <span class="text-[10px] uppercase font-bold text-sky-700 block">General Beds</span>
+                                <span class="text-base font-black text-sky-800" th:text="${h.generalBedsAvailable}">88</span>
+                                <span class="text-[10px] text-sky-600 block">Available</span>
+                            </div>
+                        </div>
+
+                        <!-- 24x7 Emergency Contact -->
+                        <div class="p-2.5 rounded-xl bg-red-50 border border-red-100 text-xs flex items-center justify-between">
+                            <span class="text-red-700 font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-phone-volume text-red-500 animate-pulse"></i> 24x7 Emergency:
+                            </span>
+                            <a th:href="${'tel:' + h.emergencyHelpline}" class="font-mono font-bold text-red-800 hover:underline" th:text="${h.emergencyHelpline}">Emergency Helpline</a>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-4 pt-3 border-t border-slate-200/70 flex gap-2">
+                        <button type="button" th:attr="data-id=${h.id}, data-name=${h.name}, data-address=${h.address}, data-phone=${h.phone != null ? h.phone : h.emergencyHelpline}, data-icu=${h.icuBedsAvailable}"
+                                onclick="openHomeAdmissionFromEl(this)"
+                                class="flex-1 text-center bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-3 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-bed"></i> <span>Direct Bed Admission</span>
+                        </button>
+                        <button type="button" th:attr="data-name=${h.name}, data-address=${h.address}, data-lat=${h.latitude}, data-lon=${h.longitude}, data-phone=${h.phone != null ? h.phone : h.emergencyHelpline}"
+                                onclick="openFacilityNavigation(this.getAttribute('data-name'), this.getAttribute('data-address'), this.getAttribute('data-lat'), this.getAttribute('data-lon'), this.getAttribute('data-phone'))"
+                                class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer" title="Turn-by-turn Directions">
+                            <i class="fa-solid fa-diamond-turn-right text-emerald-600"></i>
+                        </button>
+                        <a th:href="${'tel:' + h.emergencyHelpline}" 
+                           class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shadow-sm" title="Call Emergency Helpline">
+                            <i class="fa-solid fa-phone"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client-Side Filter Scripts -->
+            <script>
+                function switchWbSectionTab(tab) {
+                    const docBtn = document.getElementById('wb-tab-btn-doctors');
+                    const hospBtn = document.getElementById('wb-tab-btn-hospitals');
+                    const docView = document.getElementById('wb-doctors-view');
+                    const hospView = document.getElementById('wb-hospitals-view');
+
+                    if (tab === 'doctors') {
+                        docBtn.className = "px-4 py-2 rounded-xl transition bg-white text-sky-700 shadow-sm flex items-center gap-1.5 cursor-pointer";
+                        hospBtn.className = "px-4 py-2 rounded-xl transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5 cursor-pointer";
+                        docView.classList.remove('hidden');
+                        hospView.classList.add('hidden');
+                    } else {
+                        hospBtn.className = "px-4 py-2 rounded-xl transition bg-white text-sky-700 shadow-sm flex items-center gap-1.5 cursor-pointer";
+                        docBtn.className = "px-4 py-2 rounded-xl transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5 cursor-pointer";
+                        hospView.classList.remove('hidden');
+                        docView.classList.add('hidden');
+                    }
+                }
+
+                function filterWbCards(filterKey, btnElement) {
+                    document.querySelectorAll('.wb-region-chip').forEach(btn => {
+                        btn.classList.remove('bg-sky-600', 'text-white', 'shadow-sm');
+                        if (!btn.classList.contains('bg-amber-50') && !btn.classList.contains('bg-emerald-50')) {
+                            btn.classList.add('bg-slate-100', 'text-slate-700');
+                        }
+                    });
+                    btnElement.classList.remove('bg-slate-100', 'text-slate-700', 'bg-amber-50', 'bg-emerald-50');
+                    btnElement.classList.add('bg-sky-600', 'text-white', 'shadow-sm');
+
+                    const doctorCards = document.querySelectorAll('.wb-doctor-card');
+                    const hospitalCards = document.querySelectorAll('.wb-hospital-card');
+
+                    const matches = (card) => {
+                        if (filterKey === 'ALL') return true;
+                        const sector = (card.getAttribute('data-sector') || '').toUpperCase();
+                        if (filterKey === 'GOVERNMENT') return sector === 'GOVERNMENT';
+                        if (filterKey === 'PRIVATE') return sector === 'PRIVATE';
+
+                        const c = (card.getAttribute('data-city') || '').toLowerCase();
+                        const h = (card.getAttribute('data-hospital') || '').toLowerCase();
+                        const n = (card.getAttribute('data-name') || '').toLowerCase();
+                        const a = (card.getAttribute('data-address') || '').toLowerCase();
+                        const allText = (card.innerText || '').toLowerCase() + ' ' + h + ' ' + n + ' ' + a + ' ' + c;
+
+                        const reg = filterKey.toLowerCase();
+                        if (reg === 'somajiguda') return allText.includes('somajiguda') || allText.includes('punjagutta') || allText.includes('nims') || allText.includes('yashoda');
+                        if (reg === 'afzal gunj') return allText.includes('afzal') || allText.includes('osmania') || allText.includes('maternity') || allText.includes('nayapul') || allText.includes('petlaburj');
+                        if (reg === 'secunderabad') return allText.includes('secunderabad') || allText.includes('gandhi') || allText.includes('kims') || allText.includes('begumpet');
+                        if (reg === 'gachibowli') return allText.includes('gachibowli') || allText.includes('aig') || allText.includes('continental') || allText.includes('financial district');
+                        if (reg === 'banjara') return allText.includes('banjara') || allText.includes('jubilee') || allText.includes('apollo') || allText.includes('care') || allText.includes('rainbow');
+                        if (reg === 'lakdikapul') return allText.includes('lakdikapul') || allText.includes('red hills') || allText.includes('mnj');
+                        if (reg === 'park town') return allText.includes('park town') || allText.includes('rajiv gandhi') || allText.includes('omandurar') || allText.includes('anna salai') || allText.includes('madras medical');
+                        if (reg === 'greams') return allText.includes('greams') || allText.includes('thousand lights') || allText.includes('apollo');
+                        if (reg === 'vadapalani') return allText.includes('vadapalani') || allText.includes('sims') || allText.includes('aminjikarai') || allText.includes('mgm');
+                        if (reg === 'manapakkam') return allText.includes('manapakkam') || allText.includes('miot') || allText.includes('perumbakkam') || allText.includes('gleneagles');
+                        if (reg === 'royapuram') return allText.includes('royapuram') || allText.includes('stanley') || allText.includes('egmore') || allText.includes('kilpauk');
+                        if (reg === 'chromepet') return allText.includes('chromepet') || allText.includes('rela') || allText.includes('velachery') || allText.includes('prashanth');
+                        if (reg === 'kolkata') return allText.includes('kolkata') || allText.includes('bhowanipore') || allText.includes('alipore');
+                        if (reg === 'salt lake') return allText.includes('salt lake') || allText.includes('new town') || allText.includes('bidhannagar');
+                        if (reg === 'howrah') return allText.includes('howrah');
+                        if (reg === 'north bengal') return allText.includes('siliguri') || allText.includes('durgapur');
+                        return allText.includes(reg);
+                    };
+
+                    doctorCards.forEach(card => {
+                        card.style.display = matches(card) ? 'flex' : 'none';
+                    });
+
+                    hospitalCards.forEach(card => {
+                        card.style.display = matches(card) ? 'flex' : 'none';
+                    });
+                }
+
+                function selectProximityCity(city) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('city', city);
+                    window.location.href = url.toString();
+                }
+            </script>
+        </section>
+
+        <!-- VITALS & WEARABLES SNAPSHOT -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200" th:if="${recentVitals != null}">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-heart-pulse text-red-500"></i> Real-time Vitals & Wearables Sync
+                    </h3>
+                    <p class="text-xs text-slate-500">Connected to Google Health Connect & smart sensors</p>
+                </div>
+                <a href="/vitals-wellness" class="text-xs font-bold text-sky-600 hover:underline">Full Wellness Log &rarr;</a>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-xs text-slate-400 block mb-1">Heart Rate</span>
+                    <div class="text-2xl font-black text-slate-800" th:text="${recentVitals.heartRate}">72</div>
+                    <span class="text-[10px] text-slate-500 uppercase font-bold">bpm</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-xs text-slate-400 block mb-1">Blood Pressure</span>
+                    <div class="text-2xl font-black text-slate-800" th:text="${recentVitals.systolicBp + '/' + recentVitals.diastolicBp}">122/78</div>
+                    <span class="text-[10px] text-slate-500 uppercase font-bold">mmHg (Optimal)</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-xs text-slate-400 block mb-1">Blood Oxygen (SpO₂)</span>
+                    <div class="text-2xl font-black text-emerald-600" th:text="${recentVitals.spo2Percent + '%'}">98%</div>
+                    <span class="text-[10px] text-slate-500 uppercase font-bold">Normal Range</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-xs text-slate-400 block mb-1">Blood Glucose</span>
+                    <div class="text-2xl font-black text-slate-800" th:text="${recentVitals.bloodGlucoseMgDl}">114</div>
+                    <span class="text-[10px] text-slate-500 uppercase font-bold">mg/dL (Fasting)</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-xs text-slate-400 block mb-1">Steps Today</span>
+                    <div class="text-2xl font-black text-sky-600" th:text="${recentVitals.stepsToday}">7,450</div>
+                    <span class="text-[10px] text-slate-500 uppercase font-bold">Goal: 10k</span>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+                    <span class="text-xs text-slate-400 block mb-1">Sleep Duration</span>
+                    <div class="text-2xl font-black text-indigo-600" th:text="${recentVitals.sleepHours + 'h'}">7.5h</div>
+                    <span class="text-[10px] text-slate-500 uppercase font-bold">Restful Sleep</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONNECTED HEALTHCARE JOURNEY ROADMAP (Module #38) -->
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-6 sm:p-8 rounded-3xl shadow-xl">
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                <div>
+                    <span class="text-[10px] bg-sky-500 text-white uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full">Unified Care Continuum</span>
+                    <h3 class="text-xl font-black tracking-tight mt-1">The Complete Connected Healthcare Journey</h3>
+                    <p class="text-xs text-slate-300">How CarePulse integrates AI, appointments, admissions, pharmacy, lab, medicine timer & recovery.</p>
+                </div>
+                <a href="/journey" class="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2 rounded-xl transition border border-white/20">
+                    Explore Interactive Journey &rarr;
+                </a>
+            </div>
+
+            <!-- Stepper -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 text-center text-xs">
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <div class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center mx-auto mb-1">1</div>
+                    <div class="font-bold">AI Triage</div>
+                    <div class="text-[10px] text-slate-400">Symptom check</div>
+                </div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <div class="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 font-bold flex items-center justify-center mx-auto mb-1">2</div>
+                    <div class="font-bold">Find Care</div>
+                    <div class="text-[10px] text-slate-400">Doctor / Hospital</div>
+                </div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <div class="w-8 h-8 rounded-full bg-teal-500/20 text-teal-400 font-bold flex items-center justify-center mx-auto mb-1">3</div>
+                    <div class="font-bold">Appointment</div>
+                    <div class="text-[10px] text-slate-400">Token booking</div>
+                </div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center mx-auto mb-1">4</div>
+                    <div class="font-bold">Consultation</div>
+                    <div class="text-[10px] text-slate-400">In-person / Video</div>
+                </div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center mx-auto mb-1">5</div>
+                    <div class="font-bold">Prescription</div>
+                    <div class="text-[10px] text-slate-400">Digital Rx auto-sync</div>
+                </div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center mx-auto mb-1">6</div>
+                    <div class="font-bold">Timer Sync</div>
+                    <div class="text-[10px] text-slate-400">Live dose alarms</div>
+                </div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <div class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center mx-auto mb-1">7</div>
+                    <div class="font-bold">Health Locker</div>
+                    <div class="text-[10px] text-slate-400">Lab reports stored</div>
+                </div>
+                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <div class="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 font-bold flex items-center justify-center mx-auto mb-1">8</div>
+                    <div class="font-bold">Recovery</div>
+                    <div class="text-[10px] text-slate-400">Caregiver alerts</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- LIVE HOSPITAL BED ADMISSION MODAL (Embedded on Home Screen)       -->
+        <!-- ================================================================= -->
+        <div id="home-admission-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white max-w-lg w-full rounded-3xl shadow-2xl p-6 sm:p-7 border border-slate-200 relative max-h-[92vh] overflow-y-auto">
+                <button type="button" onclick="closeHomeAdmissionModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl flex-shrink-0">
+                        <i class="fa-solid fa-bed"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">Official Hospital Inpatient</span>
+                        <h3 class="text-lg font-black text-slate-900 leading-tight mt-0.5" id="home-admission-hospital-name">Hospital Admission</h3>
+                    </div>
+                </div>
+
+                <div class="bg-sky-50 border border-sky-200 rounded-xl p-3 text-sky-900 text-xs mb-4">
+                    <p class="font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-check text-sky-600"></i> Direct Electronic Bed Allocation &amp; Verification
+                    </p>
+                    <p class="text-[11px] text-sky-700 mt-0.5">Generates an authentic hospital admission token, allocates an official bed ID, and registers with the hospital reception.</p>
+                </div>
+
+                <form id="home-admission-form" onsubmit="submitHomeAdmissionRequest(event)" class="space-y-3 text-xs">
+                    <input type="hidden" id="home-admission-hospital-id" name="hospitalId" value="1">
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Patient Full Name *</label>
+                            <input type="text" name="patientName" th:value="${currentUser != null ? currentUser.fullName : ''}" placeholder="Patient Full Name" required class="w-full border border-slate-300 rounded-xl p-2.5 font-bold focus:ring-2 focus:ring-sky-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Age &amp; Gender *</label>
+                            <div class="grid grid-cols-2 gap-1">
+                                <input type="number" name="patientAge" value="28" min="1" max="120" required class="border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-sky-500 font-bold">
+                                <select name="patientGender" class="border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800">
+                                    <option value="Male" selected>Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Contact Mobile Phone *</label>
+                        <input type="tel" name="contactPhone" th:value="${currentUser != null ? currentUser.phone : '+91 98300 12345'}" required class="w-full border border-slate-300 rounded-xl p-2.5 font-bold focus:ring-2 focus:ring-sky-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Ward / Room Type *</label>
+                            <select name="roomType" id="home-admission-roomtype" class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800">
+                                <option value="ICU" selected>ICU (Critical Care / Ventilator)</option>
+                                <option value="General Ward">General Ward (Semi-Private)</option>
+                                <option value="Private Cabin">Single Private Deluxe Room</option>
+                                <option value="HDU">High Dependency Unit (HDU)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Clinical Department *</label>
+                            <select name="department" class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800">
+                                <option value="Cardiology">Cardiology &amp; CCU</option>
+                                <option value="Critical Care / Emergency" selected>Critical Care / Emergency</option>
+                                <option value="Neurology">Neurology &amp; Stroke</option>
+                                <option value="General Medicine">General Medicine</option>
+                                <option value="Orthopedics">Orthopedics &amp; Trauma</option>
+                                <option value="Pulmonology">Pulmonology / Chest</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Admission Priority / Urgency *</label>
+                        <select name="urgency" class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800">
+                            <option value="EMERGENCY" selected>🚨 Emergency (Immediate Bed Hold &amp; Duty Doctor Alert)</option>
+                            <option value="ROUTINE">📅 Planned / Scheduled Ward Admission</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+                        <button type="button" onclick="closeHomeAdmissionModal()" class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer">Cancel</button>
+                        <button type="submit" class="px-5 py-2.5 font-black bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-lg shadow-sky-600/30 flex items-center gap-2 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-bed-pulse"></i> Confirm Admission &amp; Allocate Bed
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- ADMISSION SUCCESS SLIP MODAL (Home Screen)                       -->
+        <!-- ================================================================= -->
+        <div id="home-admission-success-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-7 border border-slate-200 text-center space-y-4">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto shadow-sm">
+                    <i class="fa-solid fa-bed-pulse"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                        Official Inpatient Admission Slip
+                    </span>
+                    <h3 class="text-xl font-black text-slate-900 mt-1.5">Bed Allocated &amp; Admission Approved</h3>
+                    <p class="text-xs text-slate-500">Verified through CarePulse Healthcare Network directly with hospital admissions desk.</p>
+                </div>
+
+                <!-- Slip Card -->
+                <div class="bg-slate-50 rounded-2xl p-4 border-2 border-dashed border-emerald-300 text-left space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <div>
+                            <span class="text-[10px] text-slate-400 uppercase font-bold block">Digital Token No.</span>
+                            <span id="home-slip-token-number" class="text-xl font-mono font-black text-emerald-600">ADM-9021</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 uppercase font-bold block">Allocated Bed ID</span>
+                            <span id="home-slip-bed-number" class="text-sm font-mono font-black text-white bg-emerald-600 px-2.5 py-1 rounded-lg inline-block">ICU-Bay-03</span>
+                            <span id="home-slip-request-id" class="text-[9px] text-slate-400 font-mono block mt-0.5">#ADM-LIVE</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Hospital Facility:</span>
+                            <strong id="home-slip-hospital-name" class="text-slate-900 font-bold block truncate">Hospital Name</strong>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Patient:</span>
+                            <strong id="home-slip-patient-name" class="text-slate-900 font-bold block truncate">Patient Name</strong>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Department / Room:</span>
+                            <span id="home-slip-department" class="text-slate-700 font-semibold block truncate">ICU / Critical Care</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Attending Specialist:</span>
+                            <span id="home-slip-doctor-name" class="text-slate-700 font-semibold block truncate">Dr. On-Duty CMO, MD</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Admission Status:</span>
+                            <span id="home-slip-status" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded inline-block">BED_ALLOCATED</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">ER Hotline:</span>
+                            <a id="home-slip-hospital-phone" href="tel:108" class="text-sky-600 font-bold block hover:underline">108 / 102</a>
+                        </div>
+                    </div>
+
+                    <div id="home-slip-instructions-box" class="bg-amber-50 p-2.5 rounded-xl border border-amber-200 text-[11px] text-amber-900 font-medium">
+                        <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i>
+                        <span id="home-slip-instructions">Your bed reservation is held for 3 hours. Please present this Digital Token upon arrival at Emergency Gate.</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-1">
+                    <button type="button" id="home-slip-directions-btn"
+                            class="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-black rounded-2xl text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-diamond-turn-right"></i>
+                        <span>🗺️ Start GPS Directions to Hospital Emergency Gate</span>
+                    </button>
+                    <a href="/portals" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-hospital-user"></i>
+                        <span>View in Hospital Patient Portal (/portals)</span>
+                    </a>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="window.print()" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-print"></i> Print Admission Pass
+                        </button>
+                        <button type="button" onclick="closeHomeAdmissionSuccessModal()" class="flex-1 py-2 px-3 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-semibold transition cursor-pointer">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- LIVE SPECIALIST DOCTOR CONSULTATION MODAL (Home Screen)          -->
+        <!-- ================================================================= -->
+        <div id="home-booking-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl p-6 border border-slate-200 relative max-h-[92vh] overflow-y-auto">
+                <button type="button" onclick="closeHomeBookingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl flex-shrink-0 font-black">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">Doctor Consultation &amp; Token</span>
+                        <h3 class="text-base font-black text-slate-900 leading-tight mt-0.5" id="home-modal-doctor-name">Book Specialist</h3>
+                    </div>
+                </div>
+
+                <form id="home-booking-form" onsubmit="submitHomeBookingRequest(event)" class="space-y-3 text-xs">
+                    <input type="hidden" id="home-booking-doctor-id" name="doctorId" value="1">
+                    <input type="hidden" id="home-booking-payment-amount" name="paymentAmount" value="900">
+
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Patient Full Name *</label>
+                        <input type="text" name="patientName" th:value="${currentUser != null ? currentUser.fullName : ''}" placeholder="Patient Full Name" required class="w-full border border-slate-300 rounded-xl p-2.5 font-bold focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Patient Contact Phone *</label>
+                        <input type="tel" name="patientPhone" th:value="${currentUser != null ? (currentUser.phone != null ? currentUser.phone : currentUser.phoneNumber) : ''}" placeholder="+91 98300 00000" required class="w-full border border-slate-300 rounded-xl p-2.5 font-bold focus:ring-2 focus:ring-indigo-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Consultation Mode *</label>
+                            <select name="consultationType" id="home-booking-consult-type" class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800">
+                                <option value="IN_PERSON" selected>🏥 In-Person Clinic</option>
+                                <option value="VIDEO">🎥 Encrypted Video Call</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Preferred Slot *</label>
+                            <select class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800">
+                                <option value="TODAY">Today Express Slot</option>
+                                <option value="TOMORROW" selected>Tomorrow Morning 10:30 AM</option>
+                                <option value="EVENING">Tomorrow Evening 06:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Symptoms / Chief Complaints</label>
+                        <textarea name="symptoms" rows="2" class="w-full border border-slate-300 rounded-xl p-2.5 font-medium focus:ring-2 focus:ring-indigo-500" placeholder="e.g. Chest discomfort, high blood pressure follow-up, routine wellness check..."></textarea>
+                    </div>
+
+                    <!-- Payment Mode & Checkout Summary -->
+                    <div class="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-slate-700">Official Consultation Fee:</span>
+                            <strong class="text-base font-black text-indigo-700" id="home-modal-fee">₹900</strong>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Payment Method</label>
+                            <div class="grid grid-cols-3 gap-1.5 text-center">
+                                <label class="border border-indigo-300 bg-white p-2 rounded-xl cursor-pointer flex flex-col items-center gap-1 font-bold text-[11px] hover:border-indigo-600">
+                                    <input type="radio" name="paymentMethod" value="UPI" checked class="text-indigo-600">
+                                    <span>GPay / UPI</span>
+                                </label>
+                                <label class="border border-indigo-300 bg-white p-2 rounded-xl cursor-pointer flex flex-col items-center gap-1 font-bold text-[11px] hover:border-indigo-600">
+                                    <input type="radio" name="paymentMethod" value="CARD" class="text-indigo-600">
+                                    <span>Debit / Card</span>
+                                </label>
+                                <label class="border border-indigo-300 bg-white p-2 rounded-xl cursor-pointer flex flex-col items-center gap-1 font-bold text-[11px] hover:border-indigo-600">
+                                    <input type="radio" name="paymentMethod" value="CASH" class="text-indigo-600">
+                                    <span>Pay at Desk</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2.5 pt-2 border-t border-slate-100">
+                        <button type="button" onclick="closeHomeBookingModal()" class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer">Cancel</button>
+                        <button type="submit" class="px-5 py-2.5 font-black bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-2 cursor-pointer active:scale-95">
+                            <i class="fa-regular fa-credit-card"></i> <span id="home-booking-btn-label">Pay &amp; Generate Token</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- DOCTOR BOOKING SUCCESS SLIP MODAL (Home Screen)                  -->
+        <!-- ================================================================= -->
+        <div id="home-booking-success-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-7 border border-slate-200 text-center space-y-4">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto shadow-sm">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                        Official Doctor Consultation Pass
+                    </span>
+                    <h3 class="text-xl font-black text-slate-900 mt-1.5">Consultation &amp; Token Confirmed</h3>
+                    <p class="text-xs text-slate-500">Verified receipt registered with doctor's clinical OPD desk.</p>
+                </div>
+
+                <div class="bg-slate-50 rounded-2xl p-4 border-2 border-dashed border-emerald-300 text-left space-y-2.5 text-xs">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <div>
+                            <span class="text-[10px] text-slate-400 uppercase font-bold block">Consultation Token No.</span>
+                            <span id="home-doc-slip-token" class="text-2xl font-mono font-black text-emerald-600">TK-108</span>
+                        </div>
+                        <div class="text-right">
+                            <span id="home-doc-slip-payment" class="text-xs font-mono font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-lg inline-block">✓ ₹900 PAID</span>
+                            <span id="home-doc-slip-txn" class="text-[9px] text-slate-400 font-mono block mt-0.5">TXN-UPI-9012</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Attending Doctor:</span>
+                            <strong id="home-doc-slip-name" class="text-slate-900 font-bold block truncate">Doctor Name</strong>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Mode:</span>
+                            <span id="home-doc-slip-type" class="text-indigo-600 font-bold block">IN-PERSON</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Patient Name:</span>
+                            <strong id="home-doc-slip-patient" class="text-slate-900 font-bold block truncate">Patient Name</strong>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Facility / Hospital:</span>
+                            <span id="home-doc-slip-hospital" class="text-slate-700 font-semibold block truncate">Hospital Name</span>
+                        </div>
+                    </div>
+
+                    <div class="p-2.5 rounded-xl bg-sky-50 border border-sky-200 flex justify-between items-center text-[11px]">
+                        <span class="text-sky-800 font-bold flex items-center gap-1.5">
+                            <i class="fa-solid fa-phone-volume text-sky-600"></i> Doctor's OPD Contact:
+                        </span>
+                        <a id="home-doc-slip-phone-link" href="tel:03324821245" class="font-mono font-bold text-sky-900 hover:underline">
+                            <span id="home-doc-slip-phone">+91 98300 12345</span>
+                        </a>
+                    </div>
+
+                    <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-medium">
+                        <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i>
+                        <span id="home-doc-slip-instructions">Payment verified. Please keep this token ready when consulting with the specialist.</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-1">
+                    <!-- Video Room Button (if VIDEO) -->
+                    <a id="home-doc-slip-video-btn" href="#" target="_blank" rel="noopener noreferrer"
+                       class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2 hidden">
+                        <i class="fa-solid fa-video"></i>
+                        <span>🎥 Join Encrypted Telehealth Video Room Now</span>
+                    </a>
+
+                    <!-- GPS Directions Button (if IN_PERSON) -->
+                    <button type="button" id="home-doc-slip-directions-btn"
+                            class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2 cursor-pointer hidden">
+                        <i class="fa-solid fa-diamond-turn-right"></i>
+                        <span>🗺️ Start GPS Directions to Doctor's Clinic</span>
+                    </button>
+
+                    <a href="/portals" class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-hospital-user text-sky-400"></i>
+                        <span>View in Hospital OPD Queue (/portals)</span>
+                    </a>
+
+                    <div class="flex gap-2">
+                        <button type="button" onclick="window.print()" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-print"></i> Print Token Pass
+                        </button>
+                        <button type="button" onclick="closeHomeBookingSuccessModal()" class="flex-1 py-2 px-3 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-semibold transition cursor-pointer">
+                            Done / Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Global Client Scripts for Home Modals -->
+    <script>
+        let currentHomeAdmissionFacility = { id: '1', name: '', address: '', phone: '108' };
+        let currentHomeBookingDoctor = { id: '1', name: '', fee: '900', hospital: '', city: '', specialty: '' };
+
+        function openHomeAdmissionFromEl(el) {
+            const id = el.getAttribute('data-id') || '1';
+            const name = el.getAttribute('data-name') || 'Selected Hospital';
+            const address = el.getAttribute('data-address') || name;
+            const phone = el.getAttribute('data-phone') || '108';
+            const icu = el.getAttribute('data-icu') || 'Available';
+            openHomeAdmissionModal(id, name, address, phone, icu);
+        }
+
+        function openHomeAdmissionModal(id, name, address, phone, icu) {
+            currentHomeAdmissionFacility = { id: id, name: name, address: address, phone: phone };
+            const idEl = document.getElementById('home-admission-hospital-id');
+            const nameEl = document.getElementById('home-admission-hospital-name');
+            if (idEl) idEl.value = id;
+            if (nameEl) nameEl.innerText = 'Admit to ' + name;
+            const modal = document.getElementById('home-admission-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeHomeAdmissionModal() {
+            const modal = document.getElementById('home-admission-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function submitHomeAdmissionRequest(e) {
+            e.preventDefault();
+            const form = document.getElementById('home-admission-form');
+            const formData = new FormData(form);
+            const patientName = formData.get('patientName');
+            const department = formData.get('department');
+            const hospitalName = currentHomeAdmissionFacility.name || 'Selected Hospital';
+
+            try {
+                const resp = await fetch('/api/admissions/request', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                if (data.status === 'SUCCESS') {
+                    closeHomeAdmissionModal();
+                    showHomeAdmissionSuccessSlip(data, patientName, hospitalName, department);
+                } else {
+                    alert(data.message || 'Could not register admission.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error processing admission. Please retry.');
+            }
+        }
+
+        function showHomeAdmissionSuccessSlip(data, patientName, hospitalName, department) {
+            const tokenEl = document.getElementById('home-slip-token-number');
+            if (tokenEl) tokenEl.innerText = data.tokenNumber || ('ADM-' + Math.floor(1000 + Math.random() * 9000));
+            const reqEl = document.getElementById('home-slip-request-id');
+            if (reqEl) reqEl.innerText = '#' + (data.requestId || 'ADM-LIVE');
+
+            const hName = data.hospitalName || hospitalName || currentHomeAdmissionFacility.name || 'Certified Hospital';
+            document.getElementById('home-slip-hospital-name').innerText = hName;
+            document.getElementById('home-slip-patient-name').innerText = patientName || 'Verified Patient';
+            document.getElementById('home-slip-department').innerText = (department || 'ICU / Critical Care') + (data.roomType ? ' (' + data.roomType + ')' : '');
+            document.getElementById('home-slip-status').innerText = data.currentStage || 'BED_ALLOCATED';
+
+            const bedEl = document.getElementById('home-slip-bed-number');
+            if (bedEl) bedEl.innerText = data.allocatedBed || 'ICU-Bay-03';
+
+            const docEl = document.getElementById('home-slip-doctor-name');
+            if (docEl) docEl.innerText = data.allocatedDoctor || 'Dr. On-Duty CMO, MD';
+
+            const instEl = document.getElementById('home-slip-instructions');
+            if (instEl && data.instructions) instEl.innerText = data.instructions;
+
+            const phoneEl = document.getElementById('home-slip-hospital-phone');
+            const hPhone = data.hospitalPhone || currentHomeAdmissionFacility.phone || '108';
+            if (phoneEl) {
+                phoneEl.innerText = hPhone;
+                phoneEl.href = 'tel:' + hPhone;
+            }
+
+            const dirBtn = document.getElementById('home-slip-directions-btn');
+            if (dirBtn) {
+                dirBtn.onclick = function() {
+                    const addr = currentHomeAdmissionFacility.address || hName;
+                    openFacilityNavigation(hName, addr, null, null, hPhone);
+                };
+            }
+
+            document.getElementById('home-admission-success-modal').classList.remove('hidden');
+        }
+
+        function closeHomeAdmissionSuccessModal() {
+            document.getElementById('home-admission-success-modal').classList.add('hidden');
+            window.location.reload();
+        }
+
+        function openHomeBookingFromEl(el) {
+            const id = el.getAttribute('data-id') || '1';
+            const name = el.getAttribute('data-name') || 'Consultant Specialist';
+            const fee = el.getAttribute('data-fee') || '900';
+            const hospital = el.getAttribute('data-hospital') || 'Associated Hospital';
+            const city = el.getAttribute('data-city') || 'Kolkata';
+            const specialty = el.getAttribute('data-specialty') || 'General Medicine';
+            openHomeBookingModal(id, name, fee, hospital, city, specialty, 'IN_PERSON');
+        }
+
+        function openHomeBookingModal(id, name, fee, hospital, city, specialty, type) {
+            currentHomeBookingDoctor = { id: id, name: name, fee: fee, hospital: hospital, city: city, specialty: specialty };
+            const idEl = document.getElementById('home-booking-doctor-id');
+            const feeInput = document.getElementById('home-booking-payment-amount');
+            const nameEl = document.getElementById('home-modal-doctor-name');
+            const feeEl = document.getElementById('home-modal-fee');
+            const btnLabel = document.getElementById('home-booking-btn-label');
+
+            if (idEl) idEl.value = id;
+            if (feeInput) feeInput.value = fee;
+            if (nameEl) nameEl.innerText = 'Book with ' + name;
+            if (feeEl) feeEl.innerText = '₹' + fee;
+            if (btnLabel) btnLabel.innerText = 'Pay ₹' + fee + ' & Generate Token';
+
+            const modal = document.getElementById('home-booking-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeHomeBookingModal() {
+            const modal = document.getElementById('home-booking-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function submitHomeBookingRequest(e) {
+            e.preventDefault();
+            const form = document.getElementById('home-booking-form');
+            const formData = new FormData(form);
+            const patientName = formData.get('patientName');
+            const consultType = formData.get('consultationType');
+            const doctorName = currentHomeBookingDoctor.name || 'Selected Specialist';
+
+            try {
+                const resp = await fetch('/api/appointments/book', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                if (data.status === 'SUCCESS' || data.success) {
+                    closeHomeBookingModal();
+                    showHomeBookingSuccessSlip(data, patientName, doctorName, consultType);
+                } else {
+                    alert(data.message || 'Could not complete appointment booking.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error booking consultation. Please retry.');
+            }
+        }
+
+        function showHomeBookingSuccessSlip(data, patientName, doctorName, consultType) {
+            const token = data.tokenNumber || ('TK-' + Math.floor(100 + Math.random() * 900));
+            document.getElementById('home-doc-slip-token').innerText = token;
+
+            const payStatusEl = document.getElementById('home-doc-slip-payment');
+            if (payStatusEl) {
+                payStatusEl.innerText = `✓ ₹${data.consultationFee || currentHomeBookingDoctor.fee || '900'} PAID`;
+            }
+            const txnEl = document.getElementById('home-doc-slip-txn');
+            if (txnEl) {
+                txnEl.innerText = data.transactionId || ('TXN-UPI-' + Math.floor(10000 + Math.random() * 90000));
+            }
+
+            document.getElementById('home-doc-slip-name').innerText = data.doctorName || doctorName || currentHomeBookingDoctor.name || 'Certified Specialist';
+            document.getElementById('home-doc-slip-patient').innerText = patientName || 'Verified Patient';
+            document.getElementById('home-doc-slip-type').innerText = consultType === 'VIDEO' ? '🎥 VIDEO TELEHEALTH' : '🏥 IN-PERSON CLINIC';
+            document.getElementById('home-doc-slip-hospital').innerText = data.hospitalName || currentHomeBookingDoctor.hospital || 'CarePulse Medical Center';
+
+            const phoneEl = document.getElementById('home-doc-slip-phone');
+            const phoneLinkEl = document.getElementById('home-doc-slip-phone-link');
+            const docPhone = data.doctorPhone || '+91 98300 12345';
+            if (phoneEl) phoneEl.innerText = docPhone;
+            if (phoneLinkEl) phoneLinkEl.href = 'tel:' + docPhone;
+
+            const instEl = document.getElementById('home-doc-slip-instructions');
+            if (instEl && data.instructions) {
+                instEl.innerText = data.instructions;
+            }
+
+            const videoBtn = document.getElementById('home-doc-slip-video-btn');
+            const dirBtn = document.getElementById('home-doc-slip-directions-btn');
+
+            if (consultType === 'VIDEO') {
+                if (videoBtn) {
+                    videoBtn.href = data.videoMeetingUrl || ('https://meet.jit.si/CarePulse-' + token);
+                    videoBtn.classList.remove('hidden');
+                }
+                if (dirBtn) dirBtn.classList.add('hidden');
+            } else {
+                if (videoBtn) videoBtn.classList.add('hidden');
+                if (dirBtn) {
+                    dirBtn.classList.remove('hidden');
+                    dirBtn.onclick = function() {
+                        const clinicName = (data.doctorName || doctorName) + ' Clinic';
+                        const clinicAddr = (data.hospitalName || currentHomeBookingDoctor.hospital || 'Medical Center') + ', ' + (currentHomeBookingDoctor.city || 'Kolkata');
+                        openFacilityNavigation(clinicName, clinicAddr, null, null, docPhone);
+                    };
+                }
+            }
+
+            document.getElementById('home-booking-success-modal').classList.remove('hidden');
+        }
+
+        function closeHomeBookingSuccessModal() {
+            document.getElementById('home-booking-success-modal').classList.add('hidden');
+            window.location.reload();
+        }
+    </script>
+    <div th:replace="~{layout/main :: footer}"></div>
+</body>
+</html>

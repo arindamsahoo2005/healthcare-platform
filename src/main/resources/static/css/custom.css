@@ -1,0 +1,60 @@
+/* Custom Healthcare Platform Design System */
+:root {
+    --color-primary: #0284c7;
+    --color-primary-dark: #0369a1;
+    --color-secondary: #0d9488;
+    --color-emergency: #dc2626;
+    --color-warning: #f59e0b;
+    --color-success: #10b981;
+}
+
+@keyframes pulse-ring {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.pulse-timer {
+    animation: pulse-ring 2s infinite ease-in-out;
+}
+
+.countdown-box {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+}
+
+.glow-emergency {
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.35);
+}
+
+.glass-nav {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Print Styles for Medical Passport */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .print-only {
+        display: block !important;
+    }
+}

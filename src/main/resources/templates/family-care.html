@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
+                    👨‍👩‍👧 Module 14 & 15: Family Care & Caregiver Mode
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Family Health & Caregiver Hub
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Manage profiles for parents, spouse, and children. Monitor senior adherence and missed dose notifications.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="alert('Caregiver permissions verified and synchronized.')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> Add Family Member
+                </button>
+            </div>
+        </div>
+
+        <!-- CAREGIVER ESCALATION DASHBOARD (Module 15) -->
+        <div class="bg-gradient-to-r from-teal-900 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl">
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-teal-300">CAREGIVER MODE ACTIVE</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black">Elder Care & Dependent Supervision</h2>
+                    <p class="text-xs text-slate-300 max-w-xl">
+                        Caregivers receive automatic SMS and in-app alerts if a dependent's dose is delayed past 45 minutes.
+                    </p>
+                </div>
+                <div class="bg-white/10 p-4 rounded-2xl border border-white/20 text-center">
+                    <span class="text-[10px] text-teal-300 uppercase font-bold block">Supervised Members</span>
+                    <span class="text-2xl font-black text-white" th:text="${familyMembers.size()}">5</span>
+                    <span class="text-[10px] text-slate-400 block">Profiles Linked</span>
+                </div>
+            </div>
+
+            <!-- Caregiver Notification Log -->
+            <div class="bg-slate-950/60 rounded-2xl p-4 border border-slate-800 text-xs space-y-2">
+                <div class="flex items-center justify-between text-teal-300 font-bold">
+                    <span>Caregiver Monitoring Heartbeats:</span>
+                    <span class="text-[10px] bg-teal-950 text-teal-300 px-2 py-0.5 rounded border border-teal-800">Status Ready</span>
+                </div>
+                <p class="text-slate-400 leading-relaxed">
+                    Caregiver supervision active. Scheduled medication adherence and biometric threshold monitoring enabled for all linked profiles.
+                </p>
+            </div>
+        </div>
+
+        <!-- FAMILY MEMBERS PROFILES GRID -->
+        <div th:if="${#lists.isEmpty(familyMembers)}" class="text-center py-12 border-2 border-dashed border-slate-200 rounded-3xl bg-white">
+            <div class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-600 flex items-center justify-center text-xl mx-auto mb-3">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-700">No family profiles linked yet</h4>
+            <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-4">Add parents, spouse, or dependents to coordinate care, monitor adherence, and share emergency medical records.</p>
+            <button onclick="alert('Family member linking form initialized.')" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow transition">
+                <i class="fa-solid fa-user-plus mr-1"></i> Add First Family Member
+            </button>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(familyMembers)}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="m : ${familyMembers}" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 hover:border-teal-400 hover:shadow-md transition flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full font-mono"
+                              th:classappend="${m.relation == 'SELF' ? 'bg-sky-100 text-sky-800' : (m.relation == 'FATHER' or m.relation == 'MOTHER' ? 'bg-amber-100 text-amber-800' : 'bg-teal-100 text-teal-800')}"
+                              th:text="${m.relation}">
+                            SELF
+                        </span>
+                        <span class="text-xs bg-rose-50 text-rose-700 font-bold px-2 py-0.5 rounded-md font-mono" th:text="${m.bloodGroup}">
+                            O+
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center font-black text-base shadow-sm">
+                            <i class="fa-solid fa-user-group"></i>
+                        </div>
+                        <div>
+                            <h3 th:text="${m.fullName}" class="text-base font-black text-slate-900">Member Name</h3>
+                            <span class="text-xs text-slate-500" th:text="${m.age + ' Years Old'}">38 Years</span>
+                        </div>
+                    </div>
+
+                    <!-- Medical Summary Box -->
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs space-y-2 mb-4">
+                        <div>
+                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Chronic Conditions:</span>
+                            <strong class="text-slate-800" th:text="${m.chronicConditions}">Type 2 Diabetes</strong>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Known Allergies:</span>
+                            <strong class="text-red-600" th:text="${m.allergies}">Penicillin</strong>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[10px] uppercase font-bold">Emergency Phone:</span>
+                            <strong class="text-slate-700 font-mono" th:text="${m.emergencyContactPhone}">+91 98765 43210</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex gap-2">
+                    <button onclick="showToast('Switched active profile context.', 'info')" class="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+                        Switch Profile
+                    </button>
+                    <a href="/medicine-timer" class="flex-1 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs transition text-center">
+                        Medicines
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null ? pageTitle + ' - Arindam Healthcare' : 'Arindam Healthcare - Universal Digital Healthcare Platform | Founded by Arindam Sahoo'}">Arindam Healthcare</title>
+    <!-- Comprehensive Google Search SEO & Crawler Metadata -->
+    <meta name="description" content="Arindam Healthcare is a comprehensive digital healthcare platform founded and developed by Arindam Sahoo. Book hospital OPD outdoor seats, doctor private chambers, ICU bed admissions, and digital health records across West Bengal & India.">
+    <meta name="keywords" content="Arindam Healthcare, Arindam Sahoo Healthcare, Arindam Sahoo, Budge Budge Hospital, West Bengal Doctors, OPD Appointment, Online Healthcare India, Hospital Bed Admission, ESI Hospital Budge Budge, Budge Budge Municipal Hospital">
+    <meta name="author" content="Arindam Sahoo">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="google-site-verification" content="GOOGLE_VERIFICATION_KEY_PLACEHOLDER">
+
+    <!-- Open Graph / Social Sharing (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Arindam Healthcare">
+    <meta property="og:title" content="Arindam Healthcare - Universal Digital Healthcare & Hospital Network">
+    <meta property="og:description" content="Official Healthcare Platform founded and developed by Arindam Sahoo. Book doctor appointments, hospital OPD seats, and ICU admissions.">
+    <meta property="og:url" content="https://arindam-healthcare.onrender.com">
+    <meta property="og:locale" content="en_IN">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Arindam Healthcare - Universal Digital Healthcare">
+    <meta name="twitter:description" content="Official Healthcare Platform founded and developed by Arindam Sahoo.">
+
+    <!-- Schema.org JSON-LD Structured Data for Google Search Indexing -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://arindam-healthcare.onrender.com/#website",
+          "url": "https://arindam-healthcare.onrender.com/",
+          "name": "Arindam Healthcare",
+          "alternateName": ["Arindam Sahoo Healthcare", "CarePulse by Arindam"],
+          "description": "Universal Digital Healthcare & Hospital Network developed by Arindam Sahoo",
+          "publisher": {
+            "@type": "Person",
+            "name": "Arindam Sahoo"
+          }
+        },
+        {
+          "@type": "MedicalBusiness",
+          "@id": "https://arindam-healthcare.onrender.com/#medicalbusiness",
+          "name": "Arindam Healthcare",
+          "alternateName": "Arindam Sahoo Healthcare",
+          "url": "https://arindam-healthcare.onrender.com/",
+          "founder": {
+            "@type": "Person",
+            "name": "Arindam Sahoo"
+          },
+          "areaServed": {
+            "@type": "AdministrativeArea",
+            "name": "West Bengal, India"
+          },
+          "medicalSpecialty": [
+            "GeneralPractice",
+            "Pediatric",
+            "Cardiovascular",
+            "Emergency"
+          ]
+        }
+      ]
+    }
+    </script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0284c7',
+                        'primary-dark': '#0369a1',
+                        emergency: '#dc2626',
+                        clinical: '#0f172a'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Firebase App & Auth SDK (v10 compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <!-- Google Identity Services (GSI) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        /* Google Translate seamless styling */
+        .goog-te-banner-frame.skiptranslate, .goog-te-banner-frame { display: none !important; }
+        body { top: 0px !important; }
+        .goog-tooltip, .goog-tooltip:hover { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
+        #google_translate_element { display: none !important; }
+        .skiptranslate iframe { display: none !important; }
+
+        /* Ensure all select dropdown options have crisp, clearly visible dark text on white backgrounds */
+        select option,
+        #site-language-select option,
+        #header-city-select option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            font-weight: 500 !important;
+            padding: 8px 12px !important;
+        }
+        select option:checked,
+        #site-language-select option:checked,
+        #header-city-select option:checked {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Top Emergency & Location Bar -->
+    <header class="bg-slate-900 text-white text-xs border-b border-slate-800 sticky top-0 z-40">
+        <!-- 1. MOBILE SLIM HEADER (sm:hidden) - Ultra-Compact 38px, Single Row, Zero Overflow -->
+        <div class="sm:hidden flex items-center justify-between px-2.5 h-10 gap-1.5 w-full">
+            <!-- Left: Location Dropdown Pill -->
+            <div class="flex items-center gap-1 min-w-0 flex-1 max-w-[58%]">
+                <i class="fa-solid fa-location-dot text-sky-400 text-xs shrink-0"></i>
+                <select id="header-city-select-mobile" onchange="handleCityChange(this.value)" class="bg-slate-800 text-white text-[11px] font-bold py-1 px-1.5 rounded-lg border border-slate-700 w-full truncate focus:outline-none focus:ring-1 focus:ring-sky-400">
+                    <option value="" th:selected="${selectedCity == null || selectedCity == ''}">📍 Select City</option>
+                    <option value="Budge Budge" th:selected="${selectedCity == 'Budge Budge'}">📍 Budge Budge</option>
+                    <option value="Kolkata" th:selected="${selectedCity == 'Kolkata'}">Kolkata</option>
+                    <option value="Salt Lake" th:selected="${selectedCity == 'Salt Lake'}">Salt Lake</option>
+                    <option value="Howrah" th:selected="${selectedCity == 'Howrah'}">Howrah</option>
+                    <option value="Siliguri" th:selected="${selectedCity == 'Siliguri'}">Siliguri</option>
+                    <option value="Durgapur" th:selected="${selectedCity == 'Durgapur'}">Durgapur</option>
+                    <option value="Delhi" th:selected="${selectedCity == 'Delhi' || selectedCity == 'New Delhi'}">New Delhi &amp; NCR</option>
+                    <option value="Mumbai" th:selected="${selectedCity == 'Mumbai'}">Mumbai</option>
+                    <option value="Bengaluru" th:selected="${selectedCity == 'Bengaluru' || selectedCity == 'Bangalore'}">Bengaluru</option>
+                    <option value="Bhubaneswar" th:selected="${selectedCity == 'Bhubaneswar'}">Bhubaneswar</option>
+                    <option value="Chennai" th:selected="${selectedCity == 'Chennai'}">Chennai</option>
+                    <option value="Hyderabad" th:selected="${selectedCity == 'Hyderabad'}">Hyderabad</option>
+                    <option value="Pune" th:selected="${selectedCity == 'Pune'}">Pune</option>
+                </select>
+            </div>
+
+            <!-- Right: GPS + Lang + SOS -->
+            <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="detectUserLocation()" title="Auto Detect GPS" class="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs active:scale-95 shadow">
+                    <i class="fa-solid fa-crosshairs"></i>
+                </button>
+                <button type="button" id="custom-lang-toggle-btn-mobile" onclick="toggleLanguageMenu(event)" class="h-7 px-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-[10px] font-bold flex items-center gap-1 active:scale-95 transition">
+                    <i class="fa-solid fa-globe text-sky-400 text-xs"></i>
+                    <span id="custom-lang-current-label-mobile">EN</span>
+                </button>
+                <a href="/emergency" class="h-7 px-2 bg-red-600 hover:bg-red-700 text-white font-black text-[10px] rounded-lg flex items-center gap-1 animate-pulse shadow-sm whitespace-nowrap">
+                    <i class="fa-solid fa-truck-medical text-[10px]"></i> <span>SOS</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. DESKTOP/TABLET RICH HEADER (hidden sm:flex) -->
+        <div class="hidden sm:flex w-full max-w-[1440px] mx-auto px-3 sm:px-6 py-1.5 justify-between items-center gap-2 min-h-[38px]">
+            
+            <!-- Location Selector & GPS Status -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="flex items-center gap-1 text-slate-300">
+                    <i class="fa-solid fa-location-dot text-sky-400 text-xs"></i>
+                    <span class="font-medium text-[11px]">Location:</span>
+                </span>
+                <select id="header-city-select" onchange="handleCityChange(this.value)" class="bg-slate-800 text-white text-xs px-2 py-1 rounded border border-slate-700 focus:outline-none focus:border-sky-500 font-medium">
+                    <option value="" th:selected="${selectedCity == null || selectedCity == ''}" class="bg-white text-slate-900 font-medium">📍 Select City / Auto GPS</option>
+                    <option value="Budge Budge" th:selected="${selectedCity == 'Budge Budge'}" class="bg-white text-slate-900 font-medium">📍 Budge Budge (South 24 Parganas)</option>
+                    <option value="Kolkata" th:selected="${selectedCity == 'Kolkata'}" class="bg-white text-slate-900 font-medium">Kolkata (Apex & Superspeciality)</option>
+                    <option value="Salt Lake" th:selected="${selectedCity == 'Salt Lake'}" class="bg-white text-slate-900 font-medium">Salt Lake & New Town</option>
+                    <option value="Howrah" th:selected="${selectedCity == 'Howrah'}" class="bg-white text-slate-900 font-medium">Howrah</option>
+                    <option value="Siliguri" th:selected="${selectedCity == 'Siliguri'}" class="bg-white text-slate-900 font-medium">Siliguri (North Bengal)</option>
+                    <option value="Durgapur" th:selected="${selectedCity == 'Durgapur'}" class="bg-white text-slate-900 font-medium">Durgapur & Asansol</option>
+                    <option value="Delhi" th:selected="${selectedCity == 'Delhi' || selectedCity == 'New Delhi'}" class="bg-white text-slate-900 font-medium">New Delhi &amp; NCR</option>
+                    <option value="Mumbai" th:selected="${selectedCity == 'Mumbai'}" class="bg-white text-slate-900 font-medium">Mumbai (Maharashtra)</option>
+                    <option value="Bengaluru" th:selected="${selectedCity == 'Bengaluru' || selectedCity == 'Bangalore'}" class="bg-white text-slate-900 font-medium">Bengaluru (Karnataka)</option>
+                    <option value="Bhubaneswar" th:selected="${selectedCity == 'Bhubaneswar'}" class="bg-white text-slate-900 font-medium">Bhubaneswar (Odisha)</option>
+                    <option value="Chennai" th:selected="${selectedCity == 'Chennai'}" class="bg-white text-slate-900 font-medium">Chennai (Tamil Nadu)</option>
+                    <option value="Hyderabad" th:selected="${selectedCity == 'Hyderabad'}" class="bg-white text-slate-900 font-medium">Hyderabad (Telangana)</option>
+                    <option value="Pune" th:selected="${selectedCity == 'Pune'}" class="bg-white text-slate-900 font-medium">Pune (Maharashtra)</option>
+                </select>
+
+                <!-- Search Local Area / Neighborhood -->
+                <button type="button" onclick="openLocalitySearchModal()" title="Search your specific neighborhood, colony, or street" class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 px-2 py-1 rounded transition text-xs font-medium whitespace-nowrap">
+                    <i class="fa-solid fa-magnifying-glass-location"></i> Find Local Area
+                </button>
+
+                <!-- Browser GPS Detection -->
+                <button type="button" onclick="detectUserLocation()" title="Use real browser GPS coordinates & reverse geocode neighborhood" class="flex items-center gap-1 bg-sky-600 hover:bg-sky-500 text-white px-2.5 py-1 rounded transition text-xs font-semibold shadow-sm whitespace-nowrap">
+                    <i class="fa-solid fa-crosshairs"></i> Auto GPS
+                </button>
+
+                <!-- Exact Neighborhood Pill -->
+                <span id="header-locality-badge" class="text-xs bg-sky-950 text-sky-300 border border-sky-800 px-2.5 py-0.5 rounded-full font-bold whitespace-nowrap" th:classappend="${selectedLocality == null ? 'hidden' : ''}" th:text="${selectedLocality != null ? '📍 ' + selectedLocality : ''}">
+                </span>
+
+                <span id="location-status-badge" class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="location-status-text" th:text="${selectedLocality != null ? 'GPS Active' : 'Proximity Ready'}">Proximity Ready</span>
+                </span>
+            </div>
+
+            <!-- Right Controls: Universal Search, Language, SOS -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Universal Search Trigger -->
+                <button onclick="toggleUniversalSearch()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded border border-slate-700 text-xs whitespace-nowrap">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs"></i>
+                    <span class="hidden sm:inline">Search anything...</span>
+                    <span class="sm:hidden">Search</span>
+                    <kbd class="hidden md:inline bg-slate-900 px-1 py-0.5 rounded text-[10px] text-slate-400 font-mono">Ctrl+K</kbd>
+                </button>
+
+                <!-- Multilingual Switcher: Custom Cross-Browser Dropdown -->
+                <div class="relative flex-shrink-0" id="custom-language-selector">
+                    <button type="button" onclick="toggleLanguageMenu(event)" id="custom-lang-toggle-btn"
+                            class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 focus:outline-none focus:border-sky-500 font-medium cursor-pointer transition">
+                        <i class="fa-solid fa-globe text-sky-400 text-xs"></i>
+                        <span id="custom-lang-current-label">English</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform ml-0.5" id="lang-dropdown-chevron"></i>
+                    </button>
+
+                    <!-- Hidden select for script & test compatibility -->
+                    <select id="site-language-select" class="hidden" onchange="changeSiteLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="bn">Bengali</option>
+                        <option value="hi">Hindi</option>
+                        <option value="or">Odia</option>
+                        <option value="as">Assamese</option>
+                        <option value="mr">Marathi</option>
+                        <option value="ta">Tamil</option>
+                        <option value="te">Telugu</option>
+                        <option value="kn">Kannada</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="pa">Punjabi</option>
+                        <option value="ur">Urdu</option>
+                    </select>
+                </div>
+
+                <!-- Emergency SOS Quick Button -->
+                <a href="/emergency" class="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1 rounded-full animate-pulse transition shadow-lg shadow-red-600/30 whitespace-nowrap">
+                    <i class="fa-solid fa-truck-medical text-xs"></i> <span>EMERGENCY SOS</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Language Modal Backdrop Overlay for Mobile & Desktop -->
+        <div id="custom-language-overlay" onclick="closeLanguageMenu()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 transition-opacity"></div>
+
+        <!-- Custom Multilingual Menu (Responsive Dialog on Mobile, Dropdown on Desktop) -->
+        <div id="custom-language-menu" class="hidden fixed sm:absolute left-3 right-3 sm:left-auto top-12 sm:top-10 max-w-sm sm:w-56 mx-auto sm:mx-0 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 max-h-[82vh] overflow-y-auto">
+            <div class="px-3.5 py-1.5 text-[11px] uppercase font-bold text-slate-500 tracking-wider border-b border-slate-100 mb-1 flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-globe text-sky-600"></i> Select Language</span>
+                <button type="button" onclick="closeLanguageMenu()" class="text-slate-400 hover:text-slate-600 p-1 rounded sm:hidden text-xs font-bold" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-0.5 px-1.5">
+                <button type="button" onclick="selectSiteLanguage('en', 'English')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="en">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-sky-500 lang-dot" data-lang="en"></span> English</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check" data-lang="en"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('bn', 'বাংলা (Bengali)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="bn">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="bn"></span> বাংলা (Bengali)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="bn"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('hi', 'हिंदी (Hindi)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="hi">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="hi"></span> हिंदी (Hindi)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="hi"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('or', 'ଓଡ଼ିଆ (Odia)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="or">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="or"></span> ଓଡ଼ିଆ (Odia)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="or"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('as', 'অসমীয়া (Assamese)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="as">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="as"></span> অসমীয়া (Assamese)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="as"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('mr', 'मराठी (Marathi)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="mr">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="mr"></span> मराठी (Marathi)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="mr"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('ta', 'தமிழ் (Tamil)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="ta">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="ta"></span> தமிழ் (Tamil)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="ta"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('te', 'తెలుగు (Telugu)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="te">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="te"></span> తెలుగు (Telugu)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="te"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('kn', 'ಕನ್ನಡ (Kannada)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="kn">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="kn"></span> ಕನ್ನಡ (Kannada)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="kn"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('gu', 'ગુજરાતી (Gujarati)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="gu">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="gu"></span> ગુજરાતી (Gujarati)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="gu"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('pa', 'ਪੰਜਾਬੀ (Punjabi)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="pa">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="pa"></span> ਪੰਜਾਬੀ (Punjabi)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="pa"></i>
+                </button>
+                <button type="button" onclick="selectSiteLanguage('ur', 'اردو (Urdu)')" class="lang-option-item w-full text-left px-3 py-2 text-xs text-slate-800 hover:bg-sky-50 hover:text-sky-700 font-medium rounded-xl flex items-center justify-between transition cursor-pointer" data-lang="ur">
+                    <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-transparent lang-dot" data-lang="ur"></span> اردو (Urdu)</span>
+                    <i class="fa-solid fa-check text-sky-600 text-xs lang-check hidden" data-lang="ur"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-10 z-30 shadow-sm">
+        <div class="w-full max-w-[1440px] mx-auto px-3 sm:px-6 flex justify-between items-center h-14 sm:h-16">
+            
+            <!-- Logo & Platform Identity -->
+            <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-base sm:text-xl shadow-md shrink-0">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <div>
+                    <span class="text-base sm:text-lg font-black tracking-tight text-slate-900 block leading-tight">ARINDAM <span class="text-sky-600">HEALTHCARE</span></span>
+                    <span class="hidden sm:block text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-slate-500 block leading-none">Universal Health Platform</span>
+                </div>
+            </a>
+
+            <!-- Streamlined Navigation Links -->
+            <div class="hidden lg:flex items-center gap-1 xl:gap-1.5 text-xs xl:text-sm font-medium text-slate-600">
+                <a href="/" class="px-2.5 py-1.5 rounded-lg hover:text-sky-600 hover:bg-sky-50 transition whitespace-nowrap">Dashboard</a>
+                <a href="/medicine-timer" class="px-2.5 py-1.5 rounded-lg hover:text-sky-600 hover:bg-sky-50 transition flex items-center gap-1 text-sky-600 font-semibold whitespace-nowrap">
+                    <i class="fa-solid fa-clock"></i> <span>Timer</span>
+                </a>
+                <a href="/doctors" class="px-2.5 py-1.5 rounded-lg hover:text-sky-600 hover:bg-sky-50 transition whitespace-nowrap">Doctors</a>
+                <a href="/hospitals" class="px-2.5 py-1.5 rounded-lg hover:text-sky-600 hover:bg-sky-50 transition whitespace-nowrap">Hospitals</a>
+                <a href="/pharmacy" class="px-2.5 py-1.5 rounded-lg hover:text-emerald-600 hover:bg-emerald-50 transition flex items-center gap-1 text-emerald-600 font-semibold whitespace-nowrap">
+                    <i class="fa-solid fa-cart-shopping text-xs"></i> <span>Pharmacy</span>
+                </a>
+                <a href="/ai-assistant" class="px-2.5 py-1.5 rounded-lg hover:text-indigo-600 hover:bg-indigo-50 transition flex items-center gap-1 text-indigo-600 font-semibold whitespace-nowrap">
+                    <i class="fa-solid fa-robot"></i> <span>AI Assistant</span>
+                </a>
+
+                <!-- More Services Dropdown -->
+                <div class="relative group">
+                    <button class="px-2.5 py-1.5 rounded-lg hover:text-sky-600 hover:bg-sky-50 transition flex items-center gap-1 font-semibold text-slate-700 whitespace-nowrap cursor-pointer">
+                        <span>More Services</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 group-hover:rotate-180 transition-transform"></i>
+                    </button>
+                    <div class="hidden group-hover:block absolute left-0 top-full pt-1 w-60 z-50">
+                        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 text-xs space-y-1">
+                            <a href="/medical-records" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl whitespace-nowrap">
+                                <i class="fa-regular fa-folder-open text-sky-600 w-4"></i> Health Records (EHR)
+                            </a>
+                            <a href="/diagnostics" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl whitespace-nowrap">
+                                <i class="fa-solid fa-vial text-sky-600 w-4"></i> Diagnostic Labs & Tests
+                            </a>
+                            <a href="/home-healthcare" class="flex items-center gap-2 px-3 py-2 hover:bg-teal-50 text-slate-700 rounded-xl whitespace-nowrap">
+                                <i class="fa-solid fa-house-medical text-teal-600 w-4"></i> Home Healthcare & Nursing
+                            </a>
+                            <a href="/vaccination" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl whitespace-nowrap">
+                                <i class="fa-solid fa-syringe text-sky-600 w-4"></i> Vaccine Schedules & Certificates
+                            </a>
+                            <a href="/blood-bank" class="flex items-center gap-2 px-3 py-2 hover:bg-red-50 text-slate-700 rounded-xl whitespace-nowrap">
+                                <i class="fa-solid fa-droplet text-red-600 w-4"></i> Blood Bank Directory
+                            </a>
+                            <a href="/vitals-wellness" class="flex items-center gap-2 px-3 py-2 hover:bg-purple-50 text-slate-700 rounded-xl whitespace-nowrap">
+                                <i class="fa-solid fa-heart-pulse text-purple-600 w-4"></i> Vitals & Wearables
+                            </a>
+                            <a href="/privacy-center" class="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 text-slate-700 rounded-xl whitespace-nowrap">
+                                <i class="fa-solid fa-shield-halved text-emerald-600 w-4"></i> Privacy & Consent Center
+                            </a>
+                            <a href="/portals" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl whitespace-nowrap">
+                                <i class="fa-solid fa-network-wired text-sky-600 w-4"></i> Provider & Patient Portals
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Menu, Notifications, Health Passport & Profile -->
+            <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0 pr-1">
+                <!-- Digital Health Passport (Compact on smaller screens) -->
+                <a href="/health-passport" title="Emergency Health Passport & QR" class="flex items-center gap-1.5 text-xs bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-700 px-2 py-1.5 sm:px-2.5 rounded-xl border border-slate-200 transition font-medium flex-shrink-0">
+                    <i class="fa-solid fa-qrcode text-sky-600"></i>
+                    <span class="hidden xl:inline">Health Passport</span>
+                </a>
+
+                <!-- Notification Bell -->
+                <div class="relative flex-shrink-0">
+                    <button onclick="toggleNotificationDrawer()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 relative transition">
+                        <i class="fa-regular fa-bell text-xs sm:text-sm"></i>
+                        <span th:if="${unreadNotifCount > 0}" th:text="${unreadNotifCount}" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold"></span>
+                    </button>
+                </div>
+
+                <!-- User Auth State: Profile dropdown if logged in -->
+                <div th:if="${isAuthenticated}" class="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-slate-200 flex-shrink-0">
+                    <div class="relative group">
+                        <button class="flex items-center gap-1.5 sm:gap-2 text-left focus:outline-none cursor-pointer py-1">
+                            <div th:if="${photoUrl != null && !photoUrl.isEmpty()}" class="w-8 h-8 rounded-full overflow-hidden border border-sky-400 shadow-sm flex-shrink-0">
+                                <img th:src="${photoUrl}" 
+                                     id="navbar-user-avatar-img"
+                                     referrerpolicy="no-referrer"
+                                     th:attr="data-fallback-letter=${currentUser != null and currentUser.fullName != null and !currentUser.fullName.isEmpty() ? currentUser.fullName.substring(0, 1).toUpperCase() : 'A'}"
+                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=' + encodeURIComponent(this.getAttribute('data-fallback-letter') || 'Arindam') + '&background=0284c7&color=fff&size=96&bold=true';"
+                                     alt="Profile Avatar" class="w-full h-full object-cover" />
+                            </div>
+                            <div th:unless="${photoUrl != null && !photoUrl.isEmpty()}" id="navbar-user-avatar-fallback" class="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-600 to-teal-500 text-white flex items-center justify-center font-bold text-xs shadow-sm flex-shrink-0">
+                                <span th:text="${currentUser != null and currentUser.fullName != null and !currentUser.fullName.isEmpty() ? currentUser.fullName.substring(0, 1).toUpperCase() : 'A'}">A</span>
+                            </div>
+                            <div class="hidden sm:block text-xs text-left max-w-[85px] md:max-w-[105px]">
+                                <span class="font-bold text-slate-800 block leading-tight truncate" th:text="${currentUser.fullName}">User</span>
+                                <span class="text-[10px] text-emerald-600 font-semibold block">Connected</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 flex-shrink-0"></i>
+                        </button>
+                        <!-- Dropdown Menu (Comfortably positioned inside viewport) -->
+                        <div class="hidden group-hover:block absolute right-0 top-full pt-1.5 w-52 z-50">
+                            <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 text-xs space-y-1">
+                                <div class="px-3 py-2 border-b border-slate-100">
+                                    <p class="font-bold text-slate-900 truncate" th:text="${currentUser.fullName}">Patient</p>
+                                    <p class="text-[10px] text-slate-500 truncate" th:text="${currentUser.email}">patient@health.in</p>
+                                </div>
+                                <a href="/profile" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl font-medium"><i class="fa-solid fa-user text-sky-600"></i> My Profile &amp; Account</a>
+                                <a href="/profile?openAvatar=1" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-sky-700 rounded-xl font-bold"><i class="fa-solid fa-camera text-sky-600"></i> Change Profile Icon</a>
+                                <a href="/login" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-sky-700 rounded-xl font-medium text-left cursor-pointer"><i class="fa-solid fa-arrow-right-to-bracket text-sky-500"></i> Switch Account / Log In</a>
+                                <a href="/register" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-emerald-50 text-emerald-700 rounded-xl font-medium text-left cursor-pointer"><i class="fa-solid fa-user-plus text-emerald-500"></i> Create New Account</a>
+                                <a href="/medical-records" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl"><i class="fa-regular fa-folder-open text-sky-600"></i> My Health Records</a>
+                                <a href="/health-passport" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl"><i class="fa-solid fa-qrcode text-sky-600"></i> Health Passport</a>
+                                <a href="/privacy-center" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl"><i class="fa-solid fa-shield-halved text-emerald-600"></i> Consent &amp; Privacy</a>
+                                <button type="button" onclick="signOutUser()" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-red-50 text-red-600 rounded-xl font-semibold border-t border-slate-100 mt-1 cursor-pointer"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unauthenticated: Sign In / Create Account Button -->
+                <div th:unless="${isAuthenticated}" class="flex items-center pl-1.5 sm:pl-2 border-l border-slate-200 flex-shrink-0">
+                    <a href="/login" class="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer active:scale-95" title="Sign In / Register">
+                        <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                        <span class="hidden sm:inline">Sign In / Register</span>
+                        <span class="sm:hidden">Login</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Hamburger Button (Placed cleanly on far right) -->
+                <button type="button" onclick="toggleMobileNavDrawer()" aria-label="Open Mobile Menu" class="lg:hidden flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition cursor-pointer active:scale-95 flex-shrink-0 ml-1">
+                    <i class="fa-solid fa-bars text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Smart Reminder Banner (Triggered when medicine is due or < 30 mins) -->
+    <div id="smart-reminder-banner" class="hidden bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-xs sm:text-sm py-2 px-4 shadow-md sticky top-24 z-20">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div id="smart-reminder-text" class="flex items-center gap-2">
+                <!-- Dynamically populated by medicine-timer.js -->
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="takeMedicine()" class="bg-white text-emerald-800 font-bold px-3 py-1 rounded shadow hover:bg-emerald-50 transition text-xs flex items-center gap-1">
+                    <i class="fa-solid fa-check"></i> Take Now
+                </button>
+                <button onclick="snoozeMedicine(null, 10)" class="bg-amber-900/40 text-white font-medium px-2.5 py-1 rounded hover:bg-amber-900/60 transition text-xs">
+                    Snooze (10m)
+                </button>
+                <button onclick="openSkipModal()" class="text-amber-100 hover:text-white underline text-xs px-1">
+                    Skip Dose
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow pb-20 lg:pb-0">
+        <div th:replace="${content}">
+            <!-- Page Specific Content Injected Here -->
+        </div>
+    </main>
+
+    <!-- Consolidated Footer Fragment including Modals, Drawer, Voice Assistant & Global Scripts -->
+    <div th:fragment="footer">
+        <!-- Floating Voice Healthcare Button (Positioned safely above bottom nav on mobile) -->
+        <div class="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-40 flex flex-col items-end gap-2">
+            <div id="voice-status-text" class="bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg hidden sm:block">
+                Tap microphone to speak
+            </div>
+            <button id="voice-assistant-btn" onclick="toggleVoiceAssistant()" title="Voice Healthcare Assistant (Multilingual)" class="w-14 h-14 rounded-full bg-gradient-to-tr from-sky-600 to-teal-500 text-white text-xl flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+        </div>
+
+        <!-- Universal Spotlight Search Modal -->
+        <div id="universal-search-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-start justify-center pt-20 px-4 hidden">
+            <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-200 flex items-center gap-3">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-lg"></i>
+                    <input id="universal-search-input" oninput="performUniversalSearch(this.value)" type="text" placeholder="Search doctors, hospitals, medicines, labs, records, blood banks..." class="w-full text-base focus:outline-none text-slate-800">
+                    <button onclick="toggleUniversalSearch()" class="text-slate-400 hover:text-slate-600 text-sm font-semibold">ESC</button>
+                </div>
+                <div id="universal-search-results" class="p-4 max-h-96 overflow-y-auto">
+                    <p class="text-sm text-slate-400 text-center py-4">Search across all 38 categories by name, specialty, disease, or symptom...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skip Dose Modal with Clinical Safety Reasoning -->
+        <div id="skip-dose-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-200">
+                <div class="flex items-center gap-3 mb-4 text-amber-600">
+                    <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                    <h3 class="text-lg font-bold text-slate-900">Skip Scheduled Dose</h3>
+                </div>
+                <input type="hidden" id="skip-schedule-id">
+                <p class="text-sm text-slate-600 mb-4">Please select the reason for skipping this dose. This will be recorded in your adherence history.</p>
+                
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Reason for Skipping</label>
+                <select id="skip-reason-select" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm mb-4 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    <option value="Stomach upset or nausea">Stomach upset or nausea</option>
+                    <option value="Fasting / Pre-operative directive">Fasting / Pre-operative directive</option>
+                    <option value="Doctor or pharmacist advised hold">Doctor or pharmacist advised hold</option>
+                    <option value="Ran out of medication / Refill pending">Ran out of medication / Refill pending</option>
+                    <option value="Traveling / Medication not accessible">Traveling / Medication not accessible</option>
+                    <option value="Forgot until next dose was close">Forgot until next dose was close</option>
+                    <option value="Other personal reason">Other personal reason</option>
+                </select>
+
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded text-xs text-amber-800 mb-4">
+                    <strong>Important Medical Safety Note:</strong> Never take a double dose at the next scheduled time to compensate for a skipped dose.
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeSkipModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                    <button onclick="confirmSkipDose()" class="px-4 py-2 text-sm font-semibold bg-amber-600 hover:bg-amber-700 text-white rounded-lg shadow">Confirm Skip</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety Directive Dialog Modal -->
+        <div id="safety-directive-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border-t-4 border-emerald-600">
+                <div class="text-center mb-4">
+                    <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-2 text-xl">
+                        <i class="fa-solid fa-notes-medical"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">Clinical Safety Directive</h3>
+                </div>
+                <p id="safety-directive-text" class="text-sm text-slate-700 text-center leading-relaxed mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <!-- Filled dynamically -->
+                </p>
+                <button onclick="closeSafetyAlertModal()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl transition">
+                    I Understand & Acknowledge
+                </button>
+            </div>
+        </div>
+
+        <!-- Notifications Drawer -->
+        <div id="notification-drawer" class="fixed inset-y-0 right-0 w-80 sm:w-96 bg-white shadow-2xl z-50 border-l border-slate-200 transform translate-x-full transition-transform duration-300 flex flex-col">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-regular fa-bell text-sky-600"></i> Notification Center
+                </h3>
+                <button onclick="toggleNotificationDrawer()" class="text-slate-400 hover:text-slate-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-4 flex-grow overflow-y-auto space-y-3">
+                <div th:each="n : ${notifications}" class="p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs hover:bg-white transition shadow-sm">
+                    <div class="flex justify-between items-start mb-1">
+                        <span th:text="${n.category}" class="font-bold text-[10px] uppercase px-2 py-0.5 rounded bg-sky-100 text-sky-800"></span>
+                        <span th:text="${n.priority}" th:class="${n.priority == 'URGENT' ? 'text-red-600 font-bold' : 'text-slate-600'}"></span>
+                    </div>
+                    <h4 th:text="${n.title}" class="font-bold text-slate-900 text-sm mb-1"></h4>
+                    <p th:text="${n.message}" class="text-slate-600 leading-relaxed mb-2"></p>
+                    <a th:if="${n.actionUrl != null}" th:href="${n.actionUrl}" class="text-sky-600 font-semibold hover:underline block">View Details &rarr;</a>
+                </div>
+            </div>
+        </div>
+            <!-- Mobile Slide-out Navigation Drawer Overlay -->
+            <div id="mobile-nav-overlay" onclick="closeMobileNavDrawer()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 transition-opacity"></div>
+
+            <!-- Mobile Slide-out Navigation Drawer -->
+            <aside id="mobile-nav-drawer" class="fixed inset-y-0 right-0 w-80 max-w-[85vw] bg-white shadow-2xl z-50 border-l border-slate-200 transform translate-x-full transition-transform duration-300 flex flex-col justify-between">
+                <div class="flex flex-col h-full">
+                    <!-- Drawer Header -->
+                    <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                        <a href="/" onclick="closeMobileNavDrawer()" class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-base shadow">
+                                <i class="fa-solid fa-heart-pulse"></i>
+                            </div>
+                            <div>
+                                <span class="text-sm font-black text-slate-900 leading-none">CARE<span class="text-sky-600">PULSE</span></span>
+                                <span class="text-[9px] uppercase font-bold text-slate-400 block">All Healthcare Services</span>
+                            </div>
+                        </a>
+                        <button type="button" onclick="closeMobileNavDrawer()" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Drawer Links List -->
+                    <div class="p-3 overflow-y-auto flex-grow space-y-1 text-xs font-semibold">
+                        <div class="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Emergency &amp; Critical</div>
+                        <a href="/emergency" onclick="closeMobileNavDrawer()" class="flex items-center justify-between p-2.5 rounded-xl bg-red-50 text-red-700 hover:bg-red-100 transition">
+                            <span class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-truck-medical text-red-600 w-4"></i>
+                                <span>24x7 Emergency SOS &amp; Ambulance</span>
+                            </span>
+                            <span class="text-[10px] bg-red-600 text-white font-bold px-1.5 py-0.5 rounded">108</span>
+                        </a>
+                        <a href="/medicine-timer" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-sky-700 bg-sky-50 hover:bg-sky-100 transition">
+                            <i class="fa-solid fa-clock text-sky-600 w-4"></i>
+                            <span>Smart Medicine Timer &amp; Alerts</span>
+                        </a>
+
+                        <div class="px-2 pt-3 pb-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Clinical &amp; Care</div>
+                        <a href="/" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-house text-slate-500 w-4"></i>
+                            <span>Home Dashboard</span>
+                        </a>
+                        <a href="/doctors" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition">
+                            <i class="fa-solid fa-user-doctor text-sky-600 w-4"></i>
+                            <span>Specialist Doctors &amp; OPD Tokens</span>
+                        </a>
+                        <a href="/hospitals" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+                            <i class="fa-solid fa-hospital text-emerald-600 w-4"></i>
+                            <span>Hospitals &amp; ICU Bed Admissions</span>
+                        </a>
+                        <a href="/pharmacy" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition">
+                            <i class="fa-solid fa-pills text-teal-600 w-4"></i>
+                            <span>Pharmacy &amp; 50+ Meds Delivery</span>
+                        </a>
+                        <a href="/ai-assistant" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
+                            <i class="fa-solid fa-robot text-indigo-600 w-4"></i>
+                            <span>AI Health Assistant</span>
+                        </a>
+
+                        <div class="px-2 pt-3 pb-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Diagnostics, Blood &amp; EHR</div>
+                        <a href="/medical-records" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 transition">
+                            <i class="fa-regular fa-folder-open text-sky-600 w-4"></i>
+                            <span>Health Records Locker (EHR)</span>
+                        </a>
+                        <a href="/diagnostics" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-vial text-sky-600 w-4"></i>
+                            <span>Diagnostic Labs &amp; Tests</span>
+                        </a>
+                        <a href="/blood-bank" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-red-50 hover:text-red-700 transition">
+                            <i class="fa-solid fa-droplet text-red-600 w-4"></i>
+                            <span>Blood Bank Directory &amp; Stock</span>
+                        </a>
+                        <a href="/vitals-wellness" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-purple-50 hover:text-purple-700 transition">
+                            <i class="fa-solid fa-heart-pulse text-purple-600 w-4"></i>
+                            <span>Vitals &amp; Smartwatch Sync</span>
+                        </a>
+                        <a href="/health-passport" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition">
+                            <i class="fa-solid fa-qrcode text-amber-600 w-4"></i>
+                            <span>Emergency Health Passport QR</span>
+                        </a>
+                        <a href="/vaccination" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-sky-50 transition">
+                            <i class="fa-solid fa-syringe text-sky-600 w-4"></i>
+                            <span>Vaccine Schedules &amp; Passes</span>
+                        </a>
+                        <a href="/home-healthcare" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-teal-50 transition">
+                            <i class="fa-solid fa-house-medical text-teal-600 w-4"></i>
+                            <span>Home Healthcare &amp; Nursing</span>
+                        </a>
+                        <a href="/family-care" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-users text-sky-600 w-4"></i>
+                            <span>Family Care &amp; Caregivers</span>
+                        </a>
+                        <a href="/portals" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-network-wired text-indigo-600 w-4"></i>
+                            <span>Provider &amp; Patient Portals</span>
+                        </a>
+                        <a href="/journey" onclick="closeMobileNavDrawer()" class="flex items-center gap-2.5 p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-compass text-emerald-600 w-4"></i>
+                            <span>Connected Care Journey</span>
+                        </a>
+                    </div>
+
+                    <!-- Drawer Footer -->
+                    <div class="p-3 border-t border-slate-200 bg-slate-50 text-center text-xs space-y-2">
+                        <button type="button" onclick="closeMobileNavDrawer(); toggleLanguageMenu(event);" class="w-full py-2 px-3 rounded-xl bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center gap-2 hover:bg-sky-50 shadow-sm active:scale-95 transition">
+                            <i class="fa-solid fa-globe text-sky-600"></i>
+                            <span>Change Language / ভাষা পরিবর্তন</span>
+                        </button>
+                        <span class="text-slate-500 text-[10px] block">Developed by <strong class="text-sky-600">Arindam Sahoo</strong></span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Fixed Mobile Bottom Navigation Bar -->
+            <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] flex justify-around items-center">
+                <a href="/" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-600 hover:text-sky-600 active:scale-95 transition min-w-[56px]">
+                    <i class="fa-solid fa-house text-base mb-0.5"></i>
+                    <span class="text-[10px] font-bold">Home</span>
+                </a>
+                <a href="/doctors" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-600 hover:text-sky-600 active:scale-95 transition min-w-[56px]">
+                    <i class="fa-solid fa-user-doctor text-base mb-0.5"></i>
+                    <span class="text-[10px] font-bold">Doctors</span>
+                </a>
+                <a href="/hospitals" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-600 hover:text-sky-600 active:scale-95 transition min-w-[56px]">
+                    <i class="fa-solid fa-hospital text-base mb-0.5"></i>
+                    <span class="text-[10px] font-bold">Hospitals</span>
+                </a>
+                <a href="/pharmacy" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl text-emerald-600 hover:text-emerald-700 active:scale-95 transition min-w-[56px]">
+                    <i class="fa-solid fa-pills text-base mb-0.5"></i>
+                    <span class="text-[10px] font-bold">Pharmacy</span>
+                </a>
+                <button type="button" onclick="toggleMobileNavDrawer()" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl text-slate-700 hover:text-sky-600 active:scale-95 transition min-w-[56px] cursor-pointer">
+                    <i class="fa-solid fa-bars-staggered text-base mb-0.5"></i>
+                    <span class="text-[10px] font-bold">Services</span>
+                </button>
+            </nav>
+
+            <footer class="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 mt-12">
+            <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <div>
+                    <h4 class="text-white font-bold mb-3 uppercase tracking-wider text-[11px]">Primary Modules</h4>
+                    <ul class="space-y-1.5">
+                        <li><a href="/medicine-timer" class="hover:text-white">💊 Smart Medicine Timer</a></li>
+                        <li><a href="/doctors" class="hover:text-white">🩺 Doctors & Specialists</a></li>
+                        <li><a href="/hospitals" class="hover:text-white">🏥 Hospitals & Bed Admission</a></li>
+                        <li><a href="/emergency" class="hover:text-white">🚑 Emergency & Ambulance</a></li>
+                        <li><a href="/pharmacy" class="hover:text-white">🛒 Pharmacy & Medicine Delivery</a></li>
+                        <li><a href="/home-healthcare" class="hover:text-white">🏠 Home Healthcare & Nursing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-3 uppercase tracking-wider text-[11px]">Diagnostics & Records</h4>
+                    <ul class="space-y-1.5">
+                        <li><a href="/diagnostics" class="hover:text-white">🧪 Labs & Home Collection</a></li>
+                        <li><a href="/blood-bank" class="hover:text-white">🩸 Blood Bank Inventory</a></li>
+                        <li><a href="/medical-records" class="hover:text-white">📄 Digital Health Locker</a></li>
+                        <li><a href="/vaccination" class="hover:text-white">💉 Vaccination Schedules</a></li>
+                        <li><a href="/ai-assistant" class="hover:text-white">🧠 Ask My Records (AI)</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-3 uppercase tracking-wider text-[11px]">Wellness & Identity</h4>
+                    <ul class="space-y-1.5">
+                        <li><a href="/vitals-wellness" class="hover:text-white">❤️ Vitals & Wearables</a></li>
+                        <li><a href="/family-care" class="hover:text-white">👨‍👩‍👧 Family Healthcare & Caregiver</a></li>
+                        <li><a href="/health-passport" class="hover:text-white">🪪 Digital Health Passport & QR</a></li>
+                        <li><a href="/insurance-expenses" class="hover:text-white">🛡️ Insurance & Expenses</a></li>
+                        <li><a href="/privacy-center" class="hover:text-white">🔐 Privacy & Consent Governance</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-3 uppercase tracking-wider text-[11px]">Portals & Architecture</h4>
+                    <ul class="space-y-1.5">
+                        <li><a href="/portals" class="hover:text-white">👨‍⚕️ Doctor & Hospital Portals</a></li>
+                        <li><a href="/journey" class="hover:text-white">🧭 Connected Care Journey</a></li>
+                        <li><span class="text-emerald-400">● 24x7 Emergency & Proximity Care</span></li>
+                        <li><a href="/h2-console" target="_blank" class="hover:text-white text-slate-500">🗄️ Database Console (H2)</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="max-w-7xl mx-auto px-4 pt-6 border-t border-slate-800 flex flex-wrap justify-between items-center text-[11px] gap-3">
+                <div>
+                    <p>&copy; 2026 Arindam Healthcare Platform. All rights reserved. • <span class="text-sky-400 font-bold tracking-wide">Developed by Arindam Sahoo</span></p>
+                    <p class="text-slate-500 text-[10px] mt-0.5">Designed and engineered with full-stack Spring Boot, MongoDB & Advanced Health Informatics.</p>
+                </div>
+                <p class="text-slate-600">Disclaimer: AI triage and health guidance assist decisions and do not substitute certified medical diagnosis.</p>
+            </div>
+        </footer>
+
+        <!-- Locality / Neighborhood Search Modal -->
+        <div id="locality-search-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-5 sm:p-6 relative border border-slate-200">
+                <button type="button" onclick="closeLocalitySearchModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900">Find Your Exact Local Place</h3>
+                        <p class="text-xs text-slate-500">Search specific colonies, streets, suburbs or towns</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                    <input type="text" id="locality-search-input" oninput="onLocalitySearchInput(this.value)"
+                           placeholder="e.g. Patia, Whitefield, Salt Lake, Bandra West, Koramangala..."
+                           class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:bg-white" />
+                </div>
+
+                <div id="locality-search-results" class="mt-3 max-h-60 overflow-y-auto space-y-1">
+                    <p class="text-xs text-slate-400 text-center py-4">Type at least 2 characters to search locally across all Indian towns & colonies...</p>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <button type="button" onclick="detectUserLocation(); closeLocalitySearchModal();" class="text-sky-600 hover:text-sky-700 font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-crosshairs"></i> Or use device GPS auto-detection
+                    </button>
+                    <button type="button" onclick="closeLocalitySearchModal()" class="text-slate-400 hover:text-slate-600">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Universal Turn-by-Turn Facility Navigation Modal -->
+        <div id="facility-navigation-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative border border-slate-200">
+                <button type="button" onclick="closeFacilityNavigation()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shadow-inner flex-shrink-0">
+                        <i class="fa-solid fa-diamond-turn-right"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">GPS Navigation</span>
+                        <h3 class="text-lg font-black text-slate-900 leading-tight mt-0.5" id="nav-modal-name">Healthcare Facility</h3>
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+                    <div class="flex items-start gap-2.5">
+                        <i class="fa-solid fa-location-dot text-rose-500 text-sm mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <span class="font-bold text-slate-700 block">Verified Address:</span>
+                            <span id="nav-modal-address" class="text-slate-600 leading-relaxed">Address loading...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2.5 pt-2 border-t border-slate-200/80">
+                        <i class="fa-solid fa-phone-volume text-emerald-500 text-sm flex-shrink-0"></i>
+                        <div>
+                            <span class="font-bold text-slate-700 block">Direct Hotline:</span>
+                            <span id="nav-modal-phone" class="text-slate-600 font-semibold">108 / 102</span>
+                        </div>
+                    </div>
+                    <div id="nav-modal-distance" class="pt-2 border-t border-slate-200/80 text-xs font-semibold text-sky-700">
+                        <i class="fa-solid fa-location-crosshairs mr-1"></i> Live route guidance ready
+                    </div>
+                </div>
+
+                <div class="mt-5 space-y-2">
+                    <a id="nav-modal-maps-link" href="#" target="_blank" rel="noopener noreferrer"
+                       class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2 text-sm text-center">
+                        <i class="fa-solid fa-location-arrow"></i>
+                        <span>Start Turn-by-Turn GPS Directions</span>
+                    </a>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a id="nav-modal-call-btn" href="tel:108"
+                           class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition flex items-center justify-center gap-2 text-xs text-center border border-slate-200">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>Call Facility</span>
+                        </a>
+                        <button type="button" onclick="closeFacilityNavigation()"
+                                class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition flex items-center justify-center text-xs">
+                            <span>Dismiss</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unified Authentication Modal (Google, Email/Password Log In & Create Account / Register) -->
+        <div id="unified-auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl p-6 sm:p-7 border border-slate-200 relative">
+                <!-- Close Button -->
+                <button type="button" onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <!-- Brand Header -->
+                <div class="text-center mb-5">
+                    <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mx-auto mb-2 text-xl font-black shadow-inner">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900" id="auth-modal-title">Welcome to CarePulse</h3>
+                    <p class="text-xs text-slate-500 mt-0.5" id="auth-modal-subtitle">Sign in or create your digital healthcare account</p>
+                </div>
+
+                <!-- Inline Alert Box -->
+                <div id="auth-modal-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold flex items-center gap-2"></div>
+
+                <!-- 1. Google 1-Click Authentication -->
+                <div class="space-y-3 mb-5">
+                    <button type="button" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-4 rounded-xl border border-slate-300 shadow-sm transition hover:border-slate-400 cursor-pointer text-xs sm:text-sm">
+                        <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="relative flex py-1 items-center mb-5">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">or with email &amp; password</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <!-- Tabs Switcher: [Log In] vs [Create Account] -->
+                <div class="flex rounded-xl bg-slate-100 p-1 mb-4">
+                    <button type="button" id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition text-white bg-sky-600 shadow-sm cursor-pointer">
+                        Log In
+                    </button>
+                    <button type="button" id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition text-slate-600 hover:text-slate-900 cursor-pointer">
+                        Create Account / Register
+                    </button>
+                </div>
+
+                <!-- LOGIN FORM VIEW -->
+                <div id="login-tab-panel">
+                    <form id="auth-login-form" onsubmit="handleLoginSubmit(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Email or Username</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-envelope absolute left-3 top-3 text-slate-400 text-xs"></i>
+                                <input type="text" id="login-identifier" required placeholder="name@example.com" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-xs">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="block font-bold text-slate-700 uppercase">Password</label>
+                            </div>
+                            <div class="relative">
+                                <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-xs"></i>
+                                <input type="password" id="login-password" required placeholder="Enter password" class="w-full pl-9 pr-9 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-xs">
+                                <button type="button" onclick="togglePasswordVisibility('login-password', 'login-eye-icon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                                    <i id="login-eye-icon" class="fa-solid fa-eye text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="login-submit-btn" class="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer mt-2 text-xs sm:text-sm">
+                            <span>Log In</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </form>
+
+                    <div class="mt-4 text-center text-xs text-slate-500">
+                        <span>Don't have an account?</span>
+                        <button type="button" onclick="switchAuthTab('register')" class="text-sky-600 hover:underline font-bold ml-1 cursor-pointer">
+                            Create Account / Register
+                        </button>
+                    </div>
+                </div>
+
+                <!-- REGISTER FORM VIEW -->
+                <div id="register-tab-panel" class="hidden">
+                    <form id="auth-register-form" onsubmit="handleRegisterSubmit(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-user absolute left-3 top-3 text-slate-400 text-xs"></i>
+                                <input type="text" id="reg-fullname" required placeholder="e.g. Rahul Sharma" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-xs">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Email Address *</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-envelope absolute left-3 top-3 text-slate-400 text-xs"></i>
+                                <input type="email" id="reg-email" required placeholder="name@example.com" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-xs">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 uppercase mb-1">Phone Number (Optional)</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-phone absolute left-3 top-3 text-slate-400 text-xs"></i>
+                                <input type="tel" id="reg-phone" placeholder="+91 98765 43210" class="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-xs">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Password *</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-xs"></i>
+                                    <input type="password" id="reg-password" required minlength="4" placeholder="Min 4 chars" class="w-full pl-9 pr-7 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-xs">
+                                    <button type="button" onclick="togglePasswordVisibility('reg-password', 'reg-eye-icon1')" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600">
+                                        <i id="reg-eye-icon1" class="fa-solid fa-eye text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Confirm Password *</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-shield-halved absolute left-3 top-3 text-slate-400 text-xs"></i>
+                                    <input type="password" id="reg-confirm" required minlength="4" placeholder="Re-enter password" class="w-full pl-9 pr-7 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-xs">
+                                    <button type="button" onclick="togglePasswordVisibility('reg-confirm', 'reg-eye-icon2')" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600">
+                                        <i id="reg-eye-icon2" class="fa-solid fa-eye text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="reg-submit-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer mt-2 text-xs sm:text-sm">
+                            <i class="fa-solid fa-user-plus text-xs"></i>
+                            <span>Create Account &amp; Register</span>
+                        </button>
+                    </form>
+
+                    <div class="mt-4 text-center text-xs text-slate-500">
+                        <span>Already have an account?</span>
+                        <button type="button" onclick="switchAuthTab('login')" class="text-sky-600 hover:underline font-bold ml-1 cursor-pointer">
+                            Log In
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Google Translate Widget (Hidden) -->
+        <div id="google_translate_element" style="display:none;"></div>
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    includedLanguages: 'en,bn,hi,or,as,mr,ta,te,kn,gu,pa,ur',
+                    autoDisplay: false
+                }, 'google_translate_element');
+            }
+        </script>
+        <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+        <!-- Scripts -->
+        <script th:src="@{/js/medicine-timer.js}"></script>
+        <script th:src="@{/js/geo-location.js}"></script>
+        <script th:src="@{/js/firebase-auth.js}"></script>
+        <script th:src="@{/js/voice-assistant.js}"></script>
+        <script th:src="@{/js/qr-generator.js}"></script>
+
+        <script th:inline="javascript">
+            function toggleMobileNavDrawer() {
+                const drawer = document.getElementById('mobile-nav-drawer');
+                const overlay = document.getElementById('mobile-nav-overlay');
+                if (drawer) {
+                    drawer.classList.toggle('translate-x-full');
+                }
+                if (overlay) {
+                    overlay.classList.toggle('hidden');
+                }
+            }
+
+            function closeMobileNavDrawer() {
+                const drawer = document.getElementById('mobile-nav-drawer');
+                const overlay = document.getElementById('mobile-nav-overlay');
+                if (drawer) drawer.classList.add('translate-x-full');
+                if (overlay) overlay.classList.add('hidden');
+            }
+
+            function toggleNotificationDrawer() {
+                const d = document.getElementById('notification-drawer');
+                if (d) d.classList.toggle('translate-x-full');
+            }
+
+            // Custom Language Dropdown Management (100% Cross-Browser Visible)
+            const LANG_DISPLAY_MAP = {
+                'en': 'English',
+                'bn': 'বাংলা (Bengali)',
+                'hi': 'हिंदी (Hindi)',
+                'or': 'ଓଡ଼ିଆ (Odia)',
+                'as': 'অসমীয়া (Assamese)',
+                'mr': 'मराठी (Marathi)',
+                'ta': 'தமிழ் (Tamil)',
+                'te': 'తెలుగు (Telugu)',
+                'kn': 'ಕನ್ನಡ (Kannada)',
+                'gu': 'ગુજરાતી (Gujarati)',
+                'pa': 'ਪੰਜਾਬੀ (Punjabi)',
+                'ur': 'اردو (Urdu)'
+            };
+
+            function toggleLanguageMenu(event) {
+                if (event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+                const menu = document.getElementById('custom-language-menu');
+                const overlay = document.getElementById('custom-language-overlay');
+                const chevron = document.getElementById('lang-dropdown-chevron');
+                if (!menu) return;
+
+                const isOpening = menu.classList.contains('hidden');
+                if (isOpening) {
+                    menu.classList.remove('hidden');
+                    if (overlay) overlay.classList.remove('hidden');
+                    if (chevron) chevron.classList.add('rotate-180');
+
+                    // Position dynamically for desktop vs mobile
+                    if (window.innerWidth >= 640) {
+                        const toggleBtn = document.getElementById('custom-lang-toggle-btn');
+                        if (toggleBtn) {
+                            const rect = toggleBtn.getBoundingClientRect();
+                            menu.style.top = (rect.bottom + 6) + 'px';
+                            menu.style.right = (window.innerWidth - rect.right) + 'px';
+                            menu.style.left = 'auto';
+                        }
+                    } else {
+                        menu.style.top = '';
+                        menu.style.right = '';
+                        menu.style.left = '';
+                    }
+                } else {
+                    closeLanguageMenu();
+                }
+            }
+
+            function closeLanguageMenu() {
+                const menu = document.getElementById('custom-language-menu');
+                const overlay = document.getElementById('custom-language-overlay');
+                const chevron = document.getElementById('lang-dropdown-chevron');
+                if (menu) menu.classList.add('hidden');
+                if (overlay) overlay.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+
+            function selectSiteLanguage(lang, label) {
+                const currentLabel = document.getElementById('custom-lang-current-label');
+                if (currentLabel) currentLabel.textContent = label;
+                const mobileLabel = document.getElementById('custom-lang-current-label-mobile');
+                if (mobileLabel) mobileLabel.textContent = (lang || 'en').toUpperCase();
+
+                // Highlight active language option
+                document.querySelectorAll('.lang-check').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.lang-dot').forEach(el => el.className = 'w-2 h-2 rounded-full bg-transparent lang-dot');
+
+                const activeCheck = document.querySelector(`.lang-check[data-lang="${lang}"]`);
+                if (activeCheck) activeCheck.classList.remove('hidden');
+                const activeDot = document.querySelector(`.lang-dot[data-lang="${lang}"]`);
+                if (activeDot) activeDot.className = 'w-2 h-2 rounded-full bg-sky-500 lang-dot';
+
+                // Close dropdown menu & overlay
+                closeLanguageMenu();
+
+                // Sync hidden select element for compatibility
+                const selectEl = document.getElementById('site-language-select');
+                if (selectEl) selectEl.value = lang;
+
+                changeSiteLanguage(lang);
+            }
+
+            function changeSiteLanguage(lang) {
+                localStorage.setItem('site_lang', lang);
+                const host = window.location.hostname;
+                const cookieVal = '/en/' + lang;
+                
+                // Write googtrans cookies across paths & domains
+                document.cookie = "googtrans=" + cookieVal + "; path=/;";
+                document.cookie = "googtrans=" + cookieVal + "; path=/; domain=" + host;
+                document.cookie = "googtrans=" + cookieVal + "; path=/; domain=." + host;
+                
+                // Try direct trigger on Google select if present
+                const combo = document.querySelector('.goog-te-combo');
+                if (combo) {
+                    combo.value = lang;
+                    combo.dispatchEvent(new Event('change'));
+                } else {
+                    window.location.reload();
+                }
+                if (typeof showToast === 'function') {
+                    showToast("Translating page to " + (LANG_DISPLAY_MAP[lang] || lang.toUpperCase()) + "...", "info");
+                }
+            }
+
+            // Sync language selector on load and bind outside click
+            document.addEventListener('DOMContentLoaded', () => {
+                const savedLang = localStorage.getItem('site_lang') || 'en';
+                const currentLabel = document.getElementById('custom-lang-current-label');
+                if (currentLabel && LANG_DISPLAY_MAP[savedLang]) {
+                    currentLabel.textContent = LANG_DISPLAY_MAP[savedLang];
+                }
+                const mobileLabel = document.getElementById('custom-lang-current-label-mobile');
+                if (mobileLabel) {
+                    mobileLabel.textContent = savedLang.toUpperCase();
+                }
+
+                // Sync city selects
+                const savedCity = localStorage.getItem('user_city');
+                if (savedCity) {
+                    const cityDesktop = document.getElementById('header-city-select');
+                    const cityMobile = document.getElementById('header-city-select-mobile');
+                    if (cityDesktop && !cityDesktop.value) cityDesktop.value = savedCity;
+                    if (cityMobile && !cityMobile.value) cityMobile.value = savedCity;
+                }
+
+                document.querySelectorAll('.lang-check').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.lang-dot').forEach(el => el.className = 'w-2 h-2 rounded-full bg-transparent lang-dot');
+
+                const activeCheck = document.querySelector(`.lang-check[data-lang="${savedLang}"]`);
+                if (activeCheck) activeCheck.classList.remove('hidden');
+                const activeDot = document.querySelector(`.lang-dot[data-lang="${savedLang}"]`);
+                if (activeDot) activeDot.className = 'w-2 h-2 rounded-full bg-sky-500 lang-dot';
+
+                const selectEl = document.getElementById('site-language-select');
+                if (selectEl) selectEl.value = savedLang;
+
+                if (savedLang && savedLang !== 'en') {
+                    const cookieVal = '/en/' + savedLang;
+                    if (!document.cookie.includes('googtrans=' + cookieVal)) {
+                        document.cookie = "googtrans=" + cookieVal + "; path=/;";
+                    }
+                }
+
+                // Close dropdown on outside click
+                document.addEventListener('click', (e) => {
+                    const selector = document.getElementById('custom-language-selector');
+                    const mobileBtn = document.getElementById('custom-lang-toggle-btn-mobile');
+                    const menu = document.getElementById('custom-language-menu');
+                    if (menu && !menu.classList.contains('hidden')) {
+                        const insideDesktop = selector && selector.contains(e.target);
+                        const insideMobile = mobileBtn && mobileBtn.contains(e.target);
+                        const insideMenu = menu.contains(e.target);
+                        if (!insideDesktop && !insideMobile && !insideMenu) {
+                            closeLanguageMenu();
+                        }
+                    }
+                });
+
+                // Close on Escape
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        closeLanguageMenu();
+                        closeFacilityNavigation();
+                    }
+                });
+            });
+
+            // Universal Turn-by-Turn Facility Navigation Helper
+            function openFacilityNavigation(name, address, lat, lon, phone) {
+                const modal = document.getElementById('facility-navigation-modal');
+                if (!modal) return;
+                const nameEl = document.getElementById('nav-modal-name');
+                const addrEl = document.getElementById('nav-modal-address');
+                const phoneEl = document.getElementById('nav-modal-phone');
+                const callBtn = document.getElementById('nav-modal-call-btn');
+                const mapsLink = document.getElementById('nav-modal-maps-link');
+                const distEl = document.getElementById('nav-modal-distance');
+
+                if (nameEl) nameEl.textContent = name || 'Healthcare Facility';
+                if (addrEl) addrEl.textContent = address || 'Address available on location';
+                if (phoneEl) phoneEl.textContent = phone || '108 / 102 (24x7 Ambulance & Hospital Helpline)';
+
+                if (callBtn) {
+                    if (phone && phone.trim() !== '') {
+                        callBtn.href = 'tel:' + phone.replace(/[^\d+]/g, '');
+                    } else {
+                        callBtn.href = 'tel:108';
+                    }
+                }
+
+                const userLat = localStorage.getItem('user_lat');
+                const userLon = localStorage.getItem('user_lon');
+
+                let mapsUrl = '';
+                const hasFacilityCoords = lat && lon && lat !== 'null' && lon !== 'null' && !isNaN(parseFloat(lat));
+
+                if (hasFacilityCoords) {
+                    if (userLat && userLon) {
+                        mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLon}&destination=${lat},${lon}&travelmode=driving`;
+                    } else {
+                        mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=driving`;
+                    }
+                } else {
+                    mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((name || '') + ' ' + (address || ''))}`;
+                }
+
+                if (mapsLink) mapsLink.href = mapsUrl;
+
+                if (distEl) {
+                    if (userLat && userLon && hasFacilityCoords) {
+                        const d = calculateHaversineDistance(parseFloat(userLat), parseFloat(userLon), parseFloat(lat), parseFloat(lon));
+                        distEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-route mr-1"></i> Approximately ${d.toFixed(1)} km from your current GPS location</span>`;
+                    } else {
+                        distEl.innerHTML = `<span class="text-slate-600"><i class="fa-solid fa-location-crosshairs mr-1"></i> Live Turn-by-Turn GPS navigation available via Google Maps</span>`;
+                    }
+                }
+
+                modal.classList.remove('hidden');
+            }
+
+            function closeFacilityNavigation() {
+                const modal = document.getElementById('facility-navigation-modal');
+                if (modal) modal.classList.add('hidden');
+            }
+
+            function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371; // Earth radius in km
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            }
+
+            // Initialize Countdown on page load if next dose is active
+            /*[# th:if="${nextDose != null}"]*/
+            document.addEventListener('DOMContentLoaded', () => {
+                const seconds = /*[[${nextDose.secondsRemaining}]]*/ 1458;
+                const schedId = /*[[${nextDose.scheduleId}]]*/ 1;
+                if (typeof initMedicineCountdown === 'function') {
+                    initMedicineCountdown(seconds, schedId);
+                }
+            });
+            /*[/]*/
+        </script>
+    </div>
+</body>
+</html>

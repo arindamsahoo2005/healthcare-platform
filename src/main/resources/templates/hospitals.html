@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 pb-20 lg:pb-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                    🏥 Module 5 & 6: Hospital Center & Inpatient Admission
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Hospitals & Digital Admission
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Live ICU bed capacity, emergency department status, and an end-to-end 8-stage admission pipeline near <strong th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your Area')}">Your Area</strong>.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="sync-live-btn" onclick="triggerLiveHospitalSync()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm transition active:scale-95 cursor-pointer">
+                    <i id="sync-icon" class="fa-solid fa-arrows-rotate"></i>
+                    <span id="sync-label">Sync Live Hospital & Bed API</span>
+                </button>
+                <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Verified Hospital Feeds
+                </span>
+            </div>
+        </div>
+
+        <!-- SERIOUS PATIENT EMERGENCY ADMISSION & RAPID ICU BED HOLD PROTOCOL -->
+        <div class="bg-gradient-to-r from-red-700 via-rose-700 to-red-800 text-white p-6 sm:p-7 rounded-3xl shadow-xl border-2 border-red-400/40 glow-emergency flex flex-wrap justify-between items-center gap-6">
+            <div class="space-y-1.5 max-w-2xl">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-white animate-ping"></span>
+                    <span class="text-xs font-black uppercase tracking-widest text-red-200">PRIORITY EMERGENCY PROTOCOL</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black tracking-tight">Serious Patient Hospital & Nursing Home Admission</h2>
+                <p class="text-xs sm:text-sm text-red-100">
+                    Immediate fast-track triage for critical cases: <strong>Cardiac Arrest, Severe Stroke, Unconscious Patient, Multiple Trauma, or Acute Respiratory Failure</strong>. Direct ICU bed hold and instant ambulance dispatch.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="openSeriousPatientModal()" class="bg-white hover:bg-red-50 text-red-700 font-black text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-xl transition flex items-center gap-2 active:scale-95 cursor-pointer">
+                    <i class="fa-solid fa-truck-medical text-base"></i>
+                    <span>🚨 Priority Emergency Admit & ICU Hold</span>
+                </button>
+                <a href="tel:108" class="bg-slate-950/80 hover:bg-slate-950 text-white font-bold text-xs sm:text-sm px-4 py-3 rounded-2xl border border-white/20 transition flex items-center gap-2">
+                    <i class="fa-solid fa-phone-volume text-red-400"></i>
+                    <span>Direct Call 108</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 8-STAGE ADMISSION WORKFLOW VISUALIZER -->
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-6 rounded-3xl shadow-xl">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400 mb-3">8-Stage Digital Admission Workflow</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center text-[11px]">
+                <div class="bg-white/10 p-2.5 rounded-xl border border-sky-400/30">
+                    <span class="font-bold text-sky-300 block">1. Search</span>
+                    <span class="text-[10px] text-slate-300">By proximity</span>
+                </div>
+                <div class="bg-white/10 p-2.5 rounded-xl border border-sky-400/30">
+                    <span class="font-bold text-sky-300 block">2. Dept</span>
+                    <span class="text-[10px] text-slate-300">Select care unit</span>
+                </div>
+                <div class="bg-white/10 p-2.5 rounded-xl border border-sky-400/30">
+                    <span class="font-bold text-sky-300 block">3. Request</span>
+                    <span class="text-[10px] text-slate-300">Submit details</span>
+                </div>
+                <div class="bg-white/10 p-2.5 rounded-xl border border-sky-400/30">
+                    <span class="font-bold text-sky-300 block">4. Docs</span>
+                    <span class="text-[10px] text-slate-300">Referral upload</span>
+                </div>
+                <div class="bg-white/10 p-2.5 rounded-xl border border-sky-400/30">
+                    <span class="font-bold text-sky-300 block">5. Insurance</span>
+                    <span class="text-[10px] text-slate-300">Cashless triage</span>
+                </div>
+                <div class="bg-white/10 p-2.5 rounded-xl border border-sky-400/30">
+                    <span class="font-bold text-sky-300 block">6. Response</span>
+                    <span class="text-[10px] text-slate-300">Hospital triage</span>
+                </div>
+                <div class="bg-white/10 p-2.5 rounded-xl border border-sky-400/30">
+                    <span class="font-bold text-sky-300 block">7. Inpatient</span>
+                    <span class="text-[10px] text-slate-300">Bed assigned</span>
+                </div>
+                <div class="bg-white/10 p-2.5 rounded-xl border border-sky-400/30">
+                    <span class="font-bold text-sky-300 block">8. Discharge</span>
+                    <span class="text-[10px] text-slate-300">Follow-up plan</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIVE ADMISSION REQUESTS STREAM (Only for Authenticated Users) -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200" th:if="${currentUser != null and admissions != null and !admissions.isEmpty()}">
+            <h3 class="text-base font-black text-slate-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-bed-pulse text-sky-600"></i> Your Inpatient Admission Requests
+            </h3>
+            <div class="space-y-3">
+                <div th:each="a : ${admissions}" class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 th:text="${a.patientName}" class="font-bold text-sm text-slate-900">Patient</h4>
+                            <span class="text-xs bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded" th:text="${a.status}">REQUESTED</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1" th:text="${a.hospital.name + ' • Department: ' + a.department + ' • Urgency: ' + a.urgency}">Hospital</p>
+                        <span th:if="${a.allocatedBedNumber != null}" class="text-xs text-emerald-700 font-bold mt-1 block" th:text="${'Allocated Bed: ' + a.allocatedBedNumber}"></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span th:if="${a.status == 'REQUESTED'}" class="text-xs bg-amber-100 text-amber-800 font-bold px-3 py-1.5 rounded-lg border border-amber-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-clock-rotate-left text-amber-600"></i> Under Triage Review
+                        </span>
+                        <span th:if="${a.status == 'BED_ALLOCATED'}" class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> Bed Allocated
+                        </span>
+                        <span th:if="${a.status == 'ADMITTED'}" class="text-xs bg-sky-100 text-sky-800 font-bold px-3 py-1.5 rounded-lg border border-sky-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-hospital-user text-sky-600"></i> Inpatient Admitted
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facility Category Filters (Government, Private, Nursing Home, ICU) -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Facility Category:</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
+                    <button onclick="filterFacilityCategory('all')" id="cat-btn-all" class="cat-filter-btn px-3.5 py-1.5 rounded-xl bg-sky-600 text-white font-bold transition">
+                        🏥 All Facilities
+                    </button>
+                    <button onclick="filterFacilityCategory('govt')" id="cat-btn-govt" class="cat-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                        🏛️ Government Hospitals
+                    </button>
+                    <button onclick="filterFacilityCategory('private')" id="cat-btn-private" class="cat-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                        🏢 Private Super-Specialty
+                    </button>
+                    <button onclick="filterFacilityCategory('nursing')" id="cat-btn-nursing" class="cat-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                        🩺 Nursing Homes & Day Care
+                    </button>
+                    <button onclick="filterFacilityCategory('icu')" id="cat-btn-icu" class="cat-filter-btn px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                        🚨 24x7 Critical ICU Available
+                    </button>
+                </div>
+            </div>
+
+            <!-- Regional & Multi-City Filter -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Region:</span>
+                    <span class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-200"
+                          th:text="${selectedState == 'ALL' ? '🇮🇳 Nationwide (All India)' : '📍 ' + (selectedCity != null ? selectedCity + ' (' + selectedState + ')' : (selectedState != null ? selectedState : 'West Bengal'))}">📍 West Bengal</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                    <a th:href="@{/hospitals(state='West Bengal')}"
+                       th:class="${(selectedState == 'West Bengal' || selectedState == null) && selectedCity == null ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3.5 py-1.5 rounded-xl transition font-medium'">
+                        📍 West Bengal
+                    </a>
+                    <a th:href="@{/hospitals(city='Kolkata')}"
+                       th:class="${selectedCity == 'Kolkata' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        Kolkata
+                    </a>
+                    <a th:href="@{/hospitals(city='Budge Budge')}"
+                       th:class="${selectedCity == 'Budge Budge' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        Budge Budge
+                    </a>
+                    <a th:href="@{/hospitals(city='Delhi')}"
+                       th:class="${selectedCity == 'Delhi' || selectedCity == 'New Delhi' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        🏛️ Delhi / NCR
+                    </a>
+                    <a th:href="@{/hospitals(city='Mumbai')}"
+                       th:class="${selectedCity == 'Mumbai' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        🏙️ Mumbai
+                    </a>
+                    <a th:href="@{/hospitals(city='Bengaluru')}"
+                       th:class="${selectedCity == 'Bengaluru' || selectedCity == 'Bangalore' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        🌿 Bengaluru
+                    </a>
+                    <a th:href="@{/hospitals(city='Hyderabad')}"
+                       th:class="${selectedCity == 'Hyderabad' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        💎 Hyderabad
+                    </a>
+                    <a th:href="@{/hospitals(city='Chennai')}"
+                       th:class="${selectedCity == 'Chennai' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        🌊 Chennai
+                    </a>
+                    <a th:href="@{/hospitals(city='Bhubaneswar')}"
+                       th:class="${selectedCity == 'Bhubaneswar' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        🏛️ Bhubaneswar
+                    </a>
+                    <a th:href="@{/hospitals(city='Howrah')}"
+                       th:class="${selectedCity == 'Howrah' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        Howrah
+                    </a>
+                    <a th:href="@{/hospitals(city='Siliguri')}"
+                       th:class="${selectedCity == 'Siliguri' ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        Siliguri
+                    </a>
+                    <a th:href="@{/hospitals(state='ALL')}"
+                       th:class="${selectedState == 'ALL' ? 'bg-indigo-600 text-white font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'} + ' px-3 py-1.5 rounded-xl transition font-medium'">
+                        🇮🇳 All India
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proximity / Fallback Notification Banner -->
+        <div th:if="${localityFallback}" class="bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-200 rounded-2xl p-4 flex items-center gap-3 text-xs text-sky-900 shadow-sm">
+            <div class="w-9 h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center text-base flex-shrink-0 shadow-sm">
+                <i class="fa-solid fa-location-crosshairs"></i>
+            </div>
+            <div>
+                <p class="font-bold text-slate-900">Showing Nearby Facilities Ranked by Distance from <span class="text-sky-700" th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your Location')}">Your Location</span></p>
+                <p class="text-slate-600 mt-0.5">All certified healthcare centers and emergency hospitals across <span th:text="${selectedState != null ? selectedState : 'your state'}">West Bengal</span> are sorted by live Haversine road proximity from your coordinates.</p>
+            </div>
+        </div>
+
+        <!-- WEEKLY OUTDOOR (OPD) DOCTOR SCHEDULE & ONLINE SEAT BOOKING -->
+        <section id="weekly-opd-section" class="bg-gradient-to-br from-amber-50/70 via-white to-sky-50/50 p-6 sm:p-8 rounded-3xl border border-amber-200/80 shadow-sm space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-calendar-check text-amber-600"></i> Outdoor Visit (OPD) Roster
+                        </span>
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live Quota Active
+                        </span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-user-doctor text-amber-600"></i> Weekly Outdoor Doctor Schedule &amp; Seat Booking
+                    </h2>
+                    <p class="text-xs text-slate-600 max-w-2xl">
+                        Filter which doctors are available at nearby Government Hospitals, Private Facilities, and Nursing Homes on each day of the week. View room chamber numbers, OPD hours, and instantly secure your digital OPD seat pass.
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-bold text-slate-500">Category:</span>
+                        <select id="opd-category-filter" onchange="filterOpdSchedule()" class="text-xs font-bold border border-slate-300 rounded-xl px-2.5 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none shadow-sm">
+                            <option value="All">All Types (Govt, Private, Nursing Home)</option>
+                            <option value="Government">🏛️ Government Hospitals</option>
+                            <option value="Private">🏨 Private Hospitals</option>
+                            <option value="Nursing Home">🏡 Nursing Homes</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-bold text-slate-500">Facility:</span>
+                        <select id="opd-hospital-filter" onchange="filterOpdSchedule()" class="text-xs font-bold border border-slate-300 rounded-xl px-3 py-2 bg-white text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none max-w-xs shadow-sm">
+                            <option value="All">🏥 All Hospitals &amp; Clinics</option>
+                            <option th:each="h : ${hospitals}" th:value="${h.name}" th:text="${h.name}">Hospital</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day of Week Selector Pills -->
+            <div class="space-y-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Select Day of Week for Outdoor Visit:</span>
+                <div class="flex flex-wrap items-center gap-2 text-xs font-bold" id="opd-day-pills">
+                    <button type="button" onclick="selectOpdDay('All', this)" class="opd-day-btn px-3.5 py-2 rounded-xl bg-amber-600 text-white font-black shadow-sm transition cursor-pointer">
+                        🗓️ All Week
+                    </button>
+                    <button type="button" onclick="selectOpdDay('Monday', this)" class="opd-day-btn px-3.5 py-2 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 transition cursor-pointer">
+                        Mon
+                    </button>
+                    <button type="button" onclick="selectOpdDay('Tuesday', this)" class="opd-day-btn px-3.5 py-2 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 transition cursor-pointer">
+                        Tue
+                    </button>
+                    <button type="button" onclick="selectOpdDay('Wednesday', this)" class="opd-day-btn px-3.5 py-2 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 transition cursor-pointer">
+                        Wed
+                    </button>
+                    <button type="button" onclick="selectOpdDay('Thursday', this)" class="opd-day-btn px-3.5 py-2 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 transition cursor-pointer">
+                        Thu
+                    </button>
+                    <button type="button" onclick="selectOpdDay('Friday', this)" class="opd-day-btn px-3.5 py-2 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 transition cursor-pointer">
+                        Fri
+                    </button>
+                    <button type="button" onclick="selectOpdDay('Saturday', this)" class="opd-day-btn px-3.5 py-2 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 transition cursor-pointer">
+                        Sat
+                    </button>
+                    <button type="button" onclick="selectOpdDay('Sunday', this)" class="opd-day-btn px-3.5 py-2 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 transition cursor-pointer">
+                        Sun
+                    </button>
+                </div>
+            </div>
+
+            <!-- Doctor OPD Cards Grid -->
+            <div id="opd-roster-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div th:each="doc : ${allDoctors}"
+                     class="opd-doctor-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-amber-400 hover:shadow-md transition flex flex-col justify-between"
+                     th:attr="data-id=${doc.id}, data-name=${doc.name}, data-specialty=${doc.specialty}, data-hospital=${doc.hospitalAffiliation}, data-category=${doc.hospitalCategory}, data-days=${doc.opdScheduleDays}, data-city=${doc.city}, data-govt=${doc.isGovernment()}, data-nursing=${doc.isNursingHome()}">
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-2.5">
+                            <span th:if="${doc.isGovernment()}" class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+                                🏛️ Government OPD
+                            </span>
+                            <span th:if="${doc.isNursingHome()}" class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-100 text-purple-900 border border-purple-300">
+                                🏡 Nursing Home OPD
+                            </span>
+                            <span th:if="${!doc.isGovernment() && !doc.isNursingHome()}" class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                🏨 Private OPD
+                            </span>
+                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 flex items-center gap-1 font-mono">
+                                <i class="fa-solid fa-chair text-amber-500"></i>
+                                <span th:text="${(doc.opdSeatsAvailable != null ? doc.opdSeatsAvailable : 18) + ' seats left'}">18 seats left</span>
+                            </span>
+                        </div>
+
+                        <div class="flex items-start gap-3 mb-3">
+                            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-black text-lg shrink-0 border border-amber-200 shadow-sm">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-slate-900 text-sm leading-snug" th:text="${doc.name}">Dr. Soumen Roy</h3>
+                                <span class="text-xs font-bold text-sky-700 block" th:text="${doc.specialty}">General Medicine</span>
+                                <p class="text-[10px] text-slate-400" th:text="${doc.credentials}">MBBS, MD</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1.5 mb-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">Hospital:</span>
+                                <strong class="text-slate-800 text-[11px] truncate max-w-[170px]" th:text="${doc.hospitalAffiliation}">ESI Hospital Budge Budge</strong>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">Chamber Room:</span>
+                                <span class="text-amber-800 font-bold text-[11px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200" th:text="${doc.opdRoomNumber != null ? doc.opdRoomNumber : 'Chamber 102'}">Chamber 102</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">OPD Days:</span>
+                                <span class="text-slate-700 font-bold text-[11px]" th:text="${doc.opdScheduleDays != null ? doc.opdScheduleDays : doc.availableDays}">Mon, Wed, Fri</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">Visiting Timings:</span>
+                                <span class="bg-amber-100 text-amber-900 border border-amber-300 font-mono font-black text-xs px-2 py-0.5 rounded flex items-center gap-1">
+                                    <i class="fa-solid fa-clock text-amber-600"></i>
+                                    <span th:text="${doc.opdTimings != null ? doc.opdTimings : '09:00 AM - 10:30 AM'}">09:00 AM - 10:30 AM</span>
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between pt-1 border-t border-slate-200">
+                                <span class="text-slate-500 text-[11px]">Registration Fee:</span>
+                                <strong class="text-emerald-700 font-bold text-xs" th:text="${'₹' + (doc.opdFee != null ? #numbers.formatDecimal(doc.opdFee, 1, 0) : (doc.isGovernment() ? '20' : '500'))}">₹20</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            th:attr="data-id=${doc.id}, data-name=${doc.name}, data-specialty=${doc.specialty}, data-hospital=${doc.hospitalAffiliation}, data-chamber=${doc.opdRoomNumber != null ? doc.opdRoomNumber : 'Chamber 101'}, data-timings=${doc.opdTimings != null ? doc.opdTimings : '09:00 AM - 10:30 AM'}, data-fee=${doc.opdFee != null ? doc.opdFee : (doc.isGovernment() ? 20.0 : 500.0)}, data-days=${doc.opdScheduleDays != null ? doc.opdScheduleDays : doc.availableDays}"
+                            onclick="openBookOpdModalFromEl(this)"
+                            class="w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-black rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-md">
+                        <i class="fa-solid fa-calendar-check text-xs"></i> <span>Book Outdoor Seat / Online Appointment with <span th:text="${doc.name}">Doctor</span></span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOSPITALS DIRECTORY -->
+        <div th:if="${hospitals.isEmpty()}" class="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm">
+            <div class="w-16 h-16 bg-sky-50 text-sky-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-hospital"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-1">No Hospitals Found in this Specific Area</h3>
+            <p class="text-xs text-slate-500 max-w-md mx-auto mb-4">Try viewing all verified facilities across <span th:text="${selectedState != null ? selectedState : 'your region'}">West Bengal</span> sorted by proximity.</p>
+            <a th:href="@{/hospitals(state=${selectedState != null ? selectedState : 'ALL'})}" class="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+                <i class="fa-solid fa-globe"></i> <span th:text="${'View All ' + (selectedState != null ? selectedState : 'All India') + ' Hospitals'}">View All Hospitals</span>
+            </a>
+        </div>
+
+        <!-- Facility Category Filters (Government, Private, Nursing Home) -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs mb-6">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Facility Type:</span>
+                <span class="text-xs bg-sky-50 text-sky-700 font-bold px-2.5 py-0.5 rounded-full border border-sky-200">
+                    <span id="facility-count-badge" th:text="${hospitals.size()} + ' Facilities'">82 Facilities</span>
+                </span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs font-bold" id="facility-category-pills">
+                <button type="button" onclick="filterFacilityCategory('All', this)" class="fac-cat-btn px-4 py-2 rounded-xl bg-sky-600 text-white font-black shadow-sm transition cursor-pointer">
+                    🏥 All Facilities
+                </button>
+                <button type="button" onclick="filterFacilityCategory('Government Hospital', this)" class="fac-cat-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer">
+                    🏛️ Government Hospitals
+                </button>
+                <button type="button" onclick="filterFacilityCategory('Private Hospital', this)" class="fac-cat-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer">
+                    🏨 Private Hospitals
+                </button>
+                <button type="button" onclick="filterFacilityCategory('Nursing Home', this)" class="fac-cat-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer">
+                    🏡 Nursing Homes
+                </button>
+            </div>
+        </div>
+
+        <div th:unless="${hospitals.isEmpty()}" id="hospitals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="h : ${hospitals}"
+                 class="hospital-card bg-white rounded-3xl p-6 shadow-sm border border-slate-200 hover:border-sky-400 hover:shadow-md transition flex flex-col justify-between"
+                 th:attr="data-name=${h.name}, data-type=${h.type}, data-category=${h.facilityCategory}, data-icu=${h.icuBedsAvailable}, data-phone=${h.phone}, data-er=${h.emergencyHelpline}, data-id=${h.id}">
+                <div>
+                    <!-- Distance, Facility Category Tag & ER Status -->
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="bg-sky-50 text-sky-800 text-[11px] font-bold px-2.5 py-1 rounded-full border border-sky-100 flex items-center gap-1 font-mono">
+                            <i class="fa-solid fa-location-arrow text-[10px]"></i> <span th:text="${h.distanceKm != null ? h.distanceKm + ' km away' : 'Verified Facility'}">2.4 km away</span>
+                        </span>
+                        
+                        <div class="flex items-center gap-1.5">
+                            <span th:if="${h.isGovernment()}" class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
+                                <i class="fa-solid fa-building-columns text-amber-700"></i> Government
+                            </span>
+                            <span th:if="${h.isNursingHome()}" class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-purple-100 text-purple-900 border border-purple-300 flex items-center gap-1">
+                                <i class="fa-solid fa-house-chimney-medical text-purple-700"></i> Nursing Home
+                            </span>
+                            <span th:if="${!h.isGovernment() && !h.isNursingHome()}" class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
+                                <i class="fa-solid fa-shield-halved text-emerald-600"></i> Private
+                            </span>
+                            <span class="text-[10px] bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded-full" th:if="${h.emergencyDept}">
+                                24x7 ER
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Hospital Name & Type -->
+                    <h3 th:text="${h.name}" class="text-base font-black text-slate-900 mb-1 leading-tight">Hospital Name</h3>
+                    <span th:text="${h.type}" class="text-xs font-bold text-sky-600 block mb-2">Hospital Type</span>
+                    <p class="text-xs text-slate-500 mb-3 line-clamp-2" th:text="${h.address}">Hospital Address</p>
+
+                    <!-- Contact & 24x7 Emergency Phone -->
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-slate-600 mb-3 pb-2 border-b border-slate-100">
+                        <a th:if="${h.phone != null}" th:href="${'tel:' + h.phone}" class="flex items-center gap-1 hover:text-sky-600">
+                            <i class="fa-solid fa-phone text-sky-600 text-[10px]"></i> <span th:text="${h.phone}">+91 11 26588500</span>
+                        </a>
+                        <a th:if="${h.emergencyHelpline != null}" th:href="${'tel:' + h.emergencyHelpline}" class="flex items-center gap-1 text-red-600 font-bold hover:text-red-700 ml-auto">
+                            <i class="fa-solid fa-truck-medical text-[10px]"></i> <span th:text="${h.emergencyHelpline}">108</span>
+                        </a>
+                    </div>
+
+                    <!-- Real-time Bed Capacity Box (ICU, Ventilator, Oxygen, General) -->
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-xs grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                        <div class="bg-white p-2 rounded-xl border border-slate-200 text-center">
+                            <span class="text-[9px] text-slate-400 uppercase font-bold block">ICU Beds</span>
+                            <span class="text-base font-black text-emerald-600" th:text="${h.icuBedsAvailable}">12</span>
+                            <span class="text-[9px] text-slate-400" th:text="${' / ' + h.icuBedsTotal}"> / 45</span>
+                        </div>
+                        <div class="bg-white p-2 rounded-xl border border-slate-200 text-center">
+                            <span class="text-[9px] text-slate-400 uppercase font-bold block">Ventilators</span>
+                            <span class="text-base font-black text-indigo-600" th:text="${h.ventilatorBedsAvailable != null ? h.ventilatorBedsAvailable : 4}">4</span>
+                            <span class="text-[9px] text-slate-400" th:text="${' / ' + (h.ventilatorBedsTotal != null ? h.ventilatorBedsTotal : 12)}"> / 12</span>
+                        </div>
+                        <div class="bg-white p-2 rounded-xl border border-slate-200 text-center">
+                            <span class="text-[9px] text-slate-400 uppercase font-bold block">Oxygen Beds</span>
+                            <span class="text-base font-black text-sky-600" th:text="${h.oxygenBedsAvailable != null ? h.oxygenBedsAvailable : 28}">28</span>
+                            <span class="text-[9px] text-slate-400" th:text="${' / ' + (h.oxygenBedsTotal != null ? h.oxygenBedsTotal : 70)}"> / 70</span>
+                        </div>
+                        <div class="bg-white p-2 rounded-xl border border-slate-200 text-center">
+                            <span class="text-[9px] text-slate-400 uppercase font-bold block">General Beds</span>
+                            <span class="text-base font-black text-slate-700" th:text="${h.generalBedsAvailable}">110</span>
+                            <span class="text-[9px] text-slate-400" th:text="${' / ' + h.generalBedsTotal}"> / 600</span>
+                        </div>
+                    </div>
+
+                    <!-- Verified Registry & Clinical Badges -->
+                    <div class="flex flex-wrap items-center gap-1.5 mb-3">
+                        <span th:if="${h.abdmFacilityId != null}" class="text-[10px] bg-sky-50 text-sky-700 px-2 py-0.5 rounded-md border border-sky-200 font-mono font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-id-card text-sky-500"></i> <span th:text="${h.abdmFacilityId}">ABDM: IN190001</span>
+                        </span>
+                        <span th:if="${h.emergencyTraumaLevel != null}" class="text-[10px] bg-red-50 text-red-700 px-2 py-0.5 rounded-md border border-red-200 font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-shield-heart text-red-500"></i> <span th:text="${h.emergencyTraumaLevel}">Level 1 Trauma</span>
+                        </span>
+                        <span th:if="${h.nabhAccredited}" class="text-[10px] bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-md border border-emerald-200 font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-certificate text-emerald-600"></i> NABH Accredited
+                        </span>
+                    </div>
+
+                    <!-- Specialty Departments -->
+                    <div class="mb-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Specialty Departments:</span>
+                        <div class="flex flex-wrap gap-1">
+                            <span th:each="d : ${#strings.arraySplit(h.departments, ',')}" th:text="${#strings.trim(d)}" class="text-[10px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium"></span>
+                        </div>
+                    </div>
+
+                    <!-- Attending Doctors & Weekly Timetable for this Specific Facility -->
+                    <div class="mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                                <i class="fa-solid fa-user-doctor text-sky-600"></i> Attending Doctors &amp; Timetable:
+                            </span>
+                            <span class="text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full"
+                                  th:text="${(hospitalDoctorsMap != null && hospitalDoctorsMap.get(h.id) != null ? hospitalDoctorsMap.get(h.id).size() : 0) + ' Available'}">
+                                2 Available
+                            </span>
+                        </div>
+                        <div class="space-y-2">
+                            <div th:each="doc : ${hospitalDoctorsMap != null ? hospitalDoctorsMap.get(h.id) : null}"
+                                 class="bg-white p-2.5 rounded-xl border border-slate-200 text-[11px] flex flex-col justify-between gap-1 shadow-xs">
+                                <div class="flex justify-between items-start gap-1">
+                                    <div>
+                                        <strong class="text-slate-900 font-bold block" th:text="${doc.name}">Dr. Soumen Roy</strong>
+                                        <span class="text-sky-700 font-medium text-[10px]" th:text="${doc.specialty}">General Medicine</span>
+                                    </div>
+                                    <span class="text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded"
+                                          th:text="${doc.opdRoomNumber != null ? doc.opdRoomNumber : 'Chamber 101'}">Chamber 101</span>
+                                </div>
+                                <div class="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-100">
+                                    <span><i class="fa-solid fa-calendar-day text-amber-500"></i> <strong th:text="${doc.opdScheduleDays}">Mon, Wed, Fri</strong></span>
+                                    <span><i class="fa-solid fa-clock text-sky-500"></i> <strong class="font-mono" th:text="${doc.opdTimings}">09:30 AM - 01:30 PM</strong></span>
+                                </div>
+                                <button type="button"
+                                        th:attr="data-id=${doc.id}, data-name=${doc.name}, data-specialty=${doc.specialty}, data-hospital=${h.name}, data-chamber=${doc.opdRoomNumber != null ? doc.opdRoomNumber : 'Chamber 101'}, data-timings=${doc.opdTimings != null ? doc.opdTimings : '09:30 AM - 01:30 PM'}, data-fee=${doc.opdFee != null ? doc.opdFee : (h.isGovernment() ? 20.0 : 500.0)}, data-days=${doc.opdScheduleDays}"
+                                        onclick="openBookOpdModalFromEl(this)"
+                                        class="mt-1 w-full py-1.5 px-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-[10px] transition flex items-center justify-center gap-1 cursor-pointer active:scale-95 shadow-xs">
+                                    <i class="fa-solid fa-chair text-[9px]"></i> <span>Book Appointment at <span th:text="${h.isNursingHome() ? 'Nursing Home' : 'Hospital'}">Hospital</span></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Triple Action: Standard Admission + Emergency ICU Admit + GPS Navigation -->
+                <div class="pt-3 border-t border-slate-100 space-y-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button th:attr="data-id=${h.id}, data-name=${h.name}, data-address=${h.address}, data-phone=${h.phone != null ? h.phone : h.emergencyHelpline}" onclick="openAdmissionFromEl(this)" class="py-2.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-bed-pulse text-xs"></i> <span>Request Admission</span>
+                        </button>
+                        <button th:attr="data-id=${h.id}, data-name=${h.name}, data-er=${h.emergencyHelpline}, data-address=${h.address}" onclick="openEmergencyICUAdmission(this)" class="py-2.5 px-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-triangle-exclamation text-xs"></i> <span>🚨 Emergency ICU</span>
+                        </button>
+                    </div>
+                    <button type="button"
+                            th:attr="data-id=${h.id}, data-name=${h.name}, data-city=${h.city}"
+                            onclick="openHospitalOpdRoster(this.getAttribute('data-name'), this.getAttribute('data-city'))"
+                            class="w-full py-2 px-3 bg-amber-50 hover:bg-amber-100 text-amber-900 font-black rounded-xl text-xs transition flex items-center justify-center gap-1.5 border border-amber-300 cursor-pointer active:scale-95 shadow-sm">
+                        <i class="fa-solid fa-calendar-day text-amber-600"></i> <span>Weekly Outdoor (OPD) Schedule &amp; Book Seat</span>
+                    </button>
+                    <button type="button"
+                            th:attr="data-name=${h.name}, data-address=${h.address}, data-lat=${h.latitude}, data-lon=${h.longitude}, data-phone=${h.phone != null ? h.phone : h.emergencyHelpline}"
+                            onclick="openFacilityNavigation(this.getAttribute('data-name'), this.getAttribute('data-address'), this.getAttribute('data-lat'), this.getAttribute('data-lon'), this.getAttribute('data-phone'))"
+                            class="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-[11px] transition flex items-center justify-center gap-1.5 border border-slate-200 cursor-pointer">
+                        <i class="fa-solid fa-diamond-turn-right text-emerald-600"></i> Get Turn-by-Turn GPS Directions
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Standard Hospital Admission Request Modal -->
+    <div id="admission-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900" id="admission-hospital-name">Admission Request</h3>
+                    <p class="text-xs text-slate-500">8-Step Inpatient Admission Pathway</p>
+                </div>
+                <button onclick="closeAdmissionModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="admission-form" onsubmit="submitAdmissionRequest(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="admission-hospital-id" name="hospitalId">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Patient Name *</label>
+                        <input type="text" name="patientName" th:value="${currentUser != null ? currentUser.fullName : ''}" placeholder="Patient Full Name" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Age & Gender *</label>
+                        <div class="grid grid-cols-2 gap-1">
+                            <input type="number" name="patientAge" value="29" min="1" max="120" required class="border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <select name="patientGender" class="border border-slate-300 rounded-lg p-2.5 focus:outline-none">
+                                <option value="Male" selected>Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Contact Phone *</label>
+                    <input type="tel" name="contactPhone" th:value="${currentUser != null ? currentUser.phone : '+91 98300 12345'}" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Department *</label>
+                        <select name="department" class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none">
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="General Surgery">General Surgery</option>
+                            <option value="ICU / Critical Care">ICU / Critical Care</option>
+                            <option value="Orthopedics">Orthopedics</option>
+                            <option value="Neurology">Neurology</option>
+                            <option value="Pediatrics">Pediatrics</option>
+                            <option value="Gynecology & Maternity">Gynecology & Maternity</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Room Preference</label>
+                        <select name="roomType" class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none">
+                            <option value="General Ward">General Ward</option>
+                            <option value="Semi-Private">Semi-Private Room</option>
+                            <option value="Deluxe Single">Deluxe Single Room</option>
+                            <option value="ICU">ICU Isolation</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Admission Urgency</label>
+                    <select name="urgency" class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none font-bold">
+                        <option value="ROUTINE">Routine Planned Admission</option>
+                        <option value="URGENT">Urgent (Within 24 Hours)</option>
+                        <option value="EMERGENCY">Emergency (Immediate Triage)</option>
+                    </select>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-slate-600 text-[11px] space-y-1">
+                    <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                        <i class="fa-solid fa-file-arrow-up text-sky-600"></i> Auto-Attached Documents
+                    </div>
+                    <p>Doctor_Referral.pdf, Health_Insurance_Policy_2026.pdf (Aadhaar & Star Health cashless pre-authorization attached).</p>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeAdmissionModal()" class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="px-5 py-2 font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow">Submit Admission Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SERIOUS PATIENT EMERGENCY ADMISSION & ICU HOLD MODAL -->
+    <div id="serious-patient-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border-2 border-red-500 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-2xl flex-shrink-0 animate-pulse">
+                        <i class="fa-solid fa-truck-medical"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-black uppercase tracking-widest text-red-600">LEVEL 1 CRITICAL TRIAGE</span>
+                        <h3 class="text-xl font-black text-slate-900 leading-tight">Serious Patient Emergency Admit</h3>
+                    </div>
+                </div>
+                <button onclick="closeSeriousPatientModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="bg-red-50 border border-red-200 rounded-2xl p-3.5 mb-4 text-xs text-red-800 space-y-1">
+                <p class="font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-triangle-exclamation text-red-600"></i> Fast-Track Bed Allocation Active
+                </p>
+                <p class="text-[11px] text-red-700">This request immediately notifies the ER Duty Medical Officer & holds the next available ICU/Critical care bed.</p>
+            </div>
+
+            <form id="serious-admission-form" onsubmit="submitSeriousAdmissionRequest(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="serious-hospital-id" name="hospitalId" value="1">
+                <input type="hidden" name="urgency" value="EMERGENCY">
+                <input type="hidden" name="roomType" value="ICU">
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-800 uppercase mb-1">Patient Full Name *</label>
+                        <input type="text" name="patientName" th:value="${currentUser != null ? currentUser.fullName : ''}" placeholder="Patient Full Name" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-red-500 font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-800 uppercase mb-1">Age & Gender *</label>
+                        <div class="grid grid-cols-2 gap-1">
+                            <input type="number" name="patientAge" value="29" min="1" max="120" required class="border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-red-500">
+                            <select name="patientGender" class="border border-slate-300 rounded-lg p-2.5">
+                                <option value="Male" selected>Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-800 uppercase mb-1">Attendant Contact Mobile Phone *</label>
+                    <input type="tel" name="contactPhone" th:value="${currentUser != null ? currentUser.phone : '+91 98300 12345'}" required class="w-full border border-slate-300 rounded-lg p-2.5 font-bold focus:ring-2 focus:ring-red-500">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-red-700 uppercase mb-1">🚨 Critical Condition / Emergency Triage *</label>
+                    <select id="serious-condition-select" name="department" class="w-full border-2 border-red-300 rounded-lg p-2.5 font-bold text-slate-900 bg-red-50/50">
+                        <option value="Cardiology">🫀 Acute Myocardial Infarction / Severe Chest Pain / Cardiac Arrest</option>
+                        <option value="Neurology">🧠 Acute Stroke / Paralysis / Sudden Loss of Consciousness</option>
+                        <option value="ICU / Critical Care" selected>🚨 Severe Respiratory Distress / Oxygen Desaturation (SpO2 &lt; 85%)</option>
+                        <option value="General Surgery">🩸 Severe Polytrauma / Major Road Accident / Uncontrolled Bleeding</option>
+                        <option value="ICU / Critical Care">⚡ Acute Sepsis / High Unresponsive Fever / Shock</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-800 uppercase mb-1">Target Hospital / Nursing Home *</label>
+                    <select id="serious-hospital-select" onchange="document.getElementById('serious-hospital-id').value = this.value" class="w-full border border-slate-300 rounded-lg p-2.5 font-bold text-slate-800">
+                        <option th:each="h : ${hospitals}" th:value="${h.id}" th:text="${h.name + ' (' + h.icuBedsAvailable + ' ICU Beds Available - ' + h.city + ')'}"></option>
+                    </select>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-900 text-[11px] flex items-center justify-between">
+                    <div>
+                        <strong class="block">🚑 Need Immediate Ambulance with Oxygen/Ventilator?</strong>
+                        <span>Auto-dispatch nearest Advanced Life Support (ALS) vehicle to your GPS coordinates.</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer ml-3 flex-shrink-0">
+                        <input type="checkbox" id="dispatch-ambulance-checkbox" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeSeriousPatientModal()" class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 font-black bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg shadow-red-600/30 flex items-center gap-2">
+                        <i class="fa-solid fa-bed-pulse"></i> Confirm Critical Admission & Hold ICU Bed
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Digital Admission Slip & Hospital Bed Portal Link Modal -->
+    <div id="admission-success-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 text-center space-y-5">
+            <div class="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto shadow-sm">
+                <i class="fa-solid fa-bed-pulse"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    Official Inpatient Admission Slip
+                </span>
+                <h3 class="text-xl font-black text-slate-900 mt-2">Authentic Bed &amp; Hospital Admission Confirmed</h3>
+                <p class="text-xs text-slate-500 mt-1">Direct digital bed allocation confirmed with hospital admissions desk.</p>
+            </div>
+
+            <!-- Digital Slip Box -->
+            <div class="bg-slate-50 rounded-2xl p-5 border-2 border-dashed border-emerald-300 text-left space-y-3 text-xs">
+                <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Digital Token No.</span>
+                        <span id="slip-token-number" class="text-xl font-mono font-black text-emerald-600">TK-9021</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Allocated Bed ID</span>
+                        <span id="slip-bed-number" class="text-sm font-mono font-black text-white bg-emerald-600 px-2.5 py-1 rounded-lg inline-block">ICU-Bay-03</span>
+                        <span id="slip-request-id" class="text-[9px] text-slate-400 font-mono block mt-0.5">#ADM-LIVE</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Hospital Facility:</span>
+                        <strong id="slip-hospital-name" class="text-slate-900 font-bold block">ESI Hospital Budge Budge</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Patient:</span>
+                        <strong id="slip-patient-name" class="text-slate-900 font-bold block">Patient Name</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Department / Room:</span>
+                        <span id="slip-department" class="text-slate-700 font-semibold block">ICU / Critical Care</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Attending Specialist:</span>
+                        <span id="slip-doctor-name" class="text-slate-700 font-semibold block">Dr. On-Duty CMO, MD</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Admission Status:</span>
+                        <span id="slip-status" class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded inline-block">BED_ALLOCATED</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">ER Hotline:</span>
+                        <a id="slip-hospital-phone" href="tel:03324824500" class="text-sky-600 font-bold block hover:underline">033 2482 4500</a>
+                    </div>
+                </div>
+
+                <div id="slip-instructions-box" class="bg-amber-50 p-2.5 rounded-xl border border-amber-200 text-[11px] text-amber-900 font-medium">
+                    <i class="fa-solid fa-circle-info text-amber-600 mr-1"></i>
+                    <span id="slip-instructions">Your bed is held for 3 hours. Present Digital Token at Emergency Triage Desk upon arrival.</span>
+                </div>
+
+                <div id="slip-ambulance-alert" class="hidden bg-red-50 text-red-800 p-2.5 rounded-xl border border-red-200 text-[11px] font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-truck-medical text-red-600"></i>
+                    <span>ALS Emergency Ambulance Dispatched to Patient Location</span>
+                </div>
+            </div>
+
+            <div class="space-y-2 pt-2">
+                <button type="button" id="slip-directions-btn"
+                        class="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-black rounded-2xl text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-diamond-turn-right"></i>
+                    <span>🗺️ Start GPS Directions to Hospital Emergency Gate</span>
+                </button>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <a id="slip-portal-btn" href="/portals?tab=patient" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-hospital-user"></i>
+                        <span>Patient Portal (/portals)</span>
+                    </a>
+                    <a id="slip-hospital-portal-btn" href="/portals?tab=hospital" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-clipboard-user"></i>
+                        <span>Hospital Admissions Desk</span>
+                    </a>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="window.print()" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-print"></i> Print Admission Pass
+                    </button>
+                    <button type="button" onclick="closeAdmissionSuccessModal()" class="flex-1 py-2 px-3 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-semibold transition cursor-pointer">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outdoor Visit (OPD) Seat Booking Modal -->
+    <div id="opd-booking-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                        Outdoor Visit (OPD) Fast-Track Booking
+                    </span>
+                    <h3 class="text-lg font-black text-slate-900 mt-1" id="opd-modal-doc-name">Dr. Consultant</h3>
+                    <p class="text-xs text-slate-500" id="opd-modal-doc-details">Specialist • Hospital</p>
+                </div>
+                <button type="button" onclick="closeBookOpdModal()" class="text-slate-400 hover:text-slate-600 p-2 cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="opd-booking-form" onsubmit="submitOpdSeatBooking(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="opd-form-doctor-id" name="doctorId">
+                <input type="hidden" id="opd-form-hospital-name" name="hospitalName">
+
+                <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-3 text-xs space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">Chamber Room:</span>
+                        <strong class="text-slate-800" id="opd-modal-chamber">Chamber 102</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">OPD Consultation Hours:</span>
+                        <strong class="text-slate-800 font-mono" id="opd-modal-timings">09:30 AM - 01:30 PM</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">Weekly Schedule:</span>
+                        <strong class="text-amber-800" id="opd-modal-days">Mon, Wed, Fri</strong>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Visit Day of Week *</label>
+                        <select id="opd-form-day" name="selectedDay" required class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                            <option value="Sunday">Sunday</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Visit Date *</label>
+                        <input type="date" id="opd-form-date" name="visitDate" required class="w-full border border-slate-300 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Patient Full Name *</label>
+                    <input type="text" id="opd-form-patient-name" name="patientName" th:value="${currentUser != null ? currentUser.fullName : ''}" placeholder="Patient Full Name" required class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-900 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-1">
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Age *</label>
+                        <input type="number" id="opd-form-age" name="patientAge" value="32" min="1" max="120" required class="w-full border border-slate-300 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Gender *</label>
+                        <select id="opd-form-gender" name="patientGender" class="w-full border border-slate-300 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Contact Phone *</label>
+                        <input type="tel" id="opd-form-phone" name="patientPhone" th:value="${currentUser != null ? currentUser.phoneNumber : ''}" placeholder="+91 98300 00000" required class="w-full border border-slate-300 rounded-xl p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1 text-[11px]">Outdoor Visit Category</label>
+                    <select id="opd-form-category" name="opdCategory" class="w-full border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <option value="General Outdoor">General Outdoor (Regular Triage)</option>
+                        <option value="Senior Citizen Priority (60+ yrs)">Senior Citizen Priority Queue (60+ yrs)</option>
+                        <option value="Mother & Child Care">Mother &amp; Child Health Clinic</option>
+                        <option value="Emergency Fast-Track OPD">Emergency Fast-Track OPD</option>
+                    </select>
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="text-slate-500 block">Registration Fee:</span>
+                        <span class="text-[10px] text-emerald-700 font-bold">✓ Confirmed Seat Quota Applied</span>
+                    </div>
+                    <strong class="text-base font-black text-emerald-800" id="opd-modal-fee-display">₹20</strong>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeBookOpdModal()" class="px-4 py-2 font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer">Cancel</button>
+                    <button type="submit" id="opd-submit-btn" class="px-6 py-2.5 font-black bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-ticket"></i> Confirm Seat &amp; Generate Digital OPD Pass
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Digital OPD Seat Pass & Token Slip Modal -->
+    <div id="opd-success-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200 text-center space-y-5 max-h-[95vh] overflow-y-auto">
+            <div class="w-16 h-16 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center text-3xl mx-auto shadow-sm">
+                <i class="fa-solid fa-ticket"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                    Official Outdoor (OPD) Digital Seat Pass
+                </span>
+                <h3 class="text-xl font-black text-slate-900 mt-2">Outdoor Consultation Seat Confirmed</h3>
+                <p class="text-xs text-slate-500 mt-1">Guaranteed entry token allocated with attending specialist chamber.</p>
+            </div>
+
+            <!-- Digital Pass Card -->
+            <div class="bg-gradient-to-b from-amber-50/50 to-white rounded-2xl p-5 border-2 border-dashed border-amber-400 text-left space-y-3.5 text-xs shadow-sm">
+                <div class="flex justify-between items-center pb-2.5 border-b border-amber-200">
+                    <div>
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">OPD Token Number</span>
+                        <span id="opd-slip-token" class="text-2xl font-mono font-black text-amber-600">OPD-TK-108</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Reserved Seat</span>
+                        <span id="opd-slip-seat" class="text-sm font-mono font-black text-white bg-amber-600 px-3 py-1 rounded-lg inline-block shadow-sm">Seat #14</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Attending Doctor:</span>
+                        <strong id="opd-slip-doctor" class="text-slate-900 font-bold block text-sm">Dr. Soumen Roy</strong>
+                        <span id="opd-slip-specialty" class="text-[10px] text-sky-700 font-semibold block">General Medicine</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Hospital Facility:</span>
+                        <strong id="opd-slip-hospital" class="text-slate-900 font-bold block">ESI Hospital Budge Budge</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Chamber Room:</span>
+                        <span id="opd-slip-chamber" class="text-amber-900 font-black block">Chamber 102 (Ground Floor)</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">OPD Consultation Hours:</span>
+                        <span id="opd-slip-timings" class="text-slate-700 font-mono font-bold block">09:30 AM - 01:30 PM</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Visit Day &amp; Date:</span>
+                        <span id="opd-slip-day" class="text-slate-800 font-bold block">Monday (22 Sep 2026)</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-medium">Reporting Time:</span>
+                        <span id="opd-slip-reporting" class="text-red-700 font-bold block">09:00 AM (30 min prior)</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-2.5 rounded-xl border border-amber-200 text-[11px] text-slate-700 space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Patient:</span>
+                        <strong id="opd-slip-patient" class="text-slate-900">Patient Name</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Category:</span>
+                        <span id="opd-slip-category" class="font-bold text-amber-800">General Outdoor</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Registration Fee:</span>
+                        <span id="opd-slip-fee" class="font-black text-emerald-700">₹20 (Confirmed)</span>
+                    </div>
+                </div>
+
+                <!-- Barcode Simulation -->
+                <div class="text-center pt-1 border-t border-dashed border-slate-200">
+                    <div class="inline-block tracking-[6px] font-mono text-slate-400 text-lg font-black select-none">
+                        ||||| | |||| ||| |||| | ||||| || |||
+                    </div>
+                    <span class="text-[9px] text-slate-400 font-mono block">SCAN AT OPD GATE / HOSPITAL DESK</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="space-y-2 pt-1">
+                <a id="opd-slip-navigation" href="https://maps.google.com" target="_blank"
+                   class="w-full py-3 px-4 bg-sky-600 hover:bg-sky-700 text-white font-black rounded-2xl text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-diamond-turn-right"></i>
+                    <span>🗺️ Start GPS Directions to Hospital OPD Gate</span>
+                </a>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <a id="opd-slip-portal-btn" href="/portals?tab=patient" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-hospital-user"></i>
+                        <span>My Patient Portal</span>
+                    </a>
+                    <a id="opd-slip-hospital-portal-btn" href="/portals?tab=hospital" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-2xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-clipboard-user"></i>
+                        <span>Hospital OPD Queue</span>
+                    </a>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="window.print()" class="flex-1 py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-print"></i> Print OPD Pass
+                    </button>
+                    <button type="button" onclick="closeOpdSuccessModal()" class="flex-1 py-2 px-3 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-semibold transition cursor-pointer">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+
+    <script>
+        let currentAdmissionFacility = { name: '', address: '', phone: '' };
+
+        function openAdmissionFromEl(el) {
+            const id = el.getAttribute('data-id');
+            const name = el.getAttribute('data-name');
+            const address = el.getAttribute('data-address') || name;
+            const phone = el.getAttribute('data-phone') || '108';
+            currentAdmissionFacility = { name: name, address: address, phone: phone };
+            openAdmissionModal(id, name);
+        }
+
+        function openAdmissionModal(hospitalId, hospitalName) {
+            document.getElementById('admission-hospital-id').value = hospitalId;
+            document.getElementById('admission-hospital-name').innerText = 'Admit to ' + hospitalName;
+            if (!currentAdmissionFacility.name) {
+                currentAdmissionFacility = { name: hospitalName, address: hospitalName, phone: '108' };
+            }
+            document.getElementById('admission-modal').classList.remove('hidden');
+        }
+
+        function closeAdmissionModal() {
+            document.getElementById('admission-modal').classList.add('hidden');
+        }
+
+        function openSeriousPatientModal(hospitalId, hospitalName) {
+            const modal = document.getElementById('serious-patient-modal');
+            modal.classList.remove('hidden');
+            if (hospitalId) {
+                const select = document.getElementById('serious-hospital-select');
+                if (select) select.value = hospitalId;
+                document.getElementById('serious-hospital-id').value = hospitalId;
+            }
+            if (hospitalName) {
+                currentAdmissionFacility = { name: hospitalName, address: hospitalName, phone: '108' };
+            }
+        }
+
+        function closeSeriousPatientModal() {
+            document.getElementById('serious-patient-modal').classList.add('hidden');
+        }
+
+        function openEmergencyICUAdmission(el) {
+            const id = el.getAttribute('data-id');
+            const name = el.getAttribute('data-name');
+            const address = el.getAttribute('data-address') || name;
+            const phone = el.getAttribute('data-er') || '108';
+            currentAdmissionFacility = { name: name, address: address, phone: phone };
+            openSeriousPatientModal(id, name);
+        }
+
+        function showAdmissionSuccessSlip(data, patientName, hospitalName, department, ambulanceDispatched) {
+            document.getElementById('slip-token-number').innerText = data.tokenNumber || ('TK-' + Math.floor(1000 + Math.random() * 9000));
+            const reqEl = document.getElementById('slip-request-id');
+            if (reqEl) reqEl.innerText = '#' + (data.requestId || 'ADM-LIVE');
+
+            const hName = data.hospitalName || hospitalName || currentAdmissionFacility.name || 'Selected Facility';
+            document.getElementById('slip-hospital-name').innerText = hName;
+            document.getElementById('slip-patient-name').innerText = patientName || 'Verified Patient';
+            document.getElementById('slip-department').innerText = (department || 'General / ICU') + (data.roomType ? ' (' + data.roomType + ')' : '');
+            document.getElementById('slip-status').innerText = data.currentStage || 'BED_ALLOCATED';
+            
+            const bedEl = document.getElementById('slip-bed-number');
+            if (bedEl) bedEl.innerText = data.allocatedBed || 'ICU-Bay-03';
+
+            const docEl = document.getElementById('slip-doctor-name');
+            if (docEl) docEl.innerText = data.allocatedDoctor || 'Dr. On-Duty CMO, MD';
+
+            const instEl = document.getElementById('slip-instructions');
+            if (instEl && data.instructions) instEl.innerText = data.instructions;
+
+            const phoneEl = document.getElementById('slip-hospital-phone');
+            const hPhone = data.hospitalPhone || currentAdmissionFacility.phone || '033-24824500';
+            if (phoneEl) {
+                phoneEl.innerText = hPhone;
+                phoneEl.href = 'tel:' + hPhone;
+            }
+
+            const ambAlert = document.getElementById('slip-ambulance-alert');
+            if (ambAlert) {
+                if (ambulanceDispatched) ambAlert.classList.remove('hidden');
+                else ambAlert.classList.add('hidden');
+            }
+
+            const dirBtn = document.getElementById('slip-directions-btn');
+            if (dirBtn) {
+                dirBtn.onclick = function() {
+                    const addr = currentAdmissionFacility.address || hName;
+                    openFacilityNavigation(hName, addr, null, null, hPhone);
+                };
+            }
+
+            const portalBtn = document.getElementById('slip-portal-btn');
+            if (portalBtn && data.portalUrl) {
+                portalBtn.href = data.portalUrl;
+            }
+
+            document.getElementById('admission-success-modal').classList.remove('hidden');
+        }
+
+        function closeAdmissionSuccessModal() {
+            document.getElementById('admission-success-modal').classList.add('hidden');
+            window.location.reload();
+        }
+
+        // Live hospital sync trigger calling live API
+        async function triggerLiveHospitalSync() {
+            const btn = document.getElementById('sync-live-btn');
+            const icon = document.getElementById('sync-icon');
+            const label = document.getElementById('sync-label');
+
+            const currentParams = new URLSearchParams(window.location.search);
+            const city = currentParams.get('city') || 'Kolkata';
+            const state = currentParams.get('state') || 'West Bengal';
+
+            if (icon) icon.classList.add('fa-spin');
+            if (label) label.innerText = 'Syncing Live Feeds...';
+            btn.disabled = true;
+
+            try {
+                const resp = await fetch(`/api/hospitals/sync-live?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}`, {
+                    method: 'POST'
+                });
+                const res = await resp.json();
+                if (res.status === 'SUCCESS') {
+                    if (label) label.innerText = `Synced ${res.hospitalsCount} Facilities!`;
+                    if (typeof showToast === 'function') {
+                        showToast(`✓ Live Bed API Sync Complete! ${res.hospitalsCount} verified facilities updated.`, 'success');
+                    }
+                    setTimeout(() => window.location.reload(), 800);
+                } else {
+                    if (label) label.innerText = 'Sync Completed';
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            } catch (err) {
+                console.error(err);
+                if (label) label.innerText = 'Sync Ready';
+            } finally {
+                if (icon) icon.classList.remove('fa-spin');
+                btn.disabled = false;
+            }
+        }
+
+        // Client-side facility category filter
+        function filterFacilityCategory(cat) {
+            const cards = document.querySelectorAll('.hospital-card');
+            const btns = document.querySelectorAll('.cat-filter-btn');
+
+            btns.forEach(b => {
+                b.classList.remove('bg-sky-600', 'text-white');
+                b.classList.add('bg-slate-100', 'text-slate-700');
+            });
+            const activeBtn = document.getElementById('cat-btn-' + cat);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-sky-600', 'text-white');
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-700');
+            }
+
+            cards.forEach(card => {
+                const type = (card.getAttribute('data-type') || '').toLowerCase();
+                const icu = parseInt(card.getAttribute('data-icu') || '0', 10);
+
+                let show = false;
+                if (cat === 'all') {
+                    show = true;
+                } else if (cat === 'govt') {
+                    show = type.includes('government');
+                } else if (cat === 'nursing') {
+                    show = type.includes('nursing');
+                } else if (cat === 'private') {
+                    show = !type.includes('government') && !type.includes('nursing');
+                } else if (cat === 'icu') {
+                    show = icu > 0;
+                }
+
+                if (show) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        async function submitAdmissionRequest(e) {
+            e.preventDefault();
+            const form = document.getElementById('admission-form');
+            const formData = new FormData(form);
+            const patientName = formData.get('patientName');
+            const department = formData.get('department');
+            const hospitalName = document.getElementById('admission-hospital-name')?.innerText || '';
+
+            try {
+                const resp = await fetch('/api/admissions/request', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                if (data.status === 'SUCCESS') {
+                    closeAdmissionModal();
+                    showAdmissionSuccessSlip(data, patientName, hospitalName, department, false);
+                } else {
+                    alert(data.message || 'Could not register admission.');
+                }
+            } catch (err) {
+                console.error(err);
+                if (typeof showToast === 'function') showToast('Error submitting admission request', 'error');
+            }
+        }
+
+        async function submitSeriousAdmissionRequest(e) {
+            e.preventDefault();
+            const form = document.getElementById('serious-admission-form');
+            const formData = new FormData(form);
+            const patientName = formData.get('patientName');
+            const needAmbulance = document.getElementById('dispatch-ambulance-checkbox').checked;
+
+            try {
+                const resp = await fetch('/api/admissions/request', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+
+                if (needAmbulance) {
+                    const ambData = new FormData();
+                    ambData.append('patientName', formData.get('patientName'));
+                    ambData.append('phone', formData.get('contactPhone'));
+                    ambData.append('pickupAddress', 'Current Location / Live GPS Coordinates');
+                    ambData.append('type', 'ALS');
+                    fetch('/api/ambulance/dispatch', { method: 'POST', body: ambData });
+                }
+
+                closeSeriousPatientModal();
+                showAdmissionSuccessSlip(data, patientName, 'Emergency ICU / Critical Care Unit', 'Emergency Department', needAmbulance);
+            } catch (err) {
+                console.error(err);
+                if (typeof showToast === 'function') showToast('Error processing emergency admission', 'error');
+            }
+        }
+
+        async function advanceAdmission(id, nextStage, bedNum) {
+            try {
+                const resp = await fetch(`/api/admissions/${id}/advance-stage?nextStatus=${nextStage}${bedNum ? '&bedNumber=' + bedNum : ''}`, {
+                    method: 'POST'
+                });
+                const data = await resp.json();
+                if (data.status === 'SUCCESS') {
+                    if (typeof showToast === 'function') showToast(`Admission stage updated to: ${data.currentStage}`, 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // --- FACILITY CATEGORY FILTER (GOVERNMENT, PRIVATE, NURSING HOME) ---
+        let selectedFacilityCategory = 'All';
+
+        function filterFacilityCategory(category, btnEl) {
+            selectedFacilityCategory = category;
+            const buttons = document.querySelectorAll('.fac-cat-btn');
+            buttons.forEach(b => {
+                b.className = 'fac-cat-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer';
+            });
+            if (btnEl) {
+                btnEl.className = 'fac-cat-btn px-4 py-2 rounded-xl bg-sky-600 text-white font-black shadow-sm transition cursor-pointer';
+            }
+
+            const cards = document.querySelectorAll('.hospital-card');
+            let visibleCount = 0;
+            cards.forEach(card => {
+                const cardCat = card.getAttribute('data-category') || '';
+                if (category === 'All' || cardCat.toLowerCase().includes(category.toLowerCase())) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            const badge = document.getElementById('facility-count-badge');
+            if (badge) badge.innerText = visibleCount + ' Facilities';
+        }
+
+        // --- OUTDOOR VISIT (OPD) WEEKLY SCHEDULE & BOOKING SYSTEM ---
+        let selectedOpdDayName = 'All';
+
+        function selectOpdDay(dayName, btnEl) {
+            selectedOpdDayName = dayName;
+            const buttons = document.querySelectorAll('.opd-day-btn');
+            buttons.forEach(b => {
+                b.className = 'opd-day-btn px-3.5 py-2 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 transition cursor-pointer';
+            });
+            if (btnEl) {
+                btnEl.className = 'opd-day-btn px-3.5 py-2 rounded-xl bg-amber-600 text-white font-black shadow-sm transition cursor-pointer';
+            }
+            filterOpdSchedule();
+        }
+
+        async function filterOpdSchedule() {
+            const hospitalFilter = document.getElementById('opd-hospital-filter');
+            const targetHospital = hospitalFilter ? hospitalFilter.value : 'All';
+            const catFilter = document.getElementById('opd-category-filter');
+            const targetCat = catFilter ? catFilter.value : 'All';
+            const grid = document.getElementById('opd-roster-grid');
+            if (!grid) return;
+
+            // 1. Fast local DOM filter for instant UI responsiveness
+            const cards = grid.querySelectorAll('.opd-doctor-card');
+            let visibleCount = 0;
+            cards.forEach(card => {
+                const docHospital = card.getAttribute('data-hospital') || '';
+                const docCat = (card.getAttribute('data-category') || '').toLowerCase();
+                const docDays = (card.getAttribute('data-days') || 'Daily (Mon to Sun)').toLowerCase();
+
+                let matchesHospital = (targetHospital === 'All') || (docHospital.toLowerCase().includes(targetHospital.toLowerCase()) || targetHospital.toLowerCase().includes(docHospital.toLowerCase()));
+                let matchesCat = (targetCat === 'All') || docCat.includes(targetCat.toLowerCase());
+                let matchesDay = true;
+
+                if (selectedOpdDayName !== 'All') {
+                    const d = selectedOpdDayName.toLowerCase();
+                    const prefix = d.substring(0, 3);
+                    if (docDays.includes('daily') || docDays.includes('all') || docDays.includes('mon to sun') || docDays.includes('mon-sun')) {
+                        matchesDay = true;
+                    } else if (docDays.includes('mon to sat') || docDays.includes('mon-sat') || docDays.includes('mon - sat')) {
+                        matchesDay = !d.startsWith('sun');
+                    } else {
+                        matchesDay = docDays.includes(prefix);
+                    }
+                }
+
+                if (matchesHospital && matchesDay && matchesCat) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            // 2. If a specific facility is selected or 0 cards matched locally, fetch comprehensive live schedule from API
+            if (targetHospital !== 'All' || visibleCount === 0) {
+                try {
+                    const params = new URLSearchParams({
+                        hospitalName: targetHospital,
+                        day: selectedOpdDayName,
+                        category: targetCat
+                    });
+                    const res = await fetch('/api/opd/schedule?' + params.toString());
+                    if (res.ok) {
+                        const docs = await res.json();
+                        if (docs && docs.length > 0) {
+                            renderDynamicOpdCards(docs);
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Live OPD schedule fetch fallback:', e);
+                }
+            }
+
+            // 3. Handle empty state gracefully if 0 cards match
+            const emptyEl = document.getElementById('opd-empty-state');
+            if (visibleCount === 0) {
+                if (!emptyEl) {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.id = 'opd-empty-state';
+                    msgDiv.className = 'col-span-full bg-white p-8 rounded-3xl border border-slate-200 text-center space-y-3';
+                    msgDiv.innerHTML = `
+                        <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xl mx-auto">
+                            <i class="fa-solid fa-user-doctor"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm">No doctor schedule found for this specific filter</h4>
+                        <p class="text-xs text-slate-500 max-w-sm mx-auto">Click below to view the entire week's schedule or all facilities.</p>
+                        <button type="button" onclick="selectOpdDay('All', document.querySelector('.opd-day-btn'))" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm transition cursor-pointer">
+                            <i class="fa-solid fa-calendar-week mr-1"></i> View Full Week OPD Schedule
+                        </button>
+                    `;
+                    grid.appendChild(msgDiv);
+                } else {
+                    emptyEl.classList.remove('hidden');
+                }
+            } else if (emptyEl) {
+                emptyEl.classList.add('hidden');
+            }
+        }
+
+        function renderDynamicOpdCards(docs) {
+            const grid = document.getElementById('opd-roster-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            docs.forEach(doc => {
+                const card = document.createElement('div');
+                card.className = 'opd-doctor-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-amber-400 hover:shadow-md transition flex flex-col justify-between';
+                card.setAttribute('data-id', doc.id);
+                card.setAttribute('data-name', doc.name);
+                card.setAttribute('data-specialty', doc.specialty);
+                card.setAttribute('data-hospital', doc.hospitalAffiliation);
+                card.setAttribute('data-category', doc.hospitalCategory);
+                card.setAttribute('data-days', doc.opdScheduleDays);
+                card.setAttribute('data-city', doc.city);
+                card.setAttribute('data-govt', doc.isGovernment);
+                card.setAttribute('data-nursing', doc.isNursingHome);
+
+                let catBadge = '';
+                if (doc.isGovernment) {
+                    catBadge = '<span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">🏛️ Government OPD</span>';
+                } else if (doc.isNursingHome) {
+                    catBadge = '<span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-100 text-purple-900 border border-purple-300">🏡 Nursing Home OPD</span>';
+                } else {
+                    catBadge = '<span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-300">🏨 Private OPD</span>';
+                }
+
+                const fee = doc.opdFee != null ? Math.round(doc.opdFee) : (doc.isGovernment ? 20 : 500);
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-2.5">
+                            ${catBadge}
+                            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 flex items-center gap-1 font-mono">
+                                <i class="fa-solid fa-chair text-amber-500"></i>
+                                <span>${doc.opdSeatsAvailable || 18} seats left</span>
+                            </span>
+                        </div>
+
+                        <div class="flex items-start gap-3 mb-3">
+                            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-black text-lg shrink-0 border border-amber-200 shadow-sm">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-slate-900 text-sm leading-snug">${doc.name}</h3>
+                                <span class="text-xs font-bold text-sky-700 block">${doc.specialty}</span>
+                                <p class="text-[10px] text-slate-400">${doc.credentials || 'Specialist Consultant'}</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1.5 mb-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">Hospital:</span>
+                                <strong class="text-slate-800 text-[11px] truncate max-w-[170px]">${doc.hospitalAffiliation}</strong>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">Chamber Room:</span>
+                                <span class="text-amber-800 font-bold text-[11px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">${doc.opdRoomNumber || 'Chamber 101'}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">OPD Days:</span>
+                                <span class="text-slate-700 font-bold text-[11px]">${doc.opdScheduleDays || 'Daily (Mon to Sun)'}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400 text-[11px]">Visiting Timings:</span>
+                                <span class="bg-amber-100 text-amber-900 border border-amber-300 font-mono font-black text-xs px-2 py-0.5 rounded flex items-center gap-1">
+                                    <i class="fa-solid fa-clock text-amber-600"></i> ${doc.opdTimings || '09:00 AM - 10:30 AM'}
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between pt-1 border-t border-slate-200">
+                                <span class="text-slate-500 text-[11px]">Registration Fee:</span>
+                                <strong class="text-emerald-700 font-bold text-xs">₹${fee}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            data-id="${doc.id}"
+                            data-name="${doc.name}"
+                            data-specialty="${doc.specialty}"
+                            data-hospital="${doc.hospitalAffiliation}"
+                            data-chamber="${doc.opdRoomNumber || 'Chamber 101'}"
+                            data-timings="${doc.opdTimings || '09:00 AM - 10:30 AM'}"
+                            data-fee="${fee}"
+                            data-days="${doc.opdScheduleDays || 'Daily (Mon to Sun)'}"
+                            onclick="openBookOpdModalFromEl(this)"
+                            class="w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 text-white font-black rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-md">
+                        <i class="fa-solid fa-calendar-check text-xs"></i> <span>Book Outdoor Seat / Online Appointment with ${doc.name}</span>
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openHospitalOpdRoster(hospitalName, city) {
+            const filterEl = document.getElementById('opd-hospital-filter');
+            if (filterEl) {
+                let found = false;
+                for (let i = 0; i < filterEl.options.length; i++) {
+                    if (filterEl.options[i].value === hospitalName || filterEl.options[i].text.includes(hospitalName)) {
+                        filterEl.selectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    const opt = document.createElement('option');
+                    opt.value = hospitalName;
+                    opt.text = hospitalName;
+                    opt.selected = true;
+                    filterEl.appendChild(opt);
+                }
+            }
+            selectOpdDay('All', document.querySelector('.opd-day-btn'));
+            const sec = document.getElementById('weekly-opd-section');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function openBookOpdModalFromEl(el) {
+            const docId = el.getAttribute('data-id');
+            const docName = el.getAttribute('data-name');
+            const specialty = el.getAttribute('data-specialty');
+            const hospital = el.getAttribute('data-hospital');
+            const chamber = el.getAttribute('data-chamber');
+            const timings = el.getAttribute('data-timings');
+            const fee = el.getAttribute('data-fee') || '20';
+            const days = el.getAttribute('data-days') || 'Mon, Wed, Fri';
+
+            document.getElementById('opd-form-doctor-id').value = docId;
+            document.getElementById('opd-form-hospital-name').value = hospital;
+            document.getElementById('opd-modal-doc-name').innerText = docName;
+            document.getElementById('opd-modal-doc-details').innerText = specialty + ' • ' + hospital;
+            document.getElementById('opd-modal-chamber').innerText = chamber;
+            document.getElementById('opd-modal-timings').innerText = timings;
+            document.getElementById('opd-modal-days').innerText = days;
+            document.getElementById('opd-modal-fee-display').innerText = '₹' + parseFloat(fee).toFixed(0);
+
+            // Set default date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateStr = tomorrow.toISOString().split('T')[0];
+            const dateInput = document.getElementById('opd-form-date');
+            if (dateInput) {
+                dateInput.value = dateStr;
+                dateInput.min = new Date().toISOString().split('T')[0];
+            }
+
+            // Sync selected day
+            const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const tomDay = daysOfWeek[tomorrow.getDay()];
+            const daySelect = document.getElementById('opd-form-day');
+            if (daySelect) {
+                if (selectedOpdDayName !== 'All') {
+                    daySelect.value = selectedOpdDayName;
+                } else {
+                    daySelect.value = tomDay;
+                }
+            }
+
+            document.getElementById('opd-booking-modal').classList.remove('hidden');
+        }
+
+        function closeBookOpdModal() {
+            document.getElementById('opd-booking-modal').classList.add('hidden');
+        }
+
+        async function submitOpdSeatBooking(event) {
+            event.preventDefault();
+            const form = event.target;
+            const submitBtn = document.getElementById('opd-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Allocating Seat & Generating Token...';
+            }
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+
+            try {
+                const resp = await fetch('/api/opd/book-seat', {
+                    method: 'POST',
+                    body: params
+                });
+                const res = await resp.json();
+                if (res.status === 'SUCCESS' || res.success) {
+                    closeBookOpdModal();
+                    showOpdSuccessPass(res);
+                } else {
+                    alert('Notice: ' + (res.message || 'Unable to allocate OPD seat.'));
+                }
+            } catch (err) {
+                console.error('OPD booking error:', err);
+                alert('Connection error while booking outdoor seat. Please retry.');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-ticket"></i> Confirm Seat & Generate Digital OPD Pass';
+                }
+            }
+        }
+
+        function showOpdSuccessPass(data) {
+            document.getElementById('opd-slip-token').innerText = data.tokenNumber || 'OPD-TK-101';
+            document.getElementById('opd-slip-seat').innerText = 'Seat #' + (data.seatNumber || '1');
+            document.getElementById('opd-slip-doctor').innerText = data.doctorName || 'Attending Specialist';
+            document.getElementById('opd-slip-specialty').innerText = data.doctorSpecialty || 'Specialist Consultation';
+            document.getElementById('opd-slip-hospital').innerText = data.hospitalName || 'Hospital OPD Complex';
+            document.getElementById('opd-slip-chamber').innerText = data.chamberRoom || 'Chamber 102';
+            document.getElementById('opd-slip-timings').innerText = data.opdTimings || '09:30 AM - 01:30 PM';
+            document.getElementById('opd-slip-day').innerText = (data.selectedDay || 'Today') + ' (' + (data.visitDate || '') + ')';
+            document.getElementById('opd-slip-reporting').innerText = data.reportingTime || '09:00 AM (30 min prior)';
+            document.getElementById('opd-slip-patient').innerText = data.patientName || 'Verified Patient';
+            document.getElementById('opd-slip-category').innerText = data.opdCategory || 'General Outdoor';
+            document.getElementById('opd-slip-fee').innerText = '₹' + (data.opdFee != null ? data.opdFee : '20') + ' (Confirmed)';
+
+            const navBtn = document.getElementById('opd-slip-navigation');
+            if (navBtn) {
+                navBtn.href = data.navigationUrl || ('https://maps.google.com/?q=' + encodeURIComponent(data.hospitalName + ' OPD Gate'));
+            }
+
+            const patPortalBtn = document.getElementById('opd-slip-portal-btn');
+            if (patPortalBtn) patPortalBtn.href = data.portalUrl || '/portals?tab=patient';
+
+            const hospPortalBtn = document.getElementById('opd-slip-hospital-portal-btn');
+            if (hospPortalBtn) hospPortalBtn.href = data.hospitalPortalUrl || '/portals?tab=hospital';
+
+            document.getElementById('opd-success-modal').classList.remove('hidden');
+        }
+
+        function closeOpdSuccessModal() {
+            document.getElementById('opd-success-modal').classList.add('hidden');
+            window.location.reload();
+        }
+
+        // Auto-open admission modal if target hospital ?id=... is present in URL
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetId = urlParams.get('id');
+            if (targetId) {
+                const card = document.querySelector(`.hospital-card[data-id="${targetId}"]`);
+                if (card) {
+                    openAdmissionFromEl(card);
+                } else {
+                    openAdmissionModal(targetId, 'Selected Hospital Facility');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

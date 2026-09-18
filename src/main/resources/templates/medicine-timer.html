@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+    <div th:replace="~{layout/main :: #smart-reminder-banner}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Page Title & Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+                    💊 Module 2: Smart Medicine System
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Medicine Timer & Adherence Center
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Precision dosage alarms, food-timing guidance, refill countdowns, and caregiver safety escalations.
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="openAddMedicineModal()" class="bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add New Medicine
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN TIMER SECTION: NEXT MEDICINE CARD + ADHERENCE GAUGE -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- MASTER LIVE COUNTDOWN TIMER (7 cols) -->
+            <div class="lg:col-span-7 bg-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+                
+                <!-- Background visual accents -->
+                <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div>
+                    <!-- Badge and Status -->
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span class="text-xs font-black uppercase tracking-widest text-sky-400">NEXT MEDICINE</span>
+                        </div>
+                        <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved text-emerald-400"></i> Safety Protected
+                        </span>
+                    </div>
+
+                    <!-- Medicine Name, Form & Dosage -->
+                    <div th:if="${nextDose != null}" class="mb-6">
+                        <div class="flex flex-wrap items-baseline gap-3">
+                            <h2 class="text-3xl sm:text-4xl font-black tracking-tight" th:text="${nextDose.medicineName}">Metformin</h2>
+                            <span class="text-base sm:text-lg font-bold text-sky-300" th:text="${nextDose.dosage}">500 mg</span>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-md font-medium" th:text="${nextDose.form}">Tablet</span>
+                        </div>
+                        <p class="text-xs text-slate-400 italic mt-1" th:text="${nextDose.genericName}">Metformin Hydrochloride</p>
+                    </div>
+
+                    <!-- Visual Separator -->
+                    <div class="w-full h-px bg-gradient-to-r from-sky-500/50 via-slate-700 to-transparent my-4"></div>
+
+                    <!-- Big Countdown Clock -->
+                    <div class="bg-slate-950/90 border border-slate-800 rounded-3xl p-6 sm:p-8 my-4 text-center shadow-inner">
+                        <div class="text-xs font-mono text-slate-400 uppercase tracking-widest mb-2 flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-stopwatch text-sky-400"></i> <span>TIME UNTIL NEXT DOSE</span>
+                        </div>
+                        <div class="medicine-countdown-clock text-5xl sm:text-6xl font-black font-mono tracking-wider text-sky-400 pulse-timer">
+                            00:24:18
+                        </div>
+                        <div class="mt-4 flex flex-wrap justify-center items-center gap-4 text-xs text-slate-400">
+                            <span>Take at: <strong class="text-white text-sm" th:text="${nextDose != null ? nextDose.formattedTime : '10:00 PM'}">10:00 PM</strong></span>
+                            <span>•</span>
+                            <span>Schedule: <strong class="text-white" th:text="${nextDose != null ? nextDose.timeOfDay : 'NIGHT'}">NIGHT</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Food Association Card -->
+                    <div th:if="${nextDose != null}" class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 my-4 flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-amber-300 uppercase tracking-wider block" th:text="${nextDose.foodRelation == 'AFTER_FOOD' ? 'Take After Food' : (nextDose.foodRelation == 'BEFORE_FOOD' ? 'Take Before Food (Empty Stomach)' : 'Take With Food')}">Take After Food</span>
+                            <p class="text-xs text-slate-300 mt-0.5 leading-relaxed" th:text="${nextDose.foodAdvice}">
+                                Take 15-30 minutes after your evening meal with a full glass of water.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Special Clinical Instructions -->
+                    <div th:if="${nextDose != null and nextDose.customInstructions != null}" class="text-xs text-slate-400 italic px-2 mb-4">
+                        <i class="fa-solid fa-info-circle text-sky-400 mr-1"></i> <span th:text="${nextDose.customInstructions}"></span>
+                    </div>
+                </div>
+
+                <!-- Live Control Action Buttons -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-800" th:if="${nextDose != null}">
+                    <button th:attr="data-id=${nextDose.scheduleId}" onclick="takeMedicine(this.getAttribute('data-id'))" class="py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl shadow-xl shadow-emerald-600/30 transition text-sm flex items-center justify-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-check text-base"></i> <span>✓ TAKEN</span>
+                    </button>
+                    <div class="flex gap-1.5">
+                        <button th:attr="data-id=${nextDose.scheduleId}" onclick="snoozeMedicine(this.getAttribute('data-id'), 10)" class="flex-1 py-3 px-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-2xl border border-slate-700 transition text-xs flex items-center justify-center gap-1 active:scale-95">
+                            <i class="fa-solid fa-bell text-xs"></i> <span>Snooze (10m)</span>
+                        </button>
+                        <button th:attr="data-id=${nextDose.scheduleId}" onclick="snoozeMedicine(this.getAttribute('data-id'), 20)" class="py-3 px-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-2xl border border-slate-700 transition text-xs flex items-center justify-center active:scale-95" title="Snooze 20 mins">
+                            +20m
+                        </button>
+                    </div>
+                    <button th:attr="data-id=${nextDose.scheduleId}" onclick="openSkipModal(this.getAttribute('data-id'))" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-2xl border border-slate-700 transition text-xs flex items-center justify-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-forward"></i> <span>SKIP DOSE</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ADHERENCE METRICS & REFILL STATUS (5 cols) -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- Adherence Ring & Score -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-sky-600"></i> Medication Adherence
+                        </h3>
+                        <span class="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full">30-Day Score</span>
+                    </div>
+
+                    <div class="flex items-center gap-6 my-2">
+                        <div class="relative w-24 h-24 flex items-center justify-center shrink-0">
+                            <!-- Circular Progress Indicator -->
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none"
+                                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="text-emerald-500" stroke-dasharray="96.5, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none"
+                                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <span class="absolute text-lg font-black text-slate-800" th:text="${adherencePercentage + '%'}">96.5%</span>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-800">Excellent Adherence</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed mt-1">
+                                High adherence significantly improves metabolic and cardiovascular control.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-100 text-center">
+                        <div class="bg-emerald-50 p-2 rounded-xl">
+                            <span class="text-[10px] text-emerald-800 font-bold block">Taken</span>
+                            <span class="text-base font-black text-emerald-700">28</span>
+                        </div>
+                        <div class="bg-amber-50 p-2 rounded-xl">
+                            <span class="text-[10px] text-amber-800 font-bold block">Snoozed</span>
+                            <span class="text-base font-black text-amber-700">3</span>
+                        </div>
+                        <div class="bg-slate-100 p-2 rounded-xl">
+                            <span class="text-[10px] text-slate-600 font-bold block">Skipped</span>
+                            <span class="text-base font-black text-slate-700">1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Refill Alerts & Remaining Pills -->
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-prescription-bottle text-amber-500"></i> Pill Stock & Refill Tracker
+                        </h3>
+                        <span class="text-[11px] text-slate-400">Refill Threshold: 5 days</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div th:each="m : ${activeMedicines}" class="p-3 rounded-2xl border flex justify-between items-center"
+                             th:classappend="${m.remainingPills <= 5 ? 'border-red-300 bg-red-50/40' : 'border-slate-200 bg-slate-50'}">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 th:text="${m.name}" class="text-xs font-bold text-slate-900">Metformin</h4>
+                                    <span th:if="${m.remainingPills <= 5}" class="text-[10px] bg-red-600 text-white font-bold px-1.5 py-0.2 rounded">REFILL NOW</span>
+                                </div>
+                                <span class="text-[11px] text-slate-500" th:text="${m.dosage + ' (' + m.foodRelation + ')'}">500mg</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-black" th:classappend="${m.remainingPills <= 5 ? 'text-red-600' : 'text-slate-800'}" th:text="${m.remainingPills}">18</span>
+                                <span class="text-[10px] text-slate-400 block">pills left</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="/pharmacy" class="w-full mt-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cart-shopping text-sky-400"></i> <span>Order Refills from Local Pharmacy</span>
+                    </a>
+                </div>
+
+                <!-- Caregiver Notification Status -->
+                <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-2xl flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-indigo-200 text-indigo-700 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <span class="font-bold text-indigo-900 block">Caregiver Mode: Active</span>
+                            <span class="text-indigo-700">Debasmita Sahoo (+91 98765 43211)</span>
+                        </div>
+                    </div>
+                    <button onclick="showToast('Test notification sent to Caregiver phone successfully!', 'info')" class="text-xs font-bold text-indigo-700 hover:text-indigo-900 underline">
+                        Test Alert
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- COMPLETE PRESCRIBED MEDICINES SCHEDULE TABLE -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-check text-sky-600"></i> Daily Medication Schedule
+                    </h3>
+                    <p class="text-xs text-slate-500">Structured by Morning, Afternoon, Evening, and Bedtime doses</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
+                            <th class="pb-3">Time & Routine</th>
+                            <th class="pb-3">Medicine</th>
+                            <th class="pb-3">Dosage & Form</th>
+                            <th class="pb-3">Food Timing</th>
+                            <th class="pb-3">Prescribing Doctor</th>
+                            <th class="pb-3">Stock</th>
+                            <th class="pb-3 text-right">Quick Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr th:each="s : ${schedules}" class="hover:bg-slate-50 transition">
+                            <td class="py-3.5">
+                                <span class="font-bold text-slate-900 font-mono" th:text="${s.doseTime}">10:00 PM</span>
+                                <span class="text-[10px] block text-slate-500 uppercase font-semibold" th:text="${s.timeOfDay}">NIGHT</span>
+                            </td>
+                            <td class="py-3.5">
+                                <strong class="text-slate-900" th:text="${s.medicine.name}">Metformin</strong>
+                                <span class="block text-[11px] text-slate-400 italic" th:text="${s.medicine.genericName}">Metformin HCl</span>
+                            </td>
+                            <td class="py-3.5" th:text="${s.dosageAmount}">1 Tablet (500mg)</td>
+                            <td class="py-3.5">
+                                <span class="px-2.5 py-1 rounded-full font-bold text-[10px]"
+                                      th:classappend="${s.medicine.foodRelation == 'AFTER_FOOD' ? 'bg-amber-100 text-amber-800' : (s.medicine.foodRelation == 'BEFORE_FOOD' ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-700')}"
+                                      th:text="${s.medicine.foodRelation}">
+                                    AFTER_FOOD
+                                </span>
+                            </td>
+                            <td class="py-3.5 text-slate-600" th:text="${s.medicine.prescribingDoctor != null ? s.medicine.prescribingDoctor : 'Dr. Rajesh Sharma'}">Dr. Rajesh Sharma</td>
+                            <td class="py-3.5">
+                                <span class="font-bold" th:classappend="${s.medicine.remainingPills <= 5 ? 'text-red-600' : 'text-slate-800'}" th:text="${s.medicine.remainingPills + ' pills'}">18 pills</span>
+                            </td>
+                            <td class="py-3.5 text-right">
+                                <button th:attr="data-id=${s.id}" onclick="takeMedicine(this.getAttribute('data-id'))" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-sm">
+                                    ✓ Take
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RECENT ADHERENCE LOGS & REASONS TABLE -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+            <h3 class="text-base font-black text-slate-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-slate-500"></i> Dose Action History & Recorded Reasons
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
+                            <th class="pb-3">Scheduled Time</th>
+                            <th class="pb-3">Action Recorded</th>
+                            <th class="pb-3">Medicine</th>
+                            <th class="pb-3">Status</th>
+                            <th class="pb-3">Notes / Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr th:each="l : ${logs}" class="hover:bg-slate-50 transition">
+                            <td class="py-3 text-slate-600" th:text="${#temporals.format(l.scheduledDateTime, 'dd MMM yyyy, hh:mm a')}">16 Sep 2026, 10:00 PM</td>
+                            <td class="py-3 text-slate-600" th:text="${l.actionDateTime != null ? #temporals.format(l.actionDateTime, 'hh:mm a') : 'Pending'}">10:02 PM</td>
+                            <td class="py-3 font-bold text-slate-800" th:text="${l.schedule.medicine.name}">Metformin</td>
+                            <td class="py-3">
+                                <span class="px-2 py-0.5 rounded font-bold text-[10px]"
+                                      th:classappend="${l.status == 'TAKEN' ? 'bg-emerald-100 text-emerald-800' : (l.status == 'SNOOZED' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800')}"
+                                      th:text="${l.status}">TAKEN</span>
+                            </td>
+                            <td class="py-3 text-slate-500" th:text="${l.skipReason != null ? l.skipReason : 'Completed as prescribed'}">Completed as prescribed</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Add New Medicine Modal -->
+    <div id="add-medicine-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-pills text-sky-600"></i> Add New Medicine & Schedule
+                </h3>
+                <button onclick="closeAddMedicineModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="add-medicine-form" onsubmit="submitNewMedicine(event)" class="space-y-4 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Brand Name *</label>
+                        <input type="text" name="name" required placeholder="e.g. Metformin" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Generic Name</label>
+                        <input type="text" name="genericName" placeholder="e.g. Metformin HCl" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Dosage *</label>
+                        <input type="text" name="dosage" required placeholder="e.g. 500 mg" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Form</label>
+                        <select name="form" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            <option value="Tablet">Tablet</option>
+                            <option value="Capsule">Capsule</option>
+                            <option value="Syrup">Syrup</option>
+                            <option value="Injection">Injection</option>
+                            <option value="Inhaler">Inhaler</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Total Pills</label>
+                        <input type="number" name="remainingPills" value="30" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Food Relation *</label>
+                        <select name="foodRelation" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                            <option value="AFTER_FOOD">After Food (15-30m after meal)</option>
+                            <option value="BEFORE_FOOD">Before Food (Empty Stomach)</option>
+                            <option value="WITH_FOOD">With Food</option>
+                            <option value="NO_RELATION">No food relation</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Routine Time *</label>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <select name="timeOfDay" class="border border-slate-300 rounded-lg p-2.5 focus:outline-none">
+                                <option value="MORNING">Morning</option>
+                                <option value="AFTERNOON">Afternoon</option>
+                                <option value="EVENING">Evening</option>
+                                <option value="NIGHT" selected>Night</option>
+                            </select>
+                            <input type="time" name="doseTimeStr" value="22:00" required class="border border-slate-300 rounded-lg p-2 focus:outline-none font-mono">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Instructions</label>
+                    <input type="text" name="instructions" placeholder="e.g. Take with water, do not crush tablet" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeAddMedicineModal()" class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="px-5 py-2 font-bold bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow">Save & Schedule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+
+    <script>
+        function openAddMedicineModal() {
+            document.getElementById('add-medicine-modal').classList.remove('hidden');
+        }
+        function closeAddMedicineModal() {
+            document.getElementById('add-medicine-modal').classList.add('hidden');
+        }
+        async function submitNewMedicine(e) {
+            e.preventDefault();
+            const form = document.getElementById('add-medicine-form');
+            const formData = new FormData(form);
+
+            try {
+                const resp = await fetch('/api/medicines/add', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+                if (data.status === 'SUCCESS') {
+                    showToast(data.message, 'success');
+                    closeAddMedicineModal();
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error saving medicine', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

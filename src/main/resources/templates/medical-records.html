@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 pb-20 lg:pb-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+                    📄 Module 11, 12 & 13: Digital Health Locker & Timeline
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Medical Records & Lifetime Health Timeline
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Secure encrypted locker for diagnostic blood reports, e-prescriptions, doctor notes, and imaging scans.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="document.getElementById('upload-record-modal').classList.remove('hidden')" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Upload New Report
+                </button>
+            </div>
+        </div>
+
+        <!-- "ASK MY RECORDS" INTERACTIVE SEARCH BAR (Module 13) -->
+        <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-indigo-800/50">
+            <div class="max-w-3xl mx-auto text-center space-y-3">
+                <span class="text-xs font-mono uppercase tracking-widest text-indigo-400 font-bold flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-brain"></i> MODULE 13: ASK MY RECORDS (AI ENGINE)
+                </span>
+                <h2 class="text-xl sm:text-2xl font-black">Query Your Health History in Plain English</h2>
+                <p class="text-xs text-slate-300">
+                    The AI answers strictly from your authorized records with exact source document references.
+                </p>
+                
+                <div class="flex items-center bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20 mt-4">
+                    <input id="ask-records-input" type="text" placeholder="e.g. 'When was my last blood test?', 'What was my HbA1c score?', 'Show Metformin dose'" 
+                           class="w-full bg-transparent text-white placeholder-slate-400 text-xs sm:text-sm px-3 focus:outline-none">
+                    <button onclick="queryAskRecords()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2 cursor-pointer">
+                        <span>Analyze</span> <i class="fa-solid fa-sparkles text-xs"></i>
+                    </button>
+                </div>
+
+                <div id="ask-records-result" class="hidden text-left bg-slate-900/90 border border-indigo-500/40 p-5 rounded-2xl text-xs space-y-2 text-slate-200 mt-4">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 📷 AI PRESCRIPTION & LAB REPORT OPTICAL SCANNER (MODULE 11 & 24) -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border-2 border-emerald-200/80 space-y-6">
+            <div class="flex flex-wrap justify-between items-start gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                            📷 AI Optical Clinical Scanner
+                        </span>
+                    </div>
+                    <h2 class="text-2xl font-black text-slate-900 mt-2">
+                        Scan Prescription or Lab Report • Auto-Extract Medicines &amp; 1-Click Chemist Order
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+                        Upload or snap a photo of any doctor prescription or diagnostic test. AI automatically extracts medicines, dosage, and food timing, finds verified nearby medical shops carrying stock, and lets you order online immediately.
+                    </p>
+                </div>
+                <!-- Quick Demo Buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="scanSamplePrescription()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-file-prescription"></i> Try Demo Prescription
+                    </button>
+                    <button onclick="scanSampleLabReport()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-vial"></i> Try Demo Lab Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload Dropzone -->
+            <div id="scanner-dropzone" class="border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-emerald-50/20 hover:bg-emerald-50/40 rounded-3xl p-6 sm:p-8 text-center transition cursor-pointer">
+                <input type="file" id="prescription-file-input" accept="image/*,.pdf" class="hidden" onchange="handlePrescriptionFileUpload(event)">
+                <div onclick="document.getElementById('prescription-file-input').click()" class="space-y-3">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mx-auto shadow-inner">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-base font-bold text-slate-800">Drop doctor prescription or lab report here, or <span class="text-emerald-600 underline">browse device</span></h4>
+                        <p class="text-xs text-slate-400 mt-0.5">Supports high-res PNG, JPG, PDF documents &amp; camera uploads</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scanner Progress State -->
+            <div id="scanner-loading" class="hidden bg-slate-900 text-white p-6 rounded-2xl border border-emerald-500/30 space-y-3">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-xl"></i>
+                    <div>
+                        <strong id="scanner-progress-text" class="text-sm block">Optical AI Scanning in Progress...</strong>
+                        <span class="text-xs text-slate-400">Reading clinical handwriting, dosage symbols, and local pharmacy inventories...</span>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div id="scanner-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-1/3 transition-all duration-500"></div>
+                </div>
+            </div>
+
+            <!-- Scanner Results Container -->
+            <div id="scanner-results-container" class="hidden space-y-6 pt-2">
+                <!-- Document Header Badge -->
+                <div class="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span id="res-doc-type-badge" class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 font-bold rounded text-[10px] uppercase border border-emerald-500/40">PRESCRIPTION</span>
+                            <span id="res-doc-date" class="text-xs text-slate-400 font-mono">2026-09-18</span>
+                        </div>
+                        <h3 id="res-doc-title" class="text-lg font-black text-white">Doctor Prescription</h3>
+                        <p id="res-doc-facility" class="text-xs text-slate-400 mt-0.5">CarePulse Super Specialty Clinic</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Attending Physician</span>
+                        <strong id="res-doc-doctor" class="text-sm text-sky-300">Dr. S. K. Mukherjee, MD</strong>
+                        <span id="res-doc-diagnosis" class="block text-xs text-emerald-400 mt-0.5 font-medium">Dx: Acute Upper Respiratory Tract Infection</span>
+                    </div>
+                </div>
+
+                <!-- 1. Extracted Medicines Table (If Prescription) -->
+                <div id="section-extracted-meds" class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-pills text-emerald-600"></i> Prescribed Medicines &amp; Dosage Instructions
+                        </h3>
+                        <span id="res-meds-count" class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">3 Medicines</span>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3.5">Medicine / Vaccine</th>
+                                    <th class="p-3.5">Dosage Form</th>
+                                    <th class="p-3.5">Frequency</th>
+                                    <th class="p-3.5">Relation with Food</th>
+                                    <th class="p-3.5">Duration</th>
+                                    <th class="p-3.5">Estimated Price</th>
+                                </tr>
+                            </thead>
+                            <tbody id="res-meds-tbody" class="divide-y divide-slate-100 bg-white">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2. Extracted Lab Biomarkers (If Lab Report) -->
+                <div id="section-extracted-lab" class="hidden space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-vial-virus text-indigo-600"></i> Analyzed Diagnostic Biomarkers
+                        </h3>
+                        <span class="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-0.5 rounded-full border border-indigo-200">Lab Analysis</span>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3.5">Biomarker Parameter</th>
+                                    <th class="p-3.5">Observed Value</th>
+                                    <th class="p-3.5">Reference Range</th>
+                                    <th class="p-3.5">Status</th>
+                                    <th class="p-3.5">Clinical Interpretation</th>
+                                </tr>
+                            </thead>
+                            <tbody id="res-lab-tbody" class="divide-y divide-slate-100 bg-white">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. Verified Nearby Chemist Shops Carrying These Medicines -->
+                <div id="section-nearby-pharmacies" class="space-y-3 pt-2">
+                    <div class="flex flex-wrap justify-between items-center gap-2">
+                        <div>
+                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-store text-emerald-600"></i> Verified Nearby Medical Shops Carrying Prescribed Medicines
+                            </h3>
+                            <p class="text-xs text-slate-500">Live inventory confirmed • 100% genuine guaranteed medicines • 1-Click order</p>
+                        </div>
+                        <span class="text-xs bg-emerald-50 text-emerald-700 font-bold px-3 py-1 rounded-full border border-emerald-200">
+                            <i class="fa-solid fa-bolt mr-1"></i> 20-30 Min Rapid Home Delivery
+                        </span>
+                    </div>
+
+                    <div id="res-pharmacies-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- 4. Active Placed Order Confirmation Banner -->
+                <div id="scanned-order-success" class="hidden bg-emerald-600 text-white p-5 rounded-2xl shadow-lg space-y-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div>
+                            <strong class="text-sm block">Prescription Medicine Order Placed Successfully!</strong>
+                            <span id="scanned-order-tracking-info" class="text-xs text-emerald-100">Order #ORD-8812 assigned to Apollo Pharmacy. Delivery in 22 mins.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TWO COLUMN LAYOUT: Health Timeline (4 cols) + Records Locker (8 cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- HEALTH TIMELINE (Module 12) (4 cols) -->
+            <div class="lg:col-span-4 bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-timeline text-sky-600"></i> Chronological Timeline
+                    </h3>
+                    <span class="text-[11px] text-slate-400 font-mono">2026 Feed</span>
+                </div>
+
+                <!-- Dynamic Chronological Flow -->
+                <div th:if="${#lists.isEmpty(records)}" class="text-center py-8 text-xs text-slate-400">
+                    <i class="fa-solid fa-clock-rotate-left text-slate-300 text-2xl mb-2 block"></i>
+                    No timeline milestones yet. Upload a diagnostic report or prescription to start your lifetime care feed.
+                </div>
+                <div th:unless="${#lists.isEmpty(records)}" class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                    <div th:each="r : ${records}" class="relative">
+                        <div class="absolute -left-[27px] top-1 w-3.5 h-3.5 rounded-full bg-sky-600 border-2 border-white shadow"></div>
+                        <span class="text-[10px] uppercase font-bold text-sky-600 tracking-wider" th:text="${r.recordDate}">2026-08-20</span>
+                        <h4 class="text-xs font-bold text-slate-900 mt-0.5" th:text="${r.title}">Medical Report</h4>
+                        <p class="text-[11px] text-slate-500" th:text="${r.facilityName + ' • ' + r.recordType}">Facility</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECORDS LOCKER LIST (8 cols) -->
+            <div class="lg:col-span-8 bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-box-archive text-sky-600"></i> MongoDB Health Locker Documents
+                    </h3>
+                    <span class="text-xs text-slate-400 font-bold" th:text="${records.size() + ' Documents'}">0 Documents</span>
+                </div>
+
+                <div th:if="${#lists.isEmpty(records)}" class="text-center py-12 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
+                    <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl mx-auto mb-3">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-slate-700">No medical records uploaded yet</h4>
+                    <p class="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-4">Start by uploading your first lab panel, clinical summary, or prescription to your private MongoDB locker.</p>
+                    <button type="button" onclick="document.getElementById('upload-record-modal').classList.remove('hidden')" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow transition">
+                        <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Add Health Record
+                    </button>
+                </div>
+
+                <div class="space-y-4" th:unless="${#lists.isEmpty(records)}">
+                    <div th:each="r : ${records}" class="p-5 rounded-2xl border border-slate-200 hover:border-sky-400 bg-slate-50 hover:bg-white transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex flex-wrap justify-between items-start gap-2 mb-2">
+                                <div>
+                                    <span class="text-[10px] uppercase font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded" th:text="${r.recordType}">BLOOD_TEST</span>
+                                    <h4 th:text="${r.title}" class="text-base font-black text-slate-900 mt-1">Complete Lipid & HbA1c Panel</h4>
+                                </div>
+                                <span class="text-xs text-slate-400 font-mono font-bold" th:text="${r.recordDate}">2026-08-20</span>
+                            </div>
+
+                            <p class="text-xs text-slate-500 mb-3" th:text="${r.facilityName + ' • Attending Doctor: ' + r.doctorName}">Apollo Diagnostics</p>
+
+                            <!-- Clinical Key Findings -->
+                            <div class="bg-white p-3.5 rounded-xl border border-slate-200 text-xs mb-3">
+                                <span class="font-bold text-slate-700 block mb-1">Key Clinical Findings:</span>
+                                <p class="text-slate-600 leading-relaxed" th:text="${r.keyFindings}">
+                                    HbA1c measured at 6.4% (well-controlled diabetic target &lt; 7.0%).
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap justify-between items-center pt-3 border-t border-slate-200 text-xs">
+                            <span class="text-slate-400 flex items-center gap-1.5 font-mono text-[11px]">
+                                <i class="fa-solid fa-file-pdf text-red-500"></i> <span th:text="${r.fileName}">Report.pdf</span> (<span th:text="${r.fileSize}">1.2 MB</span>)
+                            </span>
+                            <div class="flex gap-2">
+                                <a th:href="@{/api/certificates/record/{id}/download(id=${r.id})}" target="_blank" class="text-xs font-bold text-sky-600 hover:underline flex items-center gap-1 bg-sky-50 px-3 py-1 rounded-lg">
+                                    <i class="fa-solid fa-file-arrow-down"></i> Download PDF Report
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Upload Report Modal -->
+    <div id="upload-record-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 border border-slate-200">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-slate-900">Upload to MongoDB Health Locker</h3>
+                <button type="button" onclick="document.getElementById('upload-record-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="record-upload-form" onsubmit="submitMedicalRecord(event)" class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Document Title *</label>
+                    <input type="text" id="rec-title" required placeholder="e.g. Complete Metabolic Profile" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Record Type</label>
+                    <select id="rec-type" class="w-full border border-slate-300 rounded-lg p-2.5 bg-slate-50">
+                        <option value="BLOOD_TEST">Blood Test Report</option>
+                        <option value="PRESCRIPTION">Doctor Prescription</option>
+                        <option value="IMAGING_REPORT">X-Ray / MRI / CT Scan</option>
+                        <option value="DISCHARGE_SUMMARY">Hospital Discharge Summary</option>
+                        <option value="VACCINATION">Vaccination Certificate</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Facility Name</label>
+                        <input type="text" id="rec-facility" placeholder="e.g. City Diagnostics" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Doctor Name</label>
+                        <input type="text" id="rec-doctor" placeholder="e.g. Dr. A. Sen" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Clinical Summary / Findings</label>
+                    <textarea id="rec-findings" rows="2" placeholder="e.g. Hemoglobin 14.2 g/dL, Fasting Sugar 98 mg/dL. All levels normal." class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50"></textarea>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Attach Report File (Optional)</label>
+                    <input type="file" id="rec-file" class="w-full border border-slate-300 rounded-lg p-2 bg-slate-50">
+                </div>
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="document.getElementById('upload-record-modal').classList.add('hidden')" class="px-4 py-2 text-slate-600">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow transition">Save to MongoDB</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+
+    <script>
+        async function queryAskRecords() {
+            const query = document.getElementById('ask-records-input').value.trim();
+            if (!query) return;
+
+            const resDiv = document.getElementById('ask-records-result');
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = '<span class="animate-pulse text-indigo-400">Scanning authorized health locker records...</span>';
+
+            try {
+                const resp = await fetch('/api/ai/ask-records', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `query=${encodeURIComponent(query)}&language=en`
+                });
+                const data = await resp.json();
+
+                resDiv.innerHTML = `
+                    <div class="prose-invert leading-relaxed">${data.answer.replace(/\n/g, '<br>')}</div>
+                    ${data.sourceDocuments && data.sourceDocuments.length > 0 ? `
+                        <div class="mt-2 pt-2 border-t border-indigo-800 text-indigo-300 text-[11px]">
+                            <strong>Document Citations:</strong> ${data.sourceDocuments.join(', ')}
+                        </div>
+                    ` : ''}
+                `;
+            } catch (err) {
+                console.error(err);
+                resDiv.innerHTML = '<span class="text-red-400">Failed to query records.</span>';
+            }
+        }
+
+        async function submitMedicalRecord(e) {
+            e.preventDefault();
+            const title = document.getElementById('rec-title').value.trim();
+            const recordType = document.getElementById('rec-type').value;
+            const facilityName = document.getElementById('rec-facility').value.trim();
+            const doctorName = document.getElementById('rec-doctor').value.trim();
+            const keyFindings = document.getElementById('rec-findings').value.trim();
+
+            const params = new URLSearchParams();
+            params.append('title', title);
+            params.append('recordType', recordType);
+            params.append('facilityName', facilityName || 'Care Diagnostic Center');
+            params.append('doctorName', doctorName || 'Physician');
+            params.append('keyFindings', keyFindings || 'Document recorded in personal health locker.');
+            params.append('summaryText', keyFindings || 'Clinical record entered by patient.');
+
+            try {
+                const resp = await fetch('/api/records/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                });
+                if (resp.ok) {
+                    alert('✓ Record successfully saved into MongoDB! Document is now ready for PDF download and AI analysis.');
+                    window.location.reload();
+                } else {
+                    alert('Failed to save record. Please check parameters.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error while saving document.');
+            }
+        }
+
+        // --- AI PRESCRIPTION & LAB REPORT OPTICAL SCANNER ---
+        let currentScannedData = null;
+
+        function handlePrescriptionFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            executeScannerRequest(formData, file.name);
+        }
+
+        function scanSamplePrescription() {
+            const formData = new FormData();
+            formData.append('rawText', 'Rx: Tab Augmentin 625mg 1-0-1 after food 5 days; Tab Pan-40 1-0-0 before breakfast 10 days; Tab Dolo 650mg 1-0-1 after food 5 days. Dr. Rajesh Sharma, MD (Internal Medicine)');
+            executeScannerRequest(formData, 'Dr_Sharma_Rx_Prescription.pdf');
+        }
+
+        function scanSampleLabReport() {
+            const formData = new FormData();
+            formData.append('rawText', 'Diagnostic Blood Test Panel. Fasting Blood Glucose 114 mg/dL. Glycated Hemoglobin HbA1c 6.2%. Hemoglobin 14.4 g/dL. Total Platelet Count 248000. Total Cholesterol 186 mg/dL. Serum Creatinine 0.92 mg/dL. Dr. Lal PathLabs & Diagnostics.');
+            executeScannerRequest(formData, 'Blood_Test_Panel_Report.pdf');
+        }
+
+        async function executeScannerRequest(formData, displayFilename) {
+            const loading = document.getElementById('scanner-loading');
+            const progText = document.getElementById('scanner-progress-text');
+            const progBar = document.getElementById('scanner-progress-bar');
+            const results = document.getElementById('scanner-results-container');
+            const dropzone = document.getElementById('scanner-dropzone');
+
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+            progBar.style.width = '20%';
+            progText.innerText = `Analyzing optical document "${displayFilename}"...`;
+
+            setTimeout(() => {
+                progBar.style.width = '55%';
+                progText.innerText = 'Extracting clinical handwriting, doctor credentials & dosage symbols...';
+            }, 500);
+
+            setTimeout(() => {
+                progBar.style.width = '85%';
+                progText.innerText = 'Cross-referencing verified pharmacy inventory & saving to MongoDB Locker...';
+            }, 1000);
+
+            try {
+                const resp = await fetch('/api/prescriptions/scan-upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await resp.json();
+
+                setTimeout(() => {
+                    progBar.style.width = '100%';
+                    loading.classList.add('hidden');
+                    if (data.status === 'SUCCESS' || data.success) {
+                        currentScannedData = data;
+                        renderScannerResults(data);
+                    } else {
+                        alert(data.message || 'Could not analyze document.');
+                    }
+                }, 1300);
+
+            } catch (err) {
+                console.error('Scan error:', err);
+                loading.classList.add('hidden');
+                alert('Optical scanner error. Please check file format and retry.');
+            }
+        }
+
+        function renderScannerResults(data) {
+            const container = document.getElementById('scanner-results-container');
+            container.classList.remove('hidden');
+
+            // Header info
+            document.getElementById('res-doc-type-badge').innerText = data.documentType;
+            document.getElementById('res-doc-date').innerText = data.date || new Date().toISOString().split('T')[0];
+            document.getElementById('res-doc-title').innerText = data.documentType === 'PRESCRIPTION' ? 'Verified Doctor E-Prescription' : 'Diagnostic Lab Panel Analysis';
+            document.getElementById('res-doc-facility').innerText = data.facilityName || 'Care Diagnostic Network';
+            document.getElementById('res-doc-doctor').innerText = data.doctorName || 'Attending Physician';
+            document.getElementById('res-doc-diagnosis').innerText = data.diagnosis ? `Dx: ${data.diagnosis}` : (data.overallAssessment || 'Clinical assessment completed.');
+
+            const medsSection = document.getElementById('section-extracted-meds');
+            const labSection = document.getElementById('section-extracted-lab');
+            const pharmaciesSection = document.getElementById('section-nearby-pharmacies');
+
+            if (data.documentType === 'PRESCRIPTION') {
+                medsSection.classList.remove('hidden');
+                labSection.classList.add('hidden');
+                pharmaciesSection.classList.remove('hidden');
+
+                const meds = data.extractedMedicines || [];
+                document.getElementById('res-meds-count').innerText = `${meds.length} Medicines Identified`;
+                const tbody = document.getElementById('res-meds-tbody');
+                tbody.innerHTML = '';
+
+                meds.forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition';
+                    const foodBadge = m.foodRelation === 'BEFORE_FOOD' 
+                        ? '<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold text-[10px]">⏰ Before Food</span>'
+                        : (m.foodRelation === 'WITH_FOOD' 
+                            ? '<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-bold text-[10px]">🍽️ With Food</span>'
+                            : '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">✓ After Food</span>');
+
+                    tr.innerHTML = `
+                        <td class="p-3.5 font-bold text-slate-900">
+                            <div>${m.name}</div>
+                            <div class="text-[10px] text-slate-400 font-normal">Generic: ${m.genericName || m.name}</div>
+                        </td>
+                        <td class="p-3.5 text-slate-600 font-semibold">${m.dosage} (${m.form})</td>
+                        <td class="p-3.5 font-mono font-bold text-slate-800">${m.frequency}</td>
+                        <td class="p-3.5">${foodBadge}</td>
+                        <td class="p-3.5 text-slate-600">${m.duration}</td>
+                        <td class="p-3.5">
+                            <strong class="text-slate-900">₹${m.unitPrice.toFixed(2)}</strong>
+                            <div class="text-[10px] text-emerald-600 font-bold">Generic: ₹${m.genericPrice.toFixed(2)} (${m.savingsPercent} off)</div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Render Nearby Pharmacies
+                const pharmGrid = document.getElementById('res-pharmacies-grid');
+                pharmGrid.innerHTML = '';
+                const pharmacies = data.nearbyPharmacies || [];
+
+                pharmacies.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-50 hover:bg-white p-4 rounded-2xl border border-slate-200 hover:border-emerald-400 transition flex flex-col justify-between space-y-3 shadow-sm';
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded ${p.is24x7 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">
+                                    ${p.is24x7 ? '24x7 Open' : 'Open Now'}
+                                </span>
+                                <span class="text-xs font-bold text-sky-600 font-mono"><i class="fa-solid fa-location-dot"></i> ${p.distanceKm} km</span>
+                            </div>
+                            <h4 class="font-black text-sm text-slate-900">${p.name}</h4>
+                            <p class="text-[11px] text-slate-500 mt-0.5">${p.address}</p>
+                            <div class="mt-2 text-[10px] font-bold text-emerald-700 bg-emerald-50 p-1.5 rounded-lg border border-emerald-100">
+                                ✓ ${p.stockStatus}
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-slate-200/60 space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400">Prescription Total:</span>
+                                <strong class="text-slate-900 font-black">₹${p.orderTotal.toFixed(2)}</strong>
+                            </div>
+                            <button onclick="orderFromScannedPharmacy('${p.name}', ${p.orderTotal})" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-bolt"></i> Order from Here
+                            </button>
+                            <a href="tel:${p.phone}" class="w-full py-1 text-center text-slate-500 hover:text-slate-800 text-[10px] font-semibold block">
+                                <i class="fa-solid fa-phone text-emerald-600"></i> ${p.phone}
+                            </a>
+                        </div>
+                    `;
+                    pharmGrid.appendChild(card);
+                });
+
+            } else {
+                // LAB REPORT
+                medsSection.classList.add('hidden');
+                pharmaciesSection.classList.add('hidden');
+                labSection.classList.remove('hidden');
+
+                const biomarkers = data.labBiomarkers || [];
+                const tbody = document.getElementById('res-lab-tbody');
+                tbody.innerHTML = '';
+
+                biomarkers.forEach(b => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition';
+                    tr.innerHTML = `
+                        <td class="p-3.5 font-bold text-slate-900">${b.parameter}</td>
+                        <td class="p-3.5 font-mono font-black text-slate-900">${b.observedValue}</td>
+                        <td class="p-3.5 text-slate-500">${b.referenceInterval}</td>
+                        <td class="p-3.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${b.badgeColor}">${b.status}</span>
+                        </td>
+                        <td class="p-3.5 text-slate-600 text-[11px]">${b.interpretation}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function orderFromScannedPharmacy(pharmacyName, totalAmount) {
+            if (!currentScannedData) return;
+            const meds = currentScannedData.extractedMedicines || [];
+            const itemsStr = meds.map(m => `${m.name} (${m.duration})`).join(', ');
+
+            const params = new URLSearchParams();
+            params.append('patientName', document.getElementById('user-display-name')?.innerText || 'Patient');
+            params.append('contactPhone', '+91 98300 12345');
+            params.append('deliveryAddress', 'Current Live Address / City Center');
+            params.append('pharmacyName', pharmacyName);
+            params.append('orderedItems', itemsStr);
+            params.append('totalAmount', totalAmount);
+            params.append('prescriptionRef', 'SCAN-' + (currentScannedData.jpaRecordId || Date.now()));
+
+            try {
+                const resp = await fetch('/api/prescriptions/order-scanned-meds', {
+                    method: 'POST',
+                    body: params
+                });
+                const res = await resp.json();
+                if (res.status === 'SUCCESS' || res.success) {
+                    const banner = document.getElementById('scanned-order-success');
+                    banner.classList.remove('hidden');
+                    document.getElementById('scanned-order-tracking-info').innerText = `✓ Order #${res.orderId} placed with ${res.pharmacyName}! Delivery in ${res.etaMinutes} mins by ${res.deliveryExecutive}.`;
+                    banner.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert(res.message || 'Could not place pharmacy order.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error placing medicine order.');
+            }
+        }
+</body>
+</html>

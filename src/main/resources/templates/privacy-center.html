@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main :: head}">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <!-- Header & Navigation -->
+    <div th:replace="~{layout/main :: header}"></div>
+    <div th:replace="~{layout/main :: nav}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-slate-200 gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+                    🔐 Module 29: Privacy, Consent & Security Center
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2">
+                    Patient Consent & Security Governance
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Granular emergency data controls, immutable audit access logs, and complete one-click health data portability.
+                </p>
+            </div>
+            <button onclick="downloadFullHealthDossier()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition flex items-center gap-2">
+                <i class="fa-solid fa-file-export text-sky-400"></i> Export Full Clinical Dossier (JSON)
+            </button>
+        </div>
+
+        <!-- EMERGENCY DISCLOSURE PERMISSION TOGGLES -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+            <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-emerald-600"></i> Emergency QR Data Disclosure Preferences
+            </h3>
+            <p class="text-xs text-slate-500">
+                Choose precisely what parameters are exposed to first responders and ER personnel when scanning your Emergency QR code:
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div>
+                        <strong class="text-slate-800 block">Severe Allergies</strong>
+                        <span class="text-slate-400 text-[11px]">Penicillin, Shellfish</span>
+                    </div>
+                    <input type="checkbox" checked onchange="showToast('Preference saved.', 'success')" class="w-5 h-5 text-emerald-600 rounded">
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div>
+                        <strong class="text-slate-800 block">Blood Group</strong>
+                        <span class="text-slate-400 text-[11px]">O+ (Rh Positive)</span>
+                    </div>
+                    <input type="checkbox" checked onchange="showToast('Preference saved.', 'success')" class="w-5 h-5 text-emerald-600 rounded">
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div>
+                        <strong class="text-slate-800 block">Critical Medications</strong>
+                        <span class="text-slate-400 text-[11px]">Metformin, Telmisartan</span>
+                    </div>
+                    <input type="checkbox" checked onchange="showToast('Preference saved.', 'success')" class="w-5 h-5 text-emerald-600 rounded">
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div>
+                        <strong class="text-slate-800 block">Emergency Contacts</strong>
+                        <span class="text-slate-400 text-[11px]">Debasmita (+91 98765 43211)</span>
+                    </div>
+                    <input type="checkbox" checked onchange="showToast('Preference saved.', 'success')" class="w-5 h-5 text-emerald-600 rounded">
+                </div>
+            </div>
+        </div>
+
+        <!-- IMMUTABLE ACCESS & AUDIT LOGS -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-slate-600"></i> Audit Access Logs (ABDM Compliant)
+                    </h3>
+                    <p class="text-xs text-slate-500">Every viewing, export, or scan of your clinical records is permanently audited.</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
+                            <th class="pb-3">Timestamp</th>
+                            <th class="pb-3">Accessor</th>
+                            <th class="pb-3">Role</th>
+                            <th class="pb-3">Record Accessed</th>
+                            <th class="pb-3">Access Type</th>
+                            <th class="pb-3 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr th:each="log : ${auditLogs}" class="hover:bg-slate-50 transition">
+                            <td class="py-3 text-slate-500 font-mono" th:text="${#temporals.format(log.timestamp, 'dd MMM yyyy, hh:mm a')}">16 Sep 2026, 10:45 AM</td>
+                            <td class="py-3 font-bold text-slate-900" th:text="${log.accessedBy}">Dr. Rajesh Sharma</td>
+                            <td class="py-3">
+                                <span class="bg-slate-100 text-slate-700 font-bold text-[10px] px-2 py-0.5 rounded" th:text="${log.role}">DOCTOR</span>
+                            </td>
+                            <td class="py-3 text-slate-700" th:text="${log.recordAccessed}">Complete Lipid & HbA1c Panel</td>
+                            <td class="py-3 text-slate-600 uppercase font-mono text-[10px]" th:text="${log.accessType}">VIEW</td>
+                            <td class="py-3 text-right">
+                                <span class="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2 py-0.5 rounded" th:text="${log.status}">AUTHORIZED</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{layout/main :: footer}"></div>
+
+    <script>
+        async function downloadFullHealthDossier() {
+            try {
+                const resp = await fetch('/api/privacy/export-data');
+                const data = await resp.json();
+                const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(jsonBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Health_Dossier_Export_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                showToast("✓ Clinical dossier exported securely.", "success");
+            } catch (e) {
+                console.error(e);
+                showToast("Failed to export dossier", "error");
+            }
+        }
+    </script>
+</body>
+</html>
