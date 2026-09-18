@@ -731,4 +731,20 @@ public class WebController {
     public org.springframework.core.io.Resource getSitemapXml() {
         return new org.springframework.core.io.ClassPathResource("static/sitemap.xml");
     }
+
+    @GetMapping(value = "/manifest.json", produces = "application/manifest+json")
+    @ResponseBody
+    public org.springframework.core.io.Resource getManifestJson() {
+        return new org.springframework.core.io.ClassPathResource("static/manifest.json");
+    }
+
+    @GetMapping(value = "/sw.js", produces = "application/javascript")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<org.springframework.core.io.Resource> getServiceWorker() {
+        return org.springframework.http.ResponseEntity.ok()
+                .header("Service-Worker-Allowed", "/")
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .contentType(org.springframework.http.MediaType.parseMediaType("application/javascript"))
+                .body(new org.springframework.core.io.ClassPathResource("static/sw.js"));
+    }
 }

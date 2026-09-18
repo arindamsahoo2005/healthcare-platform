@@ -1,0 +1,63 @@
+﻿{
+  "name": "CarePulse Healthcare - Universal Platform",
+  "short_name": "CarePulse",
+  "description": "Universal Digital Healthcare & Emergency Network. Book doctors, check live ICU hospital beds, and manage health records.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0284c7",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["medical", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Emergency SOS",
+      "short_name": "SOS",
+      "description": "Instant 1-tap ambulance and emergency dispatch",
+      "url": "/emergency",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Doctors & Chambers",
+      "short_name": "Doctors",
+      "description": "Book doctor consultation chamber appointments",
+      "url": "/doctors",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Hospitals & ICU Beds",
+      "short_name": "Hospitals",
+      "description": "Live ICU bed tracker and digital admission",
+      "url": "/hospitals",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Medicine Timer",
+      "short_name": "Timer",
+      "description": "Smart dose reminder with adherence tracker",
+      "url": "/medicine-timer",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

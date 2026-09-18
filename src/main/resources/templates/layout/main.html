@@ -67,6 +67,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/custom.css}">
+
+    <!-- Progressive Web App (PWA) Manifest & Theme -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0284c7">
+    <link rel="icon" type="image/png" href="/icons/favicon.png">
+
+    <!-- Apple iOS Safari & Android Native Web App Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CarePulse">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="CarePulse Healthcare">
     <script>
         tailwind.config = {
             theme: {
@@ -427,6 +440,7 @@
                                 <a href="/medical-records" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl"><i class="fa-regular fa-folder-open text-sky-600"></i> My Health Records</a>
                                 <a href="/health-passport" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl"><i class="fa-solid fa-qrcode text-sky-600"></i> Health Passport</a>
                                 <a href="/privacy-center" class="flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-slate-700 rounded-xl"><i class="fa-solid fa-shield-halved text-emerald-600"></i> Consent &amp; Privacy</a>
+                                <button type="button" onclick="triggerPwaInstall()" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-sky-50 text-sky-700 rounded-xl font-bold text-left cursor-pointer"><i class="fa-solid fa-mobile-screen-button text-sky-600"></i> Install CarePulse App</button>
                                 <button type="button" onclick="signOutUser()" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-red-50 text-red-600 rounded-xl font-semibold border-t border-slate-100 mt-1 cursor-pointer"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
                             </div>
                         </div>
@@ -678,6 +692,10 @@
 
                     <!-- Drawer Footer -->
                     <div class="p-3 border-t border-slate-200 bg-slate-50 text-center text-xs space-y-2">
+                        <button type="button" onclick="triggerPwaInstall(); closeMobileNavDrawer();" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-teal-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition cursor-pointer">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                            <span>Install App on Phone</span>
+                        </button>
                         <button type="button" onclick="closeMobileNavDrawer(); toggleLanguageMenu(event);" class="w-full py-2 px-3 rounded-xl bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center gap-2 hover:bg-sky-50 shadow-sm active:scale-95 transition">
                             <i class="fa-solid fa-globe text-sky-600"></i>
                             <span>Change Language / ভাষা পরিবর্তন</span>
@@ -1300,6 +1318,169 @@
                 }
             });
             /*[/]*/
+        </script>
+
+        <!-- PWA App Install Banner (Floating Native App Experience) -->
+        <div id="pwa-install-banner" class="hidden fixed bottom-16 sm:bottom-6 left-3 right-3 sm:left-auto sm:right-6 max-w-sm bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl border border-slate-700/80 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white text-lg shadow-md shrink-0">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-xs font-bold text-white truncate">Install CarePulse App</h4>
+                    <p class="text-[10px] text-slate-300 leading-tight">Install on your phone for 1-tap offline access & full-screen view</p>
+                </div>
+                <button type="button" onclick="dismissPwaInstallBanner()" class="text-slate-400 hover:text-white text-xs p-1 cursor-pointer" title="Dismiss">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="mt-2.5 flex items-center gap-2">
+                <button type="button" onclick="triggerPwaInstall()" class="flex-1 py-1.5 px-3 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-download text-xs"></i> <span>Install App</span>
+                </button>
+                <button type="button" onclick="dismissPwaInstallBanner()" class="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs rounded-xl transition cursor-pointer">
+                    Later
+                </button>
+            </div>
+        </div>
+
+        <!-- iOS Safari "Add to Home Screen" Instructions Modal -->
+        <div id="pwa-ios-modal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-4">
+            <div class="fixed inset-0" onclick="closeIosInstallModal()"></div>
+            <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-slate-200 relative z-10 animate-in fade-in slide-in-from-bottom-6 duration-300">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-sm font-bold">
+                            <i class="fa-brands fa-apple"></i>
+                        </div>
+                        <h3 class="text-sm font-black text-slate-900">Install on iPhone / iPad</h3>
+                    </div>
+                    <button type="button" onclick="closeIosInstallModal()" class="w-7 h-7 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                </div>
+                <p class="text-xs text-slate-600 mb-4">Add CarePulse to your iOS home screen to run full-screen without Safari browser bars:</p>
+                <div class="space-y-3 text-xs">
+                    <div class="flex items-start gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">1</span>
+                        <div>
+                            <span class="font-bold text-slate-800">Tap the Share Button</span>
+                            <p class="text-[11px] text-slate-500 mt-0.5">In Safari, tap <i class="fa-solid fa-arrow-up-from-bracket text-sky-600 font-bold mx-0.5"></i> in the bottom menu bar.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">2</span>
+                        <div>
+                            <span class="font-bold text-slate-800">Select "Add to Home Screen"</span>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Scroll down in the share sheet and tap <strong class="text-slate-700">Add to Home Screen</strong> <i class="fa-solid fa-square-plus text-slate-600 ml-0.5"></i>.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                        <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">3</span>
+                        <div>
+                            <span class="font-bold text-slate-800">Tap "Add"</span>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Confirm by tapping <strong class="text-sky-600">Add</strong> at top-right. CarePulse will launch like a native mobile app!</p>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="closeIosInstallModal()" class="w-full mt-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition shadow cursor-pointer">
+                    Got it
+                </button>
+            </div>
+        </div>
+
+        <!-- Global Toast Container -->
+        <div id="global-toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+        <script>
+            // ==========================================================
+            // PWA INSTALLATION & SERVICE WORKER LOGIC
+            // ==========================================================
+            let deferredPwaPrompt = null;
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(reg => console.log('CarePulse PWA ServiceWorker registered with scope:', reg.scope))
+                        .catch(err => console.log('ServiceWorker registration error:', err));
+                });
+            }
+
+            function isRunningStandalone() {
+                return (window.matchMedia('(display-mode: standalone)').matches) || 
+                       (window.navigator.standalone === true);
+            }
+
+            function isIosDevice() {
+                return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPwaPrompt = e;
+
+                if (!isRunningStandalone() && !sessionStorage.getItem('pwa_dismissed')) {
+                    const banner = document.getElementById('pwa-install-banner');
+                    if (banner) banner.classList.remove('hidden');
+                }
+            });
+
+            function triggerPwaInstall() {
+                if (isIosDevice()) {
+                    const iosModal = document.getElementById('pwa-ios-modal');
+                    if (iosModal) iosModal.classList.remove('hidden');
+                    dismissPwaInstallBanner();
+                    return;
+                }
+
+                if (deferredPwaPrompt) {
+                    deferredPwaPrompt.prompt();
+                    deferredPwaPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted CarePulse PWA install');
+                        }
+                        deferredPwaPrompt = null;
+                        dismissPwaInstallBanner();
+                    });
+                } else {
+                    if (isRunningStandalone()) {
+                        showGlobalToast("CarePulse is already installed and running as an app!", "info");
+                    } else {
+                        // Chrome / Edge / Android fallback instruction
+                        showGlobalToast("To install, tap your browser's menu (⋮) and choose 'Install app' or 'Add to Home screen'.", "info");
+                    }
+                }
+            }
+
+            function dismissPwaInstallBanner() {
+                const banner = document.getElementById('pwa-install-banner');
+                if (banner) banner.classList.add('hidden');
+                sessionStorage.setItem('pwa_dismissed', '1');
+            }
+
+            function closeIosInstallModal() {
+                const modal = document.getElementById('pwa-ios-modal');
+                if (modal) modal.classList.add('hidden');
+            }
+
+            window.addEventListener('appinstalled', () => {
+                dismissPwaInstallBanner();
+                showGlobalToast("CarePulse App installed to your Home Screen!", "success");
+            });
+
+            function showGlobalToast(message, type = "info") {
+                const container = document.getElementById('global-toast-container');
+                if (!container) return;
+                const toast = document.createElement('div');
+                const bgClass = type === "success" ? "bg-emerald-600 text-white" : (type === "error" ? "bg-red-600 text-white" : "bg-slate-900 text-white");
+                toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center gap-2 transition-all transform duration-300 pointer-events-auto border border-white/10`;
+                toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-300' : (type === 'error' ? 'fa-triangle-exclamation text-red-300' : 'fa-circle-info text-sky-300')}"></i> <span>${message}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-2');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3500);
+            }
         </script>
     </div>
 </body>
