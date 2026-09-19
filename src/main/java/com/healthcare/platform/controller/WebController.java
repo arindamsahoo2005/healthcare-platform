@@ -50,6 +50,18 @@ public class WebController {
     @Autowired private AuditAccessLogRepository auditAccessLogRepository;
     @Autowired private VaccinationRecordRepository vaccinationRecordRepository;
     @Autowired private com.healthcare.platform.service.PharmacyRegistryService pharmacyRegistryService;
+    @Autowired private com.healthcare.platform.service.AuthTokenService authTokenService;
+
+    private HttpServletRequest getCurrentHttpRequest() {
+        try {
+            org.springframework.web.context.request.RequestAttributes attrs = 
+                org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+            if (attrs instanceof org.springframework.web.context.request.ServletRequestAttributes) {
+                return ((org.springframework.web.context.request.ServletRequestAttributes) attrs).getRequest();
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
 
     private boolean isFacilityInRegion(String facilityCity, String facilityState, String effectiveCity, String effectiveState) {
         if ("ALL".equalsIgnoreCase(effectiveState)) {
@@ -67,6 +79,11 @@ public class WebController {
     private void populateCommonAttributes(Model model, HttpSession session) {
         User user = null;
         String photoUrl = null;
+        HttpServletRequest currentReq = getCurrentHttpRequest();
+        if (session != null && session.getAttribute("currentUser") == null && currentReq != null) {
+            authTokenService.restoreSessionIfPresent(currentReq, session);
+        }
+
         if (session != null) {
             if (session.getAttribute("currentUser") != null) {
                 user = (User) session.getAttribute("currentUser");
@@ -110,6 +127,11 @@ public class WebController {
             String cfCity = request.getHeader("CF-IPCity");
             if (cfCity != null && !cfCity.isBlank()) {
                 String matched = matchKnownCity(cfCity.trim());
+                if (matched != null) return matched;
+            }
+            String xGeoCity = request.getHeader("X-Geo-City");
+            if (xGeoCity != null && !xGeoCity.isBlank()) {
+                String matched = matchKnownCity(xGeoCity.trim());
                 if (matched != null) return matched;
             }
         }

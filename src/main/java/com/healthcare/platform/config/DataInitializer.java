@@ -1715,9 +1715,10 @@ public class DataInitializer implements CommandLineRunner {
             user.setEmergencyContactPhone("+91 98301 54321");
             user.setAllergies("None");
             userMongoRepository.save(user);
+        }
 
-            User jpaUser = userRepository.findByUsername("arindam.sahoo").orElseGet(() ->
-                    new User("arindam.sahoo", "Arindam Sahoo", "arindam.sahoo@gmail.com", "+91 98300 12345", "PATIENT"));
+        if (userRepository.findByUsername("arindam.sahoo").isEmpty() && userRepository.findByEmail("arindam.sahoo@gmail.com").isEmpty()) {
+            User jpaUser = new User("arindam.sahoo", "Arindam Sahoo", "arindam.sahoo@gmail.com", "+91 98300 12345", "PATIENT");
             jpaUser.setPassword("arindam123");
             jpaUser.setFirebaseUid("google_arindam");
             jpaUser.setPreferredCity("Kolkata");

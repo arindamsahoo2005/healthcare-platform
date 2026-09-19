@@ -183,8 +183,15 @@ async function signInWithGoogle() {
             // Concurrent popup suppressed
         } else if (err.code === 'auth/unauthorized-domain') {
             const domain = window.location.hostname;
+            const domainMsg = "Google OAuth requires adding '" + domain + "' to Firebase Console Authorized Domains. Please use the instant 1-Tap Sign-In or Email/Password below to log in right now!";
+            if (typeof showAuthAlert === 'function') {
+                showAuthAlert(domainMsg, 'error');
+            }
+            if (typeof showPageLoginAlert === 'function') {
+                showPageLoginAlert(domainMsg, 'error');
+            }
             if (typeof showToast === 'function') {
-                showToast("Domain not authorized in Firebase yet. Add '" + domain + "' to Firebase Console > Authentication > Settings > Authorized domains, or use 1-Tap Login.", "warning");
+                showToast("Firebase: Add '" + domain + "' to Authorized Domains, or use 1-Tap Sign-In.", "warning");
             }
         } else {
             if (typeof showToast === 'function') {

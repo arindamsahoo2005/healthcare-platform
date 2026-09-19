@@ -451,7 +451,7 @@
 
                 <!-- Unauthenticated: Sign In / Create Account Button -->
                 <div th:unless="${isAuthenticated}" class="flex items-center pl-1 sm:pl-2 border-l border-slate-200 flex-shrink-0">
-                    <a href="/login" class="flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer active:scale-95" title="Sign In / Register">
+                    <a href="/login" onclick="if(typeof openAuthModal==='function'){openAuthModal('login');return false;}" class="flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white px-2 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer active:scale-95" title="Sign In / Register">
                         <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
                         <span class="text-[11px] sm:text-xs">Login</span>
                     </a>
@@ -612,6 +612,35 @@
                         </button>
                     </div>
 
+                    <!-- Mobile Auth User Status Card -->
+                    <div class="px-4 py-3 bg-gradient-to-r from-sky-50 to-teal-50 border-b border-slate-200">
+                        <div th:if="${isAuthenticated}" class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5 overflow-hidden">
+                                <div class="w-9 h-9 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold text-sm overflow-hidden shrink-0 shadow-sm">
+                                    <img th:if="${photoUrl != null and photoUrl != ''}" th:src="${photoUrl}" alt="Avatar" class="w-full h-full object-cover">
+                                    <span th:unless="${photoUrl != null and photoUrl != ''}" th:text="${currentUser != null ? currentUser.fullName.substring(0,1).toUpperCase() : 'U'}">A</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-black text-slate-900 truncate" th:text="${currentUser.fullName}">User</p>
+                                    <p class="text-[10px] text-slate-500 truncate" th:text="${currentUser.email}">user@email.com</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="signOutUser()" class="px-2.5 py-1 text-[11px] font-bold text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 cursor-pointer active:scale-95 shadow-xs">
+                                Sign Out
+                            </button>
+                        </div>
+                        <div th:unless="${isAuthenticated}" class="flex items-center gap-2">
+                            <button type="button" onclick="closeMobileNavDrawer(); openAuthModal('login');" class="flex-1 py-2 px-3 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold text-center shadow-sm cursor-pointer flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-arrow-right-to-bracket text-[11px]"></i>
+                                <span>Sign In / Log In</span>
+                            </button>
+                            <button type="button" onclick="closeMobileNavDrawer(); openAuthModal('register');" class="flex-1 py-2 px-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold text-center shadow-xs cursor-pointer flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-user-plus text-[11px] text-emerald-600"></i>
+                                <span>Register</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Drawer Links List -->
                     <div class="p-3 overflow-y-auto flex-grow space-y-1 text-xs font-semibold">
                         <div class="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Emergency &amp; Critical</div>
@@ -701,6 +730,10 @@
                         <button type="button" onclick="closeMobileNavDrawer(); toggleLanguageMenu(event);" class="w-full py-2 px-3 rounded-xl bg-white border border-slate-300 text-slate-700 text-xs font-bold flex items-center justify-center gap-2 hover:bg-sky-50 shadow-sm active:scale-95 transition">
                             <i class="fa-solid fa-globe text-sky-600"></i>
                             <span>Change Language / ভাষা পরিবর্তন</span>
+                        </button>
+                        <button type="button" onclick="closeMobileNavDrawer(); shareCarePulseLink();" class="w-full py-2 px-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-100 shadow-sm active:scale-95 transition">
+                            <i class="fa-solid fa-share-nodes text-emerald-600"></i>
+                            <span>Share App Link / বন্ধুদের সাথে শেয়ার করুন</span>
                         </button>
                         <span class="text-slate-500 text-[10px] block">CarePulse Health Platform • Developed by <a href="https://github.com/arindamsahoo2005" target="_blank" rel="noopener noreferrer" class="text-sky-600 font-semibold hover:underline">Arindam Sahoo <i class="fa-brands fa-github text-[11px] ml-0.5"></i></a></span>
                     </div>

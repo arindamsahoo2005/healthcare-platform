@@ -4,6 +4,9 @@ import com.healthcare.platform.model.User;
 import com.healthcare.platform.model.mongo.UserDocument;
 import com.healthcare.platform.repository.UserRepository;
 import com.healthcare.platform.repository.mongo.UserMongoRepository;
+import com.healthcare.platform.service.AuthTokenService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,7 @@ public class AuthController {
 
     @Autowired private UserRepository userRepository;
     @Autowired private UserMongoRepository userMongoRepository;
+    @Autowired private AuthTokenService authTokenService;
 
     @PostMapping("/firebase-login")
     public ResponseEntity<?> firebaseLogin(
@@ -29,7 +33,8 @@ public class AuthController {
             @RequestParam(required = false) String photoUrl,
             @RequestParam(required = false) String phone,
             @RequestBody(required = false) Map<String, Object> body,
-            HttpSession session) {
+            HttpSession session,
+            HttpServletResponse response) {
 
         String effectiveUid = (uid != null && !uid.isBlank()) ? uid : (body != null && body.get("uid") != null ? body.get("uid").toString() : null);
         String effectiveEmail = (email != null && !email.isBlank()) ? email : (body != null && body.get("email") != null ? body.get("email").toString() : null);
@@ -121,6 +126,8 @@ public class AuthController {
         resp.put("role", user.getRole());
         resp.put("state", mongoUser.getState());
         resp.put("city", mongoUser.getCity());
+
+        authTokenService.setAuthCookie(response, user.getUsername());
         return ResponseEntity.ok(resp);
     }
 
@@ -263,9 +270,13 @@ public class AuthController {
     }
 
     @GetMapping("/current-user")
-    public ResponseEntity<?> getCurrentUser(HttpSession session) {
+    public ResponseEntity<?> getCurrentUser(HttpSession session, HttpServletRequest request) {
         User user = (User) session.getAttribute("currentUser");
         UserDocument mongoUser = (UserDocument) session.getAttribute("mongoUser");
+        if (user == null && mongoUser == null && request != null) {
+            user = authTokenService.restoreSessionIfPresent(request, session);
+            mongoUser = (UserDocument) session.getAttribute("mongoUser");
+        }
         if (user == null && mongoUser == null) {
             return ResponseEntity.ok(Map.of("authenticated", false));
         }
@@ -297,7 +308,8 @@ public class AuthController {
             @RequestParam(required = false, defaultValue = "Kolkata") String city,
             @RequestParam(required = false, defaultValue = "West Bengal") String state,
             @RequestBody(required = false) Map<String, Object> body,
-            HttpSession session) {
+            HttpSession session,
+            HttpServletResponse response) {
 
         String effectiveName = (fullName != null && !fullName.isBlank()) ? fullName.trim() : (body != null && body.get("fullName") != null ? body.get("fullName").toString().trim() : null);
         String effectiveEmail = (email != null && !email.isBlank()) ? email.trim() : (body != null && body.get("email") != null ? body.get("email").toString().trim() : null);
@@ -352,6 +364,7 @@ public class AuthController {
             resp.put("email", user.getEmail());
             resp.put("role", user.getRole());
             resp.put("uid", existing.getFirebaseUid());
+            authTokenService.setAuthCookie(response, user.getUsername());
             return ResponseEntity.ok(resp);
         }
 
@@ -382,6 +395,7 @@ public class AuthController {
         resp.put("email", user.getEmail());
         resp.put("role", user.getRole());
         resp.put("uid", uid);
+        authTokenService.setAuthCookie(response, user.getUsername());
         return ResponseEntity.ok(resp);
     }
 
@@ -391,7 +405,8 @@ public class AuthController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String password,
             @RequestBody(required = false) Map<String, Object> body,
-            HttpSession session) {
+            HttpSession session,
+            HttpServletResponse response) {
 
         String effectiveLogin = (email != null && !email.isBlank()) ? email.trim() : 
                                 (username != null && !username.isBlank() ? username.trim() : 
@@ -463,12 +478,17 @@ public class AuthController {
         resp.put("email", jpaUser.getEmail());
         resp.put("role", jpaUser.getRole());
         resp.put("uid", mongoUser.getFirebaseUid());
+
+        authTokenService.setAuthCookie(response, jpaUser.getUsername());
         return ResponseEntity.ok(resp);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpSession session) {
-        session.invalidate();
+    public ResponseEntity<?> logout(HttpSession session, HttpServletResponse response) {
+        authTokenService.clearAuthCookie(response);
+        if (session != null) {
+            session.invalidate();
+        }
         return ResponseEntity.ok(Map.of("status", "LOGGED_OUT"));
     }
 }

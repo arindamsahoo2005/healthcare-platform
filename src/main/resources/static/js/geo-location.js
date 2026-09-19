@@ -546,3 +546,24 @@ async function performUniversalSearch(query) {
         container.innerHTML = '<p class="text-sm text-red-500 text-center py-4">Search failed. Please try again.</p>';
     }
 }
+
+// Share platform link cleanly without locking recipient to sender's GPS coordinates
+function shareCarePulseLink() {
+    const cleanUrl = window.location.origin + (window.location.pathname === '/' ? '' : window.location.pathname);
+    if (navigator.share) {
+        navigator.share({
+            title: 'CarePulse Healthcare Platform',
+            text: 'CarePulse Universal Healthcare - Find nearby hospitals, doctors, blood banks, and medicine alerts:',
+            url: cleanUrl
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(cleanUrl).then(() => {
+            if (typeof showToast === 'function') {
+                showToast('📋 Link copied to clipboard! Share with anyone.', 'success');
+            }
+        }).catch(() => {
+            prompt('Copy platform link:', cleanUrl);
+        });
+    }
+}
+
