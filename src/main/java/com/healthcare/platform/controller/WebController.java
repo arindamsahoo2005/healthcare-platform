@@ -64,13 +64,64 @@ public class WebController {
     }
 
     private boolean isFacilityInRegion(String facilityCity, String facilityState, String effectiveCity, String effectiveState) {
-        if ("ALL".equalsIgnoreCase(effectiveState)) {
+        if ("ALL".equalsIgnoreCase(effectiveCity) || "ALL".equalsIgnoreCase(effectiveState)) {
             return true;
         }
+        if (effectiveCity != null && !effectiveCity.isBlank()) {
+            String c = effectiveCity.trim().toLowerCase();
+            String fc = (facilityCity != null) ? facilityCity.trim().toLowerCase() : "";
+
+            if (c.contains("budge")) {
+                return fc.contains("budge") || fc.contains("pujali") || fc.contains("nangi") || fc.contains("maheshtala") || fc.contains("24 parganas");
+            }
+            if (c.contains("salt lake") || c.contains("new town")) {
+                return fc.contains("salt lake") || fc.contains("new town") || fc.contains("bidhannagar") || fc.contains("rajarhat");
+            }
+            if (c.contains("howrah")) {
+                return fc.contains("howrah");
+            }
+            if (c.contains("siliguri")) {
+                return fc.contains("siliguri");
+            }
+            if (c.contains("durgapur") || c.contains("asansol")) {
+                return fc.contains("durgapur") || fc.contains("asansol");
+            }
+            if (c.contains("kolkata") || c.contains("calcutta")) {
+                // In Kolkata, strictly exclude peripheral/separate towns like Budge Budge, Siliguri, Durgapur
+                if (fc.contains("budge") || fc.contains("siliguri") || fc.contains("durgapur")) {
+                    return false;
+                }
+                return fc.contains("kolkata") || fc.contains("salt lake") || fc.contains("new town") || fc.contains("howrah");
+            }
+            if (c.contains("delhi")) {
+                return fc.contains("delhi") || fc.contains("ncr");
+            }
+            if (c.contains("mumbai")) {
+                return fc.contains("mumbai") || fc.contains("thane");
+            }
+            if (c.contains("bengaluru") || c.contains("bangalore")) {
+                return fc.contains("bengaluru") || fc.contains("bangalore");
+            }
+            if (c.contains("bhubaneswar") || c.contains("cuttack")) {
+                return fc.contains("bhubaneswar") || fc.contains("cuttack");
+            }
+            if (c.contains("chennai") || c.contains("madras")) {
+                return fc.contains("chennai");
+            }
+            if (c.contains("hyderabad") || c.contains("secunderabad")) {
+                return fc.contains("hyderabad") || fc.contains("secunderabad");
+            }
+            if (c.contains("pune")) {
+                return fc.contains("pune");
+            }
+            // General city fallback
+            if (!fc.isEmpty() && (fc.equals(c) || fc.contains(c) || c.contains(fc))) {
+                return true;
+            }
+            return false;
+        }
+
         if (effectiveState != null && facilityState != null && facilityState.equalsIgnoreCase(effectiveState)) {
-            return true;
-        }
-        if (effectiveCity != null && facilityCity != null && facilityCity.equalsIgnoreCase(effectiveCity)) {
             return true;
         }
         return false;
@@ -116,6 +167,62 @@ public class WebController {
         model.addAttribute("adherencePercentage", timerService.calculateAdherencePercentage());
     }
 
+    private static final Map<String, String> IP_CITY_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private String extractClientIp(HttpServletRequest request) {
+        if (request == null) return null;
+        String xff = request.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isBlank()) {
+            String[] parts = xff.split(",");
+            if (parts.length > 0) {
+                String ip = parts[0].trim();
+                if (!ip.isBlank()) return ip;
+            }
+        }
+        String realIp = request.getHeader("X-Real-IP");
+        if (realIp != null && !realIp.isBlank()) {
+            return realIp.trim();
+        }
+        return request.getRemoteAddr();
+    }
+
+    private String lookupIpCity(String ip) {
+        if (ip == null || ip.isBlank() || ip.startsWith("127.") || ip.startsWith("10.") || ip.startsWith("192.168.") || ip.contains(":")) {
+            return null;
+        }
+        if (IP_CITY_CACHE.containsKey(ip)) {
+            return IP_CITY_CACHE.get(ip);
+        }
+        try {
+            java.net.URI uri = new java.net.URI("https://get.geojs.io/v1/ip/geo/" + ip + ".json");
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) uri.toURL().openConnection();
+            conn.setConnectTimeout(1000);
+            conn.setReadTimeout(1000);
+            conn.setRequestProperty("User-Agent", "CarePulse-Server/1.0");
+            if (conn.getResponseCode() == 200) {
+                try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(conn.getInputStream()))) {
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) sb.append(line);
+                    String resp = sb.toString();
+                    int cityIdx = resp.indexOf("\"city\":\"");
+                    if (cityIdx != -1) {
+                        int end = resp.indexOf("\"", cityIdx + 8);
+                        if (end != -1) {
+                            String rawCity = resp.substring(cityIdx + 8, end);
+                            String matched = matchKnownCity(rawCity);
+                            if (matched != null) {
+                                IP_CITY_CACHE.put(ip, matched);
+                                return matched;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
     private String resolveClientCity(HttpServletRequest request, String requestedCity) {
         if (requestedCity != null && !requestedCity.isBlank() && !requestedCity.equalsIgnoreCase("ALL")) {
             return requestedCity.trim();
@@ -133,6 +240,11 @@ public class WebController {
             if (xGeoCity != null && !xGeoCity.isBlank()) {
                 String matched = matchKnownCity(xGeoCity.trim());
                 if (matched != null) return matched;
+            }
+            String clientIp = extractClientIp(request);
+            if (clientIp != null) {
+                String ipCity = lookupIpCity(clientIp);
+                if (ipCity != null) return ipCity;
             }
         }
         return "Kolkata";
@@ -204,12 +316,22 @@ public class WebController {
         List<Hospital> cityHospitals = hospitals.stream()
                 .filter(h -> isFacilityInRegion(h.getCity(), h.getState(), effectiveCity, effectiveState))
                 .toList();
-        if (cityHospitals.isEmpty()) cityHospitals = hospitals;
+        if (cityHospitals.isEmpty()) {
+            cityHospitals = hospitals.stream()
+                    .filter(h -> effectiveState != null && effectiveState.equalsIgnoreCase(h.getState()))
+                    .toList();
+            if (cityHospitals.isEmpty()) cityHospitals = hospitals;
+        }
 
         List<Doctor> cityDoctors = doctors.stream()
                 .filter(d -> isFacilityInRegion(d.getCity(), d.getState(), effectiveCity, effectiveState))
                 .toList();
-        if (cityDoctors.isEmpty()) cityDoctors = doctors;
+        if (cityDoctors.isEmpty()) {
+            cityDoctors = doctors.stream()
+                    .filter(d -> effectiveState != null && effectiveState.equalsIgnoreCase(d.getState()))
+                    .toList();
+            if (cityDoctors.isEmpty()) cityDoctors = doctors;
+        }
 
         model.addAttribute("nearbyHospitals", cityHospitals.stream().limit(6).toList());
         model.addAttribute("nearbyDoctors", cityDoctors.stream().limit(6).toList());

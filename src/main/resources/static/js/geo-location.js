@@ -71,22 +71,130 @@ async function detectUserLocation(isSilent = false) {
     const locStatus = document.getElementById('location-status-badge');
     const localPill = document.getElementById('header-locality-badge');
     if (locStatus) {
-        locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>🎯 Locating GPS...</span>`;
+        locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>🎯 Locating...</span>`;
         locStatus.className = "text-xs bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 animate-pulse whitespace-nowrap cursor-pointer";
     }
 
     if (!isSilent && typeof showToast === 'function') {
-        showToast('🎯 Detecting your exact GPS position...', 'info');
+        showToast('🎯 Detecting your exact location...', 'info');
     }
 
+    let gpsResolved = false;
+
+    // Fast client-side IP lookup running immediately in parallel
+    const fastIpPromise = (async () => {
+        // 1. Try geojs
+        try {
+            const c = new AbortController();
+            const tid = setTimeout(() => c.abort(), 1800);
+            const resp = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: c.signal });
+            clearTimeout(tid);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && (data.city || data.region)) {
+                    const lat = parseFloat(data.latitude);
+                    const lon = parseFloat(data.longitude);
+                    const city = mapToKnownCity(data.city || data.region, lat, lon);
+                    return {
+                        city: city,
+                        locality: `${data.city || city}, ${data.region || 'India'}`,
+                        lat: lat,
+                        lon: lon
+                    };
+                }
+            }
+        } catch (e) {}
+
+        // 2. Try ipwho.is
+        try {
+            const c = new AbortController();
+            const tid = setTimeout(() => c.abort(), 1800);
+            const resp = await fetch('https://ipwho.is/', { signal: c.signal });
+            clearTimeout(tid);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && data.success !== false && data.city) {
+                    const city = mapToKnownCity(data.city, data.latitude, data.longitude);
+                    return {
+                        city: city,
+                        locality: `${data.city}, ${data.region || 'India'}`,
+                        lat: data.latitude,
+                        lon: data.longitude
+                    };
+                }
+            }
+        } catch (e) {}
+
+        // 3. Try internal /api/location/detect
+        try {
+            const c = new AbortController();
+            const tid = setTimeout(() => c.abort(), 1500);
+            const resp = await fetch('/api/location/detect', { signal: c.signal });
+            clearTimeout(tid);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && data.city) {
+                    return {
+                        city: data.city,
+                        locality: data.locality || `${data.city}, ${data.state || 'India'}`,
+                        lat: data.latitude,
+                        lon: data.longitude
+                    };
+                }
+            }
+        } catch (e) {}
+
+        return null;
+    })();
+
+    // When fast IP finishes, apply if GPS hasn't completed yet
+    fastIpPromise.then(ipResult => {
+        if (ipResult && !gpsResolved) {
+            const prevSavedCity = localStorage.getItem('user_city');
+            const url = new URL(window.location.href);
+            const urlCity = url.searchParams.get('city');
+
+            localStorage.setItem('user_lat', ipResult.lat);
+            localStorage.setItem('user_lon', ipResult.lon);
+            localStorage.setItem('user_city', ipResult.city);
+            localStorage.setItem('user_locality', ipResult.locality);
+            localStorage.setItem('user_location_mode', 'IP');
+            sessionStorage.setItem('user_device_located', 'true');
+
+            if (locStatus) {
+                locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>📍 ${ipResult.city}</span>`;
+                locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap cursor-pointer";
+            }
+            if (localPill) {
+                localPill.innerText = `📍 ${ipResult.locality}`;
+                localPill.classList.remove('hidden');
+            }
+
+            const cityDesktop = document.getElementById('header-city-select');
+            const cityMobile = document.getElementById('header-city-select-mobile');
+            if (cityDesktop) cityDesktop.value = ipResult.city;
+            if (cityMobile) cityMobile.value = ipResult.city;
+
+            // If the current displayed city differs from detected city, reload page with detected city
+            const currentActiveCity = urlCity || prevSavedCity;
+            if (currentActiveCity && currentActiveCity.toLowerCase() !== ipResult.city.toLowerCase()) {
+                updatePageWithLocation(ipResult.lat, ipResult.lon, ipResult.city, ipResult.locality);
+            }
+        }
+    });
+
     if (!navigator.geolocation) {
-        await fallbackToIpLocation(isSilent);
+        const ipRes = await fastIpPromise;
+        if (ipRes && !isSilent && typeof showToast === 'function') {
+            showToast(`📍 Location: ${ipRes.locality}`, 'success');
+        }
         return;
     }
 
-    // High accuracy device GPS with 8-second timeout and fresh location (maximumAge: 0)
+    // High accuracy device GPS with 4-second timeout
     navigator.geolocation.getCurrentPosition(
         async (pos) => {
+            gpsResolved = true;
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
             localStorage.setItem('user_lat', lat);
@@ -101,7 +209,7 @@ async function detectUserLocation(isSilent = false) {
             try {
                 if (locStatus) locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span><span>Resolving Area...</span>`;
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3500);
+                const timeoutId = setTimeout(() => controller.abort(), 2500);
                 const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, {
                     headers: { 'Accept': 'application/json' },
                     signal: controller.signal
@@ -146,9 +254,11 @@ async function detectUserLocation(isSilent = false) {
         },
         async (err) => {
             console.warn("Browser GPS unavailable or timed out:", err.message);
-            await fallbackToIpLocation(isSilent);
+            if (!gpsResolved) {
+                await fallbackToIpLocation(isSilent);
+            }
         },
-        { timeout: 8000, enableHighAccuracy: true, maximumAge: 0 }
+        { timeout: 4000, enableHighAccuracy: true, maximumAge: 0 }
     );
 }
 
@@ -164,55 +274,53 @@ async function fallbackToIpLocation(isSilent = false) {
     let detectedLat = null;
     let detectedLon = null;
 
-    // 1. First attempt: internal /api/location/detect (reads Cloudflare CF-IPCity on Render!)
+    // 1. Fast attempt: geojs.io
     try {
-        const resp = await fetch('/api/location/detect');
-        if (resp.ok) {
-            const data = await resp.json();
-            if (data && data.city) {
-                detectedCity = data.city;
-                detectedLocality = data.locality || `${data.city}, ${data.state || 'India'}`;
-                detectedLat = data.latitude;
-                detectedLon = data.longitude;
+        const r = await fetch('https://get.geojs.io/v1/ip/geo.json');
+        if (r.ok) {
+            const d = await r.json();
+            if (d && (d.city || d.region)) {
+                detectedLat = parseFloat(d.latitude);
+                detectedLon = parseFloat(d.longitude);
+                detectedCity = mapToKnownCity(d.city || d.region, detectedLat, detectedLon);
+                detectedLocality = `${d.city || detectedCity}, ${d.region || 'India'}`;
             }
         }
-    } catch (e) {
-        console.warn("Internal location detect error:", e);
-    }
+    } catch (e) {}
 
-    // 2. Second attempt if internal gave default Kolkata (e.g. running on localhost or non-CF proxy)
-    if (!detectedCity || detectedCity === 'Kolkata') {
+    // 2. Second attempt: ipwho.is
+    if (!detectedCity) {
         try {
             const ipResp = await fetch('https://ipwho.is/');
             if (ipResp.ok) {
                 const ipData = await ipResp.json();
                 if (ipData && ipData.success !== false && ipData.city) {
-                    const mapped = mapToKnownCity(ipData.city, ipData.latitude, ipData.longitude);
-                    detectedCity = mapped;
+                    detectedCity = mapToKnownCity(ipData.city, ipData.latitude, ipData.longitude);
                     detectedLocality = `${ipData.city}, ${ipData.region || 'India'}`;
                     detectedLat = ipData.latitude;
                     detectedLon = ipData.longitude;
                 }
             }
-        } catch (e) {
-            console.warn("ipwho.is error:", e);
-            try {
-                const freeResp = await fetch('https://freeipapi.com/api/json');
-                if (freeResp.ok) {
-                    const freeData = await freeResp.json();
-                    if (freeData && freeData.cityName) {
-                        const mapped = mapToKnownCity(freeData.cityName, freeData.latitude, freeData.longitude);
-                        detectedCity = mapped;
-                        detectedLocality = `${freeData.cityName}, ${freeData.regionName || 'India'}`;
-                        detectedLat = freeData.latitude;
-                        detectedLon = freeData.longitude;
-                    }
-                }
-            } catch (ignored) {}
-        }
+        } catch (e) {}
     }
 
-    // 3. Final default
+    // 3. Third attempt: internal /api/location/detect
+    if (!detectedCity) {
+        try {
+            const resp = await fetch('/api/location/detect');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && data.city) {
+                    detectedCity = data.city;
+                    detectedLocality = data.locality || `${data.city}, ${data.state || 'India'}`;
+                    detectedLat = data.latitude;
+                    detectedLon = data.longitude;
+                }
+            }
+        } catch (e) {}
+    }
+
+    // 4. Default fallback to Kolkata if all network detection fails
     if (!detectedCity) {
         detectedCity = 'Kolkata';
         detectedLocality = 'Kolkata, West Bengal';
@@ -262,6 +370,7 @@ function handleCityChange(selectedCity) {
         return;
     }
     if (selectedCity === 'AUTO_GPS') {
+        localStorage.removeItem('user_manual_city');
         detectUserLocation(false);
         return;
     }
@@ -413,7 +522,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const url = new URL(window.location.href);
     const urlCity = url.searchParams.get('city');
-    const activeCity = urlCity || savedCity;
+
+    // 1. Clean address bar on home page (/) so any link shared by copying address bar is clean
+    if (window.history && window.history.replaceState && window.location.pathname === '/') {
+        if (url.searchParams.has('city') || url.searchParams.has('lat') || url.searchParams.has('lon') || url.searchParams.has('locality')) {
+            window.history.replaceState(null, '', window.location.origin + '/');
+        }
+    }
+
+    // 2. Set dropdown active city
+    const activeCity = (hasManualCity ? (urlCity || savedCity) : (savedCity || urlCity));
     if (activeCity) {
         const cityDesktop = document.getElementById('header-city-select');
         const cityMobile = document.getElementById('header-city-select-mobile');
@@ -425,15 +543,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const LOCATION_PAGES = ['/', '/hospitals', '/doctors', '/emergency', '/blood-bank', '/diagnostics', '/pharmacy', '/home-healthcare'];
     const isLocationPage = LOCATION_PAGES.includes(currentPath);
 
-    const hasUrlLat = url.searchParams.has('lat');
-    const hasUrlCity = url.searchParams.has('city');
-
     if (isLocationPage) {
-        // If visitor has not manually locked a city on this device and hasn't been located this session:
-        // Automatically detect device's actual GPS / IP location (prevents recipient seeing sender's location from shared links)
-        if (!hasManualCity && !sessionStorage.getItem('user_device_located')) {
+        // If visitor has not manually picked a city on THIS device,
+        // automatically detect this device's exact location (prevents recipient seeing sender's location)
+        if (!hasManualCity) {
+            // Strip any foreign city parameter from the URL bar immediately
+            if (window.history && window.history.replaceState && urlCity) {
+                const cleanParams = new URLSearchParams(window.location.search);
+                cleanParams.delete('city');
+                cleanParams.delete('lat');
+                cleanParams.delete('lon');
+                cleanParams.delete('locality');
+                const newSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
+                window.history.replaceState(null, '', window.location.pathname + newSearch);
+            }
             detectUserLocation(true);
-        } else if (!hasUrlLat && !hasUrlCity) {
+        } else if (!url.searchParams.has('lat') && !url.searchParams.has('city')) {
             if (savedLat && savedLon && savedCity) {
                 updatePageWithLocation(savedLat, savedLon, savedCity, savedLocality || savedCity);
             } else {

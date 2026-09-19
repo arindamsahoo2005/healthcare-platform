@@ -131,7 +131,7 @@
                 <!-- Subheadline -->
                 <p class="text-xs sm:text-base lg:text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto">
                     Connect directly with certified specialist doctors, check verified real-time ICU hospital beds, order 50+ genuine medicines with doorstep delivery, and launch turn-by-turn GPS navigation near
-                    <strong class="text-white underline decoration-sky-400" th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your City')}">Your Location</strong>.
+                    <strong class="text-white underline decoration-sky-400 cursor-pointer hover:text-sky-300 transition" onclick="detectUserLocation(false)" title="Tap to detect your exact location" th:text="${selectedLocality != null ? selectedLocality : (selectedCity != null ? selectedCity : 'Your City')}">Your Location</strong>.
                 </p>
 
                 <!-- Universal Omnisearch Bar -->
