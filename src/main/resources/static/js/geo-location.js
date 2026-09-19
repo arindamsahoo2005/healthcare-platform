@@ -67,7 +67,7 @@ function mapToKnownCity(cityName, lat, lon) {
     return 'Kolkata';
 }
 
-async function detectUserLocation(isSilent = false) {
+async function detectUserLocation(isSilent = false, isExplicit = false) {
     const locStatus = document.getElementById('location-status-badge');
     const localPill = document.getElementById('header-locality-badge');
     if (locStatus) {
@@ -175,10 +175,10 @@ async function detectUserLocation(isSilent = false) {
             if (cityDesktop) cityDesktop.value = ipResult.city;
             if (cityMobile) cityMobile.value = ipResult.city;
 
-            // If the current displayed city differs from detected city, reload page with detected city
+            // Only reload if the current displayed city differs from detected city
             const currentActiveCity = urlCity || prevSavedCity;
             if (currentActiveCity && currentActiveCity.toLowerCase() !== ipResult.city.toLowerCase()) {
-                updatePageWithLocation(ipResult.lat, ipResult.lon, ipResult.city, ipResult.locality);
+                updatePageWithLocation(ipResult.lat, ipResult.lon, ipResult.city, ipResult.locality, false);
             }
         }
     });
@@ -249,20 +249,20 @@ async function detectUserLocation(isSilent = false) {
                 showToast(`📍 Exact Location: ${locality}`, 'success');
             }
 
-            // Always update page with the fresh GPS coordinates and resolved locality
-            updatePageWithLocation(lat, lon, targetCity, locality);
+            // Only reload if the city actually changed or if user explicitly requested it (isExplicit)
+            updatePageWithLocation(lat, lon, targetCity, locality, isExplicit);
         },
         async (err) => {
             console.warn("Browser GPS unavailable or timed out:", err.message);
             if (!gpsResolved) {
-                await fallbackToIpLocation(isSilent);
+                await fallbackToIpLocation(isSilent, isExplicit);
             }
         },
         { timeout: 4000, enableHighAccuracy: true, maximumAge: 0 }
     );
 }
 
-async function fallbackToIpLocation(isSilent = false) {
+async function fallbackToIpLocation(isSilent = false, isExplicit = false) {
     const locStatus = document.getElementById('location-status-badge');
     const localPill = document.getElementById('header-locality-badge');
     if (locStatus) {
@@ -351,12 +351,8 @@ async function fallbackToIpLocation(isSilent = false) {
     if (cityDesktop) cityDesktop.value = detectedCity;
     if (cityMobile) cityMobile.value = detectedCity;
 
-    if (typeof showToast === 'function' && !isSilent) {
-        showToast(`📍 Detected Area: ${detectedLocality}`, 'success');
-    }
-
-    // Reload page with detected city & coordinates
-    updatePageWithLocation(detectedLat, detectedLon, detectedCity, detectedLocality);
+    // Only reload if the city actually changed or if user explicitly requested it
+    updatePageWithLocation(detectedLat, detectedLon, detectedCity, detectedLocality, isExplicit);
 }
 
 function handleCityChange(selectedCity) {
@@ -366,12 +362,16 @@ function handleCityChange(selectedCity) {
         localStorage.removeItem('user_lon');
         localStorage.removeItem('user_locality');
         localStorage.removeItem('user_manual_city');
+        sessionStorage.removeItem('user_device_located');
+        sessionStorage.removeItem('last_reloaded_city');
         window.location.href = window.location.pathname;
         return;
     }
     if (selectedCity === 'AUTO_GPS') {
         localStorage.removeItem('user_manual_city');
-        detectUserLocation(false);
+        sessionStorage.removeItem('user_device_located');
+        sessionStorage.removeItem('last_reloaded_city');
+        detectUserLocation(false, true);
         return;
     }
     const clean = selectedCity.trim();
@@ -401,29 +401,52 @@ function handleCityChange(selectedCity) {
     if (cityDesktop) cityDesktop.value = selectedCity;
     if (cityMobile) cityMobile.value = selectedCity;
 
-    updatePageWithLocation(coords.lat, coords.lon, selectedCity, selectedCity);
+    updatePageWithLocation(coords.lat, coords.lon, selectedCity, selectedCity, true);
 }
 
 function selectProximityCity(cityName) {
     handleCityChange(cityName);
 }
 
-function updatePageWithLocation(lat, lon, city, locality) {
-    const url = new URL(window.location.href);
-    if (city) {
-        url.searchParams.set('city', city);
-        url.searchParams.delete('state'); // Remove conflicting state parameter so city drives exact regional results
-    } else {
-        url.searchParams.delete('city');
-    }
-    if (lat) url.searchParams.set('lat', lat); else url.searchParams.delete('lat');
-    if (lon) url.searchParams.set('lon', lon); else url.searchParams.delete('lon');
-    if (locality) url.searchParams.set('locality', locality); else url.searchParams.delete('locality');
+function updatePageWithLocation(lat, lon, city, locality, forceReload = false) {
+    if (!city) return;
 
-    // Only replace if parameters actually changed to prevent refresh loops
-    if (url.toString() !== window.location.href) {
-        window.location.replace(url.toString());
+    // Read currently displayed city on page
+    const citySelect = document.getElementById('header-city-select');
+    const currentDisplayedCity = citySelect ? citySelect.value : (new URL(window.location.href).searchParams.get('city') || '');
+
+    // Check if city actually changed
+    const isCityChanged = currentDisplayedCity && city.trim().toLowerCase() !== currentDisplayedCity.trim().toLowerCase();
+
+    // Update locality pill text and storage silently
+    const localPill = document.getElementById('header-locality-badge');
+    if (localPill && locality) {
+        localPill.innerText = `📍 ${locality}`;
+        localPill.classList.remove('hidden');
     }
+
+    // CRITICAL PREVENT RELOAD LOOP:
+    // If the city hasn't changed, and this is not an explicit user action, DO NOT RELOAD!
+    if (!isCityChanged && !forceReload) {
+        return;
+    }
+
+    // Avoid multiple reloads for the same city in the same session
+    const lastReloadCity = sessionStorage.getItem('last_reloaded_city');
+    if (lastReloadCity && lastReloadCity.toLowerCase() === city.toLowerCase() && !forceReload) {
+        return;
+    }
+    sessionStorage.setItem('last_reloaded_city', city);
+    sessionStorage.setItem('user_device_located', 'true');
+
+    const targetUrl = new URL(window.location.href);
+    targetUrl.searchParams.set('city', city);
+    targetUrl.searchParams.delete('state');
+    if (lat) targetUrl.searchParams.set('lat', lat); else targetUrl.searchParams.delete('lat');
+    if (lon) targetUrl.searchParams.set('lon', lon); else targetUrl.searchParams.delete('lon');
+    if (locality) targetUrl.searchParams.set('locality', locality); else targetUrl.searchParams.delete('locality');
+
+    window.location.replace(targetUrl.toString());
 }
 
 // Custom Locality Search (Neighborhood / Street / Suburb modal)
@@ -503,7 +526,7 @@ function selectCustomPlace(lat, lon, encodedCity, encodedLocality) {
     localStorage.setItem('user_location_mode', 'CUSTOM_LOCALITY');
 
     closeLocalitySearchModal();
-    updatePageWithLocation(lat, lon, city, locality);
+    updatePageWithLocation(lat, lon, city, locality, true);
 }
 
 // Restore locality badge and auto-detect on load
@@ -544,10 +567,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const isLocationPage = LOCATION_PAGES.includes(currentPath);
 
     if (isLocationPage) {
-        // If visitor has not manually picked a city on THIS device,
-        // automatically detect this device's exact location (prevents recipient seeing sender's location)
-        if (!hasManualCity) {
-            // Strip any foreign city parameter from the URL bar immediately
+        // Auto-detect ONLY ONCE per session to prevent any page refresh loops
+        const alreadyLocated = sessionStorage.getItem('user_device_located') === 'true';
+        if (!hasManualCity && !alreadyLocated) {
+            sessionStorage.setItem('user_device_located', 'true');
             if (window.history && window.history.replaceState && urlCity) {
                 const cleanParams = new URLSearchParams(window.location.search);
                 cleanParams.delete('city');
@@ -557,13 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newSearch = cleanParams.toString() ? '?' + cleanParams.toString() : '';
                 window.history.replaceState(null, '', window.location.pathname + newSearch);
             }
-            detectUserLocation(true);
-        } else if (!url.searchParams.has('lat') && !url.searchParams.has('city')) {
-            if (savedLat && savedLon && savedCity) {
-                updatePageWithLocation(savedLat, savedLon, savedCity, savedLocality || savedCity);
-            } else {
-                detectUserLocation(true);
-            }
+            detectUserLocation(true, false);
         }
     }
 });
