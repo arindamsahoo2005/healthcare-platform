@@ -197,15 +197,15 @@ public class PharmacyRegistryService {
      * Retrieve verified pharmacies near the user's location, sorted by live proximity.
      */
     public List<PharmacyStore> getNearbyPharmacies(String city, Double userLat, Double userLon, String apiKey) {
-        String effectiveCity = (city != null && !city.isBlank()) ? city : "Budge Budge";
+        String effectiveCity = (city != null && !city.isBlank()) ? city : "Kolkata";
         String effectiveState = GeoService.resolveStateFromCity(effectiveCity);
 
         // Resolve reference coordinates
         double[] coords = (userLat != null && userLon != null)
                 ? new double[]{userLat, userLon}
                 : GeoService.resolveCityCoordinates(effectiveCity);
-        double targetLat = coords != null ? coords[0] : 22.4820;
-        double targetLon = coords != null ? coords[1] : 88.1812;
+        double targetLat = coords != null ? coords[0] : 22.5726;
+        double targetLon = coords != null ? coords[1] : 88.3639;
 
         List<PharmacyStore> matching = new ArrayList<>();
 

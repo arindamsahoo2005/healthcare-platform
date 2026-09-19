@@ -25,6 +25,48 @@ const CITY_PRESETS = {
     'Pune': { lat: 18.5204, lon: 73.8567 }
 };
 
+function findClosestPresetCity(lat, lon) {
+    if (!lat || !lon) return 'Kolkata';
+    let bestCity = 'Kolkata';
+    let minDistance = Infinity;
+    const ALIASES = ['Bangalore', 'New Delhi', 'South 24 Parganas'];
+    for (const [cityName, coords] of Object.entries(CITY_PRESETS)) {
+        if (ALIASES.includes(cityName)) continue;
+        const dLat = coords.lat - lat;
+        const dLon = coords.lon - lon;
+        const distSq = dLat * dLat + dLon * dLon;
+        if (distSq < minDistance) {
+            minDistance = distSq;
+            bestCity = cityName;
+        }
+    }
+    return bestCity;
+}
+
+function mapToKnownCity(cityName, lat, lon) {
+    if (cityName) {
+        const c = cityName.toLowerCase().trim();
+        if (c.includes('delhi') || c.includes('noida') || c.includes('gurgaon') || c.includes('gurugram') || c.includes('ghaziabad') || c.includes('faridabad')) return 'Delhi';
+        if (c.includes('mumbai') || c.includes('thane') || c.includes('navi mumbai')) return 'Mumbai';
+        if (c.includes('bengaluru') || c.includes('bangalore')) return 'Bengaluru';
+        if (c.includes('bhubaneswar') || c.includes('cuttack') || c.includes('khordha')) return 'Bhubaneswar';
+        if (c.includes('chennai') || c.includes('madras')) return 'Chennai';
+        if (c.includes('hyderabad') || c.includes('secunderabad')) return 'Hyderabad';
+        if (c.includes('pune') || c.includes('pimpri') || c.includes('chinchwad')) return 'Pune';
+        if (c.includes('howrah')) return 'Howrah';
+        if (c.includes('salt lake') || c.includes('bidhannagar')) return 'Salt Lake';
+        if (c.includes('new town') || c.includes('rajarhat')) return 'New Town';
+        if (c.includes('siliguri') || c.includes('darjeeling')) return 'Siliguri';
+        if (c.includes('durgapur') || c.includes('asansol') || c.includes('bardhaman') || c.includes('burdwan')) return 'Durgapur';
+        if (c.includes('budge budge') || c.includes('pujali') || c.includes('nangi') || c.includes('maheshtala')) return 'Budge Budge';
+        if (c.includes('kolkata') || c.includes('calcutta')) return 'Kolkata';
+    }
+    if (lat && lon) {
+        return findClosestPresetCity(lat, lon);
+    }
+    return 'Kolkata';
+}
+
 async function detectUserLocation(isSilent = false) {
     const locStatus = document.getElementById('location-status-badge');
     const localPill = document.getElementById('header-locality-badge');
@@ -38,7 +80,7 @@ async function detectUserLocation(isSilent = false) {
         return;
     }
 
-    // Try fast device network/GPS position (maximumAge 5m for instantaneous cached mobile resolution)
+    // Fast device network/GPS position (maximumAge 5m for instantaneous mobile resolution)
     navigator.geolocation.getCurrentPosition(
         async (pos) => {
             const lat = pos.coords.latitude;
@@ -47,8 +89,8 @@ async function detectUserLocation(isSilent = false) {
             localStorage.setItem('user_lon', lon);
             localStorage.setItem('user_location_mode', 'GPS');
 
-            let locality = 'My Exact Location';
-            let city = 'Local Area';
+            let rawLocality = '';
+            let rawCity = '';
 
             try {
                 if (locStatus) locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span><span>Resolving Area...</span>`;
@@ -58,18 +100,21 @@ async function detectUserLocation(isSilent = false) {
                 if (resp.ok) {
                     const data = await resp.json();
                     const addr = data.address || {};
-                    locality = addr.neighbourhood || addr.suburb || addr.subdistrict || addr.residential || addr.road || addr.village || addr.town || addr.city_district || addr.county || addr.city || 'Exact Spot';
-                    city = addr.city || addr.town || addr.state_district || addr.state || 'Local';
+                    rawLocality = addr.neighbourhood || addr.suburb || addr.subdistrict || addr.residential || addr.road || addr.village || addr.town || addr.city_district || addr.county || addr.city || '';
+                    rawCity = addr.city || addr.town || addr.state_district || addr.state || '';
                 }
             } catch (err) {
                 console.warn("Reverse geocode failed, using coordinates:", err);
             }
 
+            const targetCity = mapToKnownCity(rawCity, lat, lon);
+            const locality = rawLocality ? `${rawLocality}, ${targetCity}` : targetCity;
+
             localStorage.setItem('user_locality', locality);
-            localStorage.setItem('user_city', city);
+            localStorage.setItem('user_city', targetCity);
 
             if (locStatus) {
-                locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>GPS Active</span>`;
+                locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>GPS: ${targetCity}</span>`;
                 locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap";
             }
             if (localPill) {
@@ -77,19 +122,25 @@ async function detectUserLocation(isSilent = false) {
                 localPill.classList.remove('hidden');
             }
 
+            const cityDesktop = document.getElementById('header-city-select');
+            const cityMobile = document.getElementById('header-city-select-mobile');
+            if (cityDesktop) cityDesktop.value = targetCity;
+            if (cityMobile) cityMobile.value = targetCity;
+
             if (typeof showToast === 'function' && !isSilent) {
-                showToast(`📍 GPS Active: ${locality}`, 'success');
+                showToast(`📍 Location: ${locality}`, 'success');
             }
 
-            // Reload current page with exact GPS parameters and neighborhood locality
-            updatePageWithLocation(lat, lon, city, locality);
+            const currentUrl = new URL(window.location.href);
+            if (currentUrl.searchParams.get('city') !== targetCity) {
+                updatePageWithLocation(lat, lon, targetCity, locality);
+            }
         },
         async (err) => {
             console.warn("Browser GPS unavailable or timed out:", err.message);
-            // Seamlessly fall back to IP-based location with ZERO permission popups
             await fallbackToIpLocation(isSilent);
         },
-        { timeout: 6000, enableHighAccuracy: false, maximumAge: 300000 }
+        { timeout: 7000, enableHighAccuracy: false, maximumAge: 300000 }
     );
 }
 
@@ -97,66 +148,99 @@ async function fallbackToIpLocation(isSilent = false) {
     const locStatus = document.getElementById('location-status-badge');
     const localPill = document.getElementById('header-locality-badge');
     if (locStatus) {
-        locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span><span>Network Area...</span>`;
+        locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span><span>Detecting City...</span>`;
     }
 
-    try {
-        const res = await fetch('https://ipapi.co/json/', { headers: { 'Accept': 'application/json' } });
-        if (res.ok) {
-            const data = await res.json();
-            if (data && data.latitude && data.longitude) {
-                const city = data.city || 'Kolkata';
-                const region = data.region || 'West Bengal';
-                const locality = `${city}, ${region}`;
-                localStorage.setItem('user_lat', data.latitude);
-                localStorage.setItem('user_lon', data.longitude);
-                localStorage.setItem('user_city', city);
-                localStorage.setItem('user_locality', locality);
-                localStorage.setItem('user_location_mode', 'IP');
+    let detectedCity = null;
+    let detectedLocality = null;
+    let detectedLat = null;
+    let detectedLon = null;
 
-                if (locStatus) {
-                    locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>${city} (Network)</span>`;
-                    locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap";
-                }
-                if (localPill) {
-                    localPill.innerText = `📍 ${city}`;
-                    localPill.classList.remove('hidden');
-                }
-                if (typeof showToast === 'function' && !isSilent) {
-                    showToast(`📍 Location detected: ${city}, ${region}`, 'success');
-                }
-                updatePageWithLocation(data.latitude, data.longitude, city, locality);
-                return;
+    // 1. First attempt: internal /api/location/detect (reads Cloudflare CF-IPCity on Render!)
+    try {
+        const resp = await fetch('/api/location/detect');
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data && data.city) {
+                detectedCity = data.city;
+                detectedLocality = data.locality || `${data.city}, ${data.state || 'India'}`;
+                detectedLat = data.latitude;
+                detectedLon = data.longitude;
             }
         }
     } catch (e) {
-        console.warn("IP geolocation fallback error:", e);
+        console.warn("Internal location detect error:", e);
     }
 
-    // Default to Kolkata, West Bengal gracefully
-    const def = CITY_PRESETS['Kolkata'] || { lat: 22.5726, lon: 88.3639 };
-    localStorage.setItem('user_lat', def.lat);
-    localStorage.setItem('user_lon', def.lon);
-    localStorage.setItem('user_city', 'Kolkata');
-    localStorage.setItem('user_locality', 'Kolkata, WB');
-    localStorage.setItem('user_location_mode', 'DEFAULT');
+    // 2. Second attempt if internal gave default Kolkata (e.g. running on localhost or non-CF proxy)
+    if (!detectedCity || detectedCity === 'Kolkata') {
+        try {
+            const ipResp = await fetch('https://ipwho.is/');
+            if (ipResp.ok) {
+                const ipData = await ipResp.json();
+                if (ipData && ipData.success !== false && ipData.city) {
+                    const mapped = mapToKnownCity(ipData.city, ipData.latitude, ipData.longitude);
+                    detectedCity = mapped;
+                    detectedLocality = `${ipData.city}, ${ipData.region || 'India'}`;
+                    detectedLat = ipData.latitude;
+                    detectedLon = ipData.longitude;
+                }
+            }
+        } catch (e) {
+            console.warn("ipwho.is error:", e);
+            try {
+                const freeResp = await fetch('https://freeipapi.com/api/json');
+                if (freeResp.ok) {
+                    const freeData = await freeResp.json();
+                    if (freeData && freeData.cityName) {
+                        const mapped = mapToKnownCity(freeData.cityName, freeData.latitude, freeData.longitude);
+                        detectedCity = mapped;
+                        detectedLocality = `${freeData.cityName}, ${freeData.regionName || 'India'}`;
+                        detectedLat = freeData.latitude;
+                        detectedLon = freeData.longitude;
+                    }
+                }
+            } catch (ignored) {}
+        }
+    }
+
+    // 3. Final default
+    if (!detectedCity) {
+        detectedCity = 'Kolkata';
+        detectedLocality = 'Kolkata, West Bengal';
+        const def = CITY_PRESETS['Kolkata'] || { lat: 22.5726, lon: 88.3639 };
+        detectedLat = def.lat;
+        detectedLon = def.lon;
+    }
+
+    localStorage.setItem('user_lat', detectedLat);
+    localStorage.setItem('user_lon', detectedLon);
+    localStorage.setItem('user_city', detectedCity);
+    localStorage.setItem('user_locality', detectedLocality);
+    localStorage.setItem('user_location_mode', 'IP');
 
     if (locStatus) {
-        locStatus.innerHTML = `<span>📍 Kolkata, WB</span>`;
-        locStatus.className = "text-xs bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap";
+        locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>${detectedCity}</span>`;
+        locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap";
     }
     if (localPill) {
-        localPill.innerText = `📍 Kolkata`;
+        localPill.innerText = `📍 ${detectedLocality || detectedCity}`;
         localPill.classList.remove('hidden');
     }
 
-    if (!isSilent) {
-        if (typeof openLocalitySearchModal === 'function') {
-            openLocalitySearchModal();
-        }
-        if (typeof showToast === 'function') {
-            showToast("Defaulted to Kolkata. You can pick your local neighborhood below!", "info");
-        }
+    const cityDesktop = document.getElementById('header-city-select');
+    const cityMobile = document.getElementById('header-city-select-mobile');
+    if (cityDesktop) cityDesktop.value = detectedCity;
+    if (cityMobile) cityMobile.value = detectedCity;
+
+    if (typeof showToast === 'function' && !isSilent) {
+        showToast(`📍 Detected Area: ${detectedLocality}`, 'success');
+    }
+
+    // Reload page with detected city if currently missing or differing
+    const currentUrl = new URL(window.location.href);
+    if (currentUrl.searchParams.get('city') !== detectedCity) {
+        updatePageWithLocation(detectedLat, detectedLon, detectedCity, detectedLocality);
     }
 }
 
@@ -180,13 +264,19 @@ function handleCityChange(selectedCity) {
         }
     }
     if (!coords) {
-        coords = { lat: 22.4820, lon: 88.1812 };
+        coords = { lat: 22.5726, lon: 88.3639 };
     }
     localStorage.setItem('user_lat', coords.lat);
     localStorage.setItem('user_lon', coords.lon);
     localStorage.setItem('user_city', selectedCity);
     localStorage.setItem('user_locality', selectedCity);
     localStorage.setItem('user_location_mode', 'CITY');
+
+    // Keep both dropdowns in sync
+    const cityDesktop = document.getElementById('header-city-select');
+    const cityMobile = document.getElementById('header-city-select-mobile');
+    if (cityDesktop) cityDesktop.value = selectedCity;
+    if (cityMobile) cityMobile.value = selectedCity;
 
     updatePageWithLocation(coords.lat, coords.lon, selectedCity, selectedCity);
 }
@@ -302,19 +392,28 @@ document.addEventListener('DOMContentLoaded', () => {
         localPill.classList.remove('hidden');
     }
 
+    const url = new URL(window.location.href);
+    const urlCity = url.searchParams.get('city');
+    const activeCity = urlCity || savedCity;
+    if (activeCity) {
+        const cityDesktop = document.getElementById('header-city-select');
+        const cityMobile = document.getElementById('header-city-select-mobile');
+        if (cityDesktop) cityDesktop.value = activeCity;
+        if (cityMobile) cityMobile.value = activeCity;
+    }
+
     const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
     const LOCATION_PAGES = ['/', '/hospitals', '/doctors', '/emergency', '/blood-bank', '/diagnostics', '/pharmacy', '/home-healthcare'];
     const isLocationPage = LOCATION_PAGES.includes(currentPath);
 
-    const url = new URL(window.location.href);
     const hasUrlLat = url.searchParams.has('lat');
     const hasUrlCity = url.searchParams.has('city');
 
     if (isLocationPage && !hasUrlLat && !hasUrlCity) {
-        if (savedLat && savedLon) {
-            updatePageWithLocation(savedLat, savedLon, savedCity || '', savedLocality || '');
+        if (savedLat && savedLon && savedCity) {
+            updatePageWithLocation(savedLat, savedLon, savedCity, savedLocality || savedCity);
         } else {
-            // Auto detect device GPS silently on first visit
+            // Auto detect device GPS or network city silently on first visit
             detectUserLocation(true);
         }
     }

@@ -32,7 +32,7 @@ class GeoServiceTest {
 
         assertEquals(22.5726, kolkata[0]);
         assertEquals(22.5726, partial[0]);
-        assertSame(GeoService.CITY_COORDINATES.get("Budge Budge"), fallback);
+        assertSame(GeoService.CITY_COORDINATES.get("Kolkata"), fallback);
     }
 
     @Test

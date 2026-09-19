@@ -55,7 +55,7 @@ public class GeoService {
 
     public static double[] resolveCityCoordinates(String cityName) {
         if (cityName == null || cityName.isBlank()) {
-            return CITY_COORDINATES.get("Budge Budge");
+            return CITY_COORDINATES.get("Kolkata");
         }
         String clean = cityName.trim();
         for (Map.Entry<String, double[]> entry : CITY_COORDINATES.entrySet()) {
@@ -69,7 +69,7 @@ public class GeoService {
                 return entry.getValue();
             }
         }
-        return CITY_COORDINATES.get("Budge Budge");
+        return CITY_COORDINATES.get("Kolkata");
     }
 
     /**

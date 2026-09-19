@@ -8,6 +8,7 @@ import com.healthcare.platform.repository.mongo.MedicalRecordMongoRepository;
 import com.healthcare.platform.repository.mongo.UserMongoRepository;
 import com.healthcare.platform.service.GeoService;
 import com.healthcare.platform.service.MedicineTimerService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -98,6 +99,50 @@ public class WebController {
         model.addAttribute("adherencePercentage", timerService.calculateAdherencePercentage());
     }
 
+    private String resolveClientCity(HttpServletRequest request, String requestedCity) {
+        if (requestedCity != null && !requestedCity.isBlank() && !requestedCity.equalsIgnoreCase("ALL")) {
+            return requestedCity.trim();
+        }
+        if ("ALL".equalsIgnoreCase(requestedCity)) {
+            return "ALL";
+        }
+        if (request != null) {
+            String cfCity = request.getHeader("CF-IPCity");
+            if (cfCity != null && !cfCity.isBlank()) {
+                String matched = matchKnownCity(cfCity.trim());
+                if (matched != null) return matched;
+            }
+        }
+        return "Kolkata";
+    }
+
+    private String matchKnownCity(String city) {
+        if (city == null || city.isBlank()) return "Kolkata";
+        for (String c : new String[]{"Kolkata", "Salt Lake", "New Town", "Howrah", "Budge Budge", "Siliguri", "Durgapur", "Delhi", "New Delhi", "Mumbai", "Bengaluru", "Bangalore", "Bhubaneswar", "Chennai", "Hyderabad", "Pune"}) {
+            if (c.equalsIgnoreCase(city) || city.toLowerCase().contains(c.toLowerCase()) || c.toLowerCase().contains(city.toLowerCase())) {
+                if ("Bangalore".equalsIgnoreCase(c)) return "Bengaluru";
+                if ("New Delhi".equalsIgnoreCase(c)) return "Delhi";
+                return c;
+            }
+        }
+        return city;
+    }
+
+    @GetMapping("/api/location/detect")
+    @ResponseBody
+    public Map<String, Object> detectLocation(HttpServletRequest request) {
+        String city = resolveClientCity(request, null);
+        double[] coords = GeoService.resolveCityCoordinates(city);
+        String state = GeoService.resolveStateFromCity(city);
+        Map<String, Object> res = new HashMap<>();
+        res.put("city", city);
+        res.put("locality", city + ", " + state);
+        res.put("state", state);
+        res.put("latitude", coords != null ? coords[0] : 22.5726);
+        res.put("longitude", coords != null ? coords[1] : 88.3639);
+        return res;
+    }
+
     private double[] resolveCoordinates(Double lat, Double lon, String city) {
         if (lat != null && lon != null) {
             return new double[]{lat, lon};
@@ -106,14 +151,14 @@ public class WebController {
     }
 
     @GetMapping("/")
-    public String index(Model model, HttpSession session,
+    public String index(Model model, HttpSession session, HttpServletRequest request,
                         @RequestParam(required = false) Double lat,
                         @RequestParam(required = false) Double lon,
                         @RequestParam(required = false) String locality,
                         @RequestParam(required = false) String city) {
         populateCommonAttributes(model, session);
-        String effectiveCity = (city != null && !city.isBlank()) ? city : "Budge Budge";
-        String effectiveLocality = (locality != null && !locality.isBlank()) ? locality : (city != null ? city : "Budge Budge, South 24 Parganas");
+        String effectiveCity = resolveClientCity(request, city);
+        String effectiveLocality = (locality != null && !locality.isBlank()) ? locality : (effectiveCity + ", " + GeoService.resolveStateFromCity(effectiveCity));
         String effectiveState = GeoService.resolveStateFromCity(effectiveCity);
         double[] coords = resolveCoordinates(lat, lon, effectiveCity);
 
@@ -180,7 +225,7 @@ public class WebController {
     }
 
     @GetMapping("/doctors")
-    public String doctors(Model model, HttpSession session,
+    public String doctors(Model model, HttpSession session, HttpServletRequest request,
                           @RequestParam(required = false) String state,
                           @RequestParam(required = false) String specialty,
                           @RequestParam(required = false) Double lat,
@@ -188,15 +233,17 @@ public class WebController {
                           @RequestParam(required = false) String locality,
                           @RequestParam(required = false) String city) {
         populateCommonAttributes(model, session);
-        String effectiveCity = (city != null && !city.isBlank()) ? city : null;
+        String effectiveCity;
         String effectiveState;
-        if (effectiveCity != null) {
+        if (city != null && !city.isBlank()) {
+            effectiveCity = city.trim();
             effectiveState = GeoService.resolveStateFromCity(effectiveCity);
         } else if (state != null && !state.isBlank()) {
-            effectiveState = state;
+            effectiveCity = null;
+            effectiveState = state.trim();
         } else {
-            effectiveState = "West Bengal";
-            effectiveCity = "Budge Budge";
+            effectiveCity = resolveClientCity(request, null);
+            effectiveState = GeoService.resolveStateFromCity(effectiveCity);
         }
 
         double[] coords = resolveCoordinates(lat, lon, (effectiveCity != null) ? effectiveCity : ("ALL".equalsIgnoreCase(effectiveState) ? "Kolkata" : effectiveState));
@@ -263,22 +310,24 @@ public class WebController {
     }
 
     @GetMapping("/hospitals")
-    public String hospitals(Model model, HttpSession session,
+    public String hospitals(Model model, HttpSession session, HttpServletRequest request,
                             @RequestParam(required = false) String state,
                             @RequestParam(required = false) Double lat,
                             @RequestParam(required = false) Double lon,
                             @RequestParam(required = false) String locality,
                             @RequestParam(required = false) String city) {
         populateCommonAttributes(model, session);
-        String effectiveCity = (city != null && !city.isBlank()) ? city : null;
+        String effectiveCity;
         String effectiveState;
-        if (effectiveCity != null) {
+        if (city != null && !city.isBlank()) {
+            effectiveCity = city.trim();
             effectiveState = GeoService.resolveStateFromCity(effectiveCity);
         } else if (state != null && !state.isBlank()) {
-            effectiveState = state;
+            effectiveCity = null;
+            effectiveState = state.trim();
         } else {
-            effectiveState = "West Bengal";
-            effectiveCity = "Budge Budge";
+            effectiveCity = resolveClientCity(request, null);
+            effectiveState = GeoService.resolveStateFromCity(effectiveCity);
         }
 
         double[] coords = resolveCoordinates(lat, lon, (effectiveCity != null) ? effectiveCity : ("ALL".equalsIgnoreCase(effectiveState) ? "Kolkata" : effectiveState));
@@ -369,14 +418,14 @@ public class WebController {
     }
 
     @GetMapping("/emergency")
-    public String emergency(Model model, HttpSession session,
+    public String emergency(Model model, HttpSession session, HttpServletRequest request,
                             @RequestParam(required = false) Double lat,
                             @RequestParam(required = false) Double lon,
                             @RequestParam(required = false) String locality,
                             @RequestParam(required = false) String city) {
         populateCommonAttributes(model, session);
-        String effectiveCity = (city != null && !city.isBlank()) ? city : null;
-        String effectiveState = effectiveCity != null ? GeoService.resolveStateFromCity(effectiveCity) : "West Bengal";
+        String effectiveCity = resolveClientCity(request, city);
+        String effectiveState = GeoService.resolveStateFromCity(effectiveCity);
         double[] coords = resolveCoordinates(lat, lon, (effectiveCity != null) ? effectiveCity : "Kolkata");
 
         List<Hospital> emergencyHospitals = hospitalRepository.findByEmergencyDeptTrue();
@@ -409,20 +458,20 @@ public class WebController {
         model.addAttribute("emergencyBlood", blood.stream().limit(6).toList());
         model.addAttribute("selectedCity", effectiveCity);
         model.addAttribute("selectedState", effectiveState);
-        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (effectiveCity != null ? effectiveCity : null));
+        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (effectiveCity + ", " + effectiveState));
         return "emergency";
     }
 
     @GetMapping("/blood-bank")
-    public String bloodBank(Model model, HttpSession session,
+    public String bloodBank(Model model, HttpSession session, HttpServletRequest request,
                             @RequestParam(required = false) String group,
                             @RequestParam(required = false) Double lat,
                             @RequestParam(required = false) Double lon,
                             @RequestParam(required = false) String locality,
                             @RequestParam(required = false) String city) {
         populateCommonAttributes(model, session);
-        String effectiveCity = (city != null && !city.isBlank()) ? city : null;
-        String effectiveState = effectiveCity != null ? GeoService.resolveStateFromCity(effectiveCity) : "West Bengal";
+        String effectiveCity = resolveClientCity(request, city);
+        String effectiveState = GeoService.resolveStateFromCity(effectiveCity);
         double[] coords = resolveCoordinates(lat, lon, (effectiveCity != null) ? effectiveCity : "Kolkata");
 
         List<BloodInventory> list = (group != null && !group.isBlank())
@@ -451,20 +500,20 @@ public class WebController {
         model.addAttribute("selectedGroup", group);
         model.addAttribute("selectedCity", effectiveCity);
         model.addAttribute("selectedState", effectiveState);
-        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (effectiveCity != null ? effectiveCity : null));
+        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (effectiveCity + ", " + effectiveState));
         return "blood-bank";
     }
 
     @GetMapping("/diagnostics")
-    public String diagnostics(Model model, HttpSession session,
+    public String diagnostics(Model model, HttpSession session, HttpServletRequest request,
                               @RequestParam(required = false) String category,
                               @RequestParam(required = false) Double lat,
                               @RequestParam(required = false) Double lon,
                               @RequestParam(required = false) String locality,
                               @RequestParam(required = false) String city) {
         populateCommonAttributes(model, session);
-        String effectiveCity = (city != null && !city.isBlank()) ? city : null;
-        String effectiveState = effectiveCity != null ? GeoService.resolveStateFromCity(effectiveCity) : "West Bengal";
+        String effectiveCity = resolveClientCity(request, city);
+        String effectiveState = GeoService.resolveStateFromCity(effectiveCity);
         double[] coords = resolveCoordinates(lat, lon, (effectiveCity != null) ? effectiveCity : "Kolkata");
 
         List<LabTest> tests = (category != null && !category.isBlank())
@@ -496,7 +545,7 @@ public class WebController {
         model.addAttribute("selectedCategory", category);
         model.addAttribute("selectedCity", effectiveCity);
         model.addAttribute("selectedState", effectiveState);
-        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (effectiveCity != null ? effectiveCity : null));
+        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (effectiveCity + ", " + effectiveState));
         return "diagnostics";
     }
 
@@ -624,36 +673,38 @@ public class WebController {
     }
 
     @GetMapping("/pharmacy")
-    public String pharmacy(Model model, HttpSession session,
+    public String pharmacy(Model model, HttpSession session, HttpServletRequest request,
                            @RequestParam(required = false) Double lat,
                            @RequestParam(required = false) Double lon,
                            @RequestParam(required = false) String locality,
                            @RequestParam(required = false) String city) {
         populateCommonAttributes(model, session);
-        double[] coords = resolveCoordinates(lat, lon, city);
+        String effectiveCity = resolveClientCity(request, city);
+        double[] coords = resolveCoordinates(lat, lon, effectiveCity);
 
         model.addAttribute("activeMeds", medicineRepository.findByActiveTrue());
         model.addAttribute("lowStockMeds", medicineRepository.findByRemainingPillsLessThanEqual(5));
         model.addAttribute("orders", pharmacyOrderRepository.findAllByOrderByOrderedAtDesc());
-        model.addAttribute("pharmacies", pharmacyRegistryService.getNearbyPharmacies(city != null ? city : "Budge Budge", coords != null ? coords[0] : null, coords != null ? coords[1] : null, null));
-        model.addAttribute("selectedCity", city);
-        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (city != null ? city : null));
+        model.addAttribute("pharmacies", pharmacyRegistryService.getNearbyPharmacies(effectiveCity, coords != null ? coords[0] : null, coords != null ? coords[1] : null, null));
+        model.addAttribute("selectedCity", effectiveCity);
+        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (effectiveCity + ", " + GeoService.resolveStateFromCity(effectiveCity)));
         model.addAttribute("userLat", coords != null ? coords[0] : null);
         model.addAttribute("userLon", coords != null ? coords[1] : null);
         return "pharmacy";
     }
 
     @GetMapping("/home-healthcare")
-    public String homeHealthcare(Model model, HttpSession session,
+    public String homeHealthcare(Model model, HttpSession session, HttpServletRequest request,
                                  @RequestParam(required = false) Double lat,
                                  @RequestParam(required = false) Double lon,
                                  @RequestParam(required = false) String locality,
                                  @RequestParam(required = false) String city) {
         populateCommonAttributes(model, session);
-        double[] coords = resolveCoordinates(lat, lon, city);
+        String effectiveCity = resolveClientCity(request, city);
+        double[] coords = resolveCoordinates(lat, lon, effectiveCity);
 
-        model.addAttribute("selectedCity", city);
-        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (city != null ? city : null));
+        model.addAttribute("selectedCity", effectiveCity);
+        model.addAttribute("selectedLocality", (locality != null && !locality.isBlank()) ? locality : (effectiveCity + ", " + GeoService.resolveStateFromCity(effectiveCity)));
         model.addAttribute("userLat", coords != null ? coords[0] : null);
         model.addAttribute("userLon", coords != null ? coords[1] : null);
         model.addAttribute("bookings", homeCareBookingRepository.findAllByOrderByBookedAtDesc());
