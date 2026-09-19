@@ -133,7 +133,7 @@
         <div class="sm:hidden flex items-center justify-between px-2.5 h-10 gap-1.5 w-full">
             <!-- Left: Location Dropdown Pill -->
             <div class="flex items-center gap-1 min-w-0 flex-1 max-w-[58%]">
-                <i class="fa-solid fa-location-dot text-sky-400 text-xs shrink-0 cursor-pointer hover:scale-110 active:scale-95 transition" onclick="detectUserLocation(false)" title="Tap to detect exact GPS location"></i>
+                <i class="fa-solid fa-location-dot text-sky-400 text-xs shrink-0 cursor-pointer hover:scale-110 active:scale-95 transition" onclick="detectUserLocation(false, true)" title="Tap to detect exact GPS location"></i>
                 <select id="header-city-select-mobile" onchange="handleCityChange(this.value)" class="bg-slate-800 text-white text-[11px] font-bold py-1 px-1.5 rounded-lg border border-slate-700 w-full truncate focus:outline-none focus:ring-1 focus:ring-sky-400">
                     <option value="AUTO_GPS">🎯 Auto-Detect GPS (My Location)</option>
                     <option value="" th:selected="${selectedCity == null || selectedCity == ''}">📍 Select City</option>
@@ -155,7 +155,7 @@
 
             <!-- Right: GPS + Lang + SOS -->
             <div class="flex items-center gap-1.5 shrink-0">
-                <button type="button" onclick="detectUserLocation(false)" title="Auto Detect GPS" class="w-7 h-7 rounded-lg bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center text-xs active:scale-95 shadow cursor-pointer">
+                <button type="button" onclick="detectUserLocation(false, true)" title="Auto Detect GPS" class="w-7 h-7 rounded-lg bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center text-xs active:scale-95 shadow cursor-pointer">
                     <i class="fa-solid fa-crosshairs"></i>
                 </button>
                 <button type="button" id="custom-lang-toggle-btn-mobile" onclick="toggleLanguageMenu(event)" class="h-7 px-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-[10px] font-bold flex items-center gap-1 active:scale-95 transition">
@@ -173,7 +173,7 @@
             
             <!-- Location Selector & GPS Status -->
             <div class="flex items-center gap-2 flex-wrap">
-                <span class="flex items-center gap-1 text-slate-300 cursor-pointer hover:text-sky-300 transition" onclick="detectUserLocation(false)" title="Tap to detect exact GPS location">
+                <span class="flex items-center gap-1 text-slate-300 cursor-pointer hover:text-sky-300 transition" onclick="detectUserLocation(false, true)" title="Tap to detect exact GPS location">
                     <i class="fa-solid fa-location-dot text-sky-400 text-xs"></i>
                     <span class="font-medium text-[11px]">Location:</span>
                 </span>
@@ -201,15 +201,15 @@
                 </button>
 
                 <!-- Browser GPS Detection -->
-                <button type="button" onclick="detectUserLocation(false)" title="Use real browser GPS coordinates &amp; reverse geocode neighborhood" class="flex items-center gap-1 bg-sky-600 hover:bg-sky-500 text-white px-2.5 py-1 rounded transition text-xs font-semibold shadow-sm whitespace-nowrap active:scale-95 cursor-pointer">
+                <button type="button" onclick="detectUserLocation(false, true)" title="Use real browser GPS coordinates &amp; reverse geocode neighborhood" class="flex items-center gap-1 bg-sky-600 hover:bg-sky-500 text-white px-2.5 py-1 rounded transition text-xs font-semibold shadow-sm whitespace-nowrap active:scale-95 cursor-pointer">
                     <i class="fa-solid fa-crosshairs"></i> Auto GPS
                 </button>
 
                 <!-- Exact Neighborhood Pill -->
-                <span id="header-locality-badge" onclick="detectUserLocation(false)" title="Tap to refresh exact GPS position" class="text-xs bg-sky-950 text-sky-300 border border-sky-800 px-2.5 py-0.5 rounded-full font-bold whitespace-nowrap cursor-pointer hover:border-sky-500 transition" th:classappend="${selectedLocality == null ? 'hidden' : ''}" th:text="${selectedLocality != null ? '📍 ' + selectedLocality : ''}">
+                <span id="header-locality-badge" onclick="detectUserLocation(false, true)" title="Tap to refresh exact GPS position" class="text-xs bg-sky-950 text-sky-300 border border-sky-800 px-2.5 py-0.5 rounded-full font-bold whitespace-nowrap cursor-pointer hover:border-sky-500 transition" th:classappend="${selectedLocality == null ? 'hidden' : ''}" th:text="${selectedLocality != null ? '📍 ' + selectedLocality : ''}">
                 </span>
 
-                <span id="location-status-badge" onclick="detectUserLocation(false)" title="Tap to detect exact location" class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap cursor-pointer hover:border-emerald-600 transition">
+                <span id="location-status-badge" onclick="detectUserLocation(false, true)" title="Tap to detect exact location" class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap cursor-pointer hover:border-emerald-600 transition">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span id="location-status-text" th:text="${selectedLocality != null ? 'GPS Active' : 'Proximity Ready'}">Proximity Ready</span>
                 </span>

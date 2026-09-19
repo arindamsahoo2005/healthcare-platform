@@ -81,12 +81,12 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
 
     let gpsResolved = false;
 
-    // Fast client-side IP lookup running immediately in parallel
+    // Fast client-side IP lookup running in parallel with 1.5s timeout
     const fastIpPromise = (async () => {
         // 1. Try geojs
         try {
             const c = new AbortController();
-            const tid = setTimeout(() => c.abort(), 1800);
+            const tid = setTimeout(() => c.abort(), 1500);
             const resp = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: c.signal });
             clearTimeout(tid);
             if (resp.ok) {
@@ -108,7 +108,7 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
         // 2. Try ipwho.is
         try {
             const c = new AbortController();
-            const tid = setTimeout(() => c.abort(), 1800);
+            const tid = setTimeout(() => c.abort(), 1500);
             const resp = await fetch('https://ipwho.is/', { signal: c.signal });
             clearTimeout(tid);
             if (resp.ok) {
@@ -128,7 +128,7 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
         // 3. Try internal /api/location/detect
         try {
             const c = new AbortController();
-            const tid = setTimeout(() => c.abort(), 1500);
+            const tid = setTimeout(() => c.abort(), 1200);
             const resp = await fetch('/api/location/detect', { signal: c.signal });
             clearTimeout(tid);
             if (resp.ok) {
@@ -147,13 +147,9 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
         return null;
     })();
 
-    // When fast IP finishes, apply if GPS hasn't completed yet
+    // When fast IP finishes, apply ONLY to DOM if GPS hasn't completed yet and never force reload
     fastIpPromise.then(ipResult => {
-        if (ipResult && !gpsResolved) {
-            const prevSavedCity = localStorage.getItem('user_city');
-            const url = new URL(window.location.href);
-            const urlCity = url.searchParams.get('city');
-
+        if (ipResult && !gpsResolved && localStorage.getItem('user_location_mode') !== 'GPS') {
             localStorage.setItem('user_lat', ipResult.lat);
             localStorage.setItem('user_lon', ipResult.lon);
             localStorage.setItem('user_city', ipResult.city);
@@ -175,11 +171,8 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
             if (cityDesktop) cityDesktop.value = ipResult.city;
             if (cityMobile) cityMobile.value = ipResult.city;
 
-            // Only reload if the current displayed city differs from detected city
-            const currentActiveCity = urlCity || prevSavedCity;
-            if (currentActiveCity && currentActiveCity.toLowerCase() !== ipResult.city.toLowerCase()) {
-                updatePageWithLocation(ipResult.lat, ipResult.lon, ipResult.city, ipResult.locality, false);
-            }
+            // Update in-place only - zero automatic reload
+            updatePageWithLocation(ipResult.lat, ipResult.lon, ipResult.city, ipResult.locality, false);
         }
     });
 
@@ -191,7 +184,7 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
         return;
     }
 
-    // High accuracy device GPS with 4-second timeout
+    // High accuracy device GPS with 3-second timeout and 5-min cache to prevent any hanging
     navigator.geolocation.getCurrentPosition(
         async (pos) => {
             gpsResolved = true;
@@ -209,7 +202,7 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
             try {
                 if (locStatus) locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span><span>Resolving Area...</span>`;
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2500);
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
                 const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, {
                     headers: { 'Accept': 'application/json' },
                     signal: controller.signal
@@ -222,7 +215,7 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
                     rawCity = addr.city || addr.town || addr.state_district || addr.state || '';
                 }
             } catch (err) {
-                console.warn("Reverse geocode failed, using coordinates:", err);
+                console.warn("Reverse geocode failed or timed out, using coordinates:", err);
             }
 
             const targetCity = mapToKnownCity(rawCity, lat, lon);
@@ -232,7 +225,7 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
             localStorage.setItem('user_city', targetCity);
 
             if (locStatus) {
-                locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>GPS: ${targetCity}</span>`;
+                locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>GPS: ${targetCity}</span>`;
                 locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap cursor-pointer";
             }
             if (localPill) {
@@ -249,8 +242,13 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
                 showToast(`📍 Exact Location: ${locality}`, 'success');
             }
 
-            // Only reload if the city actually changed or if user explicitly requested it (isExplicit)
-            updatePageWithLocation(lat, lon, targetCity, locality, isExplicit);
+            // Only reload if user explicitly requested it (isExplicit = true) AND the city differs
+            const citySelect = document.getElementById('header-city-select');
+            const currentDisplayedCity = citySelect ? citySelect.value : '';
+            const isCityChanged = currentDisplayedCity && targetCity.trim().toLowerCase() !== currentDisplayedCity.trim().toLowerCase();
+            const shouldReload = isExplicit && isCityChanged;
+
+            updatePageWithLocation(lat, lon, targetCity, locality, shouldReload);
         },
         async (err) => {
             console.warn("Browser GPS unavailable or timed out:", err.message);
@@ -258,7 +256,7 @@ async function detectUserLocation(isSilent = false, isExplicit = false) {
                 await fallbackToIpLocation(isSilent, isExplicit);
             }
         },
-        { timeout: 4000, enableHighAccuracy: true, maximumAge: 0 }
+        { timeout: 3000, enableHighAccuracy: true, maximumAge: 300000 }
     );
 }
 
@@ -274,9 +272,12 @@ async function fallbackToIpLocation(isSilent = false, isExplicit = false) {
     let detectedLat = null;
     let detectedLon = null;
 
-    // 1. Fast attempt: geojs.io
+    // 1. Fast attempt: geojs.io with AbortController
     try {
-        const r = await fetch('https://get.geojs.io/v1/ip/geo.json');
+        const c = new AbortController();
+        const tid = setTimeout(() => c.abort(), 1500);
+        const r = await fetch('https://get.geojs.io/v1/ip/geo.json', { signal: c.signal });
+        clearTimeout(tid);
         if (r.ok) {
             const d = await r.json();
             if (d && (d.city || d.region)) {
@@ -288,10 +289,13 @@ async function fallbackToIpLocation(isSilent = false, isExplicit = false) {
         }
     } catch (e) {}
 
-    // 2. Second attempt: ipwho.is
+    // 2. Second attempt: ipwho.is with AbortController
     if (!detectedCity) {
         try {
-            const ipResp = await fetch('https://ipwho.is/');
+            const c = new AbortController();
+            const tid = setTimeout(() => c.abort(), 1500);
+            const ipResp = await fetch('https://ipwho.is/', { signal: c.signal });
+            clearTimeout(tid);
             if (ipResp.ok) {
                 const ipData = await ipResp.json();
                 if (ipData && ipData.success !== false && ipData.city) {
@@ -304,10 +308,13 @@ async function fallbackToIpLocation(isSilent = false, isExplicit = false) {
         } catch (e) {}
     }
 
-    // 3. Third attempt: internal /api/location/detect
+    // 3. Third attempt: internal /api/location/detect with AbortController
     if (!detectedCity) {
         try {
-            const resp = await fetch('/api/location/detect');
+            const c = new AbortController();
+            const tid = setTimeout(() => c.abort(), 1200);
+            const resp = await fetch('/api/location/detect', { signal: c.signal });
+            clearTimeout(tid);
             if (resp.ok) {
                 const data = await resp.json();
                 if (data && data.city) {
@@ -351,8 +358,13 @@ async function fallbackToIpLocation(isSilent = false, isExplicit = false) {
     if (cityDesktop) cityDesktop.value = detectedCity;
     if (cityMobile) cityMobile.value = detectedCity;
 
-    // Only reload if the city actually changed or if user explicitly requested it
-    updatePageWithLocation(detectedLat, detectedLon, detectedCity, detectedLocality, isExplicit);
+    // Never auto reload in fallback unless explicit user action requested it
+    const citySelect = document.getElementById('header-city-select');
+    const currentDisplayedCity = citySelect ? citySelect.value : '';
+    const isCityChanged = currentDisplayedCity && detectedCity.trim().toLowerCase() !== currentDisplayedCity.trim().toLowerCase();
+    const shouldReload = isExplicit && isCityChanged;
+
+    updatePageWithLocation(detectedLat, detectedLon, detectedCity, detectedLocality, shouldReload);
 }
 
 function handleCityChange(selectedCity) {
@@ -411,29 +423,34 @@ function selectProximityCity(cityName) {
 function updatePageWithLocation(lat, lon, city, locality, forceReload = false) {
     if (!city) return;
 
-    // Read currently displayed city on page
-    const citySelect = document.getElementById('header-city-select');
-    const currentDisplayedCity = citySelect ? citySelect.value : (new URL(window.location.href).searchParams.get('city') || '');
-
-    // Check if city actually changed
-    const isCityChanged = currentDisplayedCity && city.trim().toLowerCase() !== currentDisplayedCity.trim().toLowerCase();
-
-    // Update locality pill text and storage silently
+    // Update locality pill text silently in DOM
     const localPill = document.getElementById('header-locality-badge');
     if (localPill && locality) {
         localPill.innerText = `📍 ${locality}`;
         localPill.classList.remove('hidden');
     }
 
-    // CRITICAL PREVENT RELOAD LOOP:
-    // If the city hasn't changed, and this is not an explicit user action, DO NOT RELOAD!
-    if (!isCityChanged && !forceReload) {
+    // Keep dropdowns in sync in DOM
+    const cityDesktop = document.getElementById('header-city-select');
+    const cityMobile = document.getElementById('header-city-select-mobile');
+    if (cityDesktop && cityDesktop.value !== city) cityDesktop.value = city;
+    if (cityMobile && cityMobile.value !== city) cityMobile.value = city;
+
+    // Save location to storage
+    localStorage.setItem('user_city', city);
+    if (locality) localStorage.setItem('user_locality', locality);
+    if (lat) localStorage.setItem('user_lat', lat);
+    if (lon) localStorage.setItem('user_lon', lon);
+
+    // CRITICAL: NEVER RELOAD AUTOMATICALLY!
+    // Only proceed to navigation if forceReload is explicitly true (i.e. manual user selection)
+    if (!forceReload) {
         return;
     }
 
-    // Avoid multiple reloads for the same city in the same session
+    // Guard against rapid repetitive reloads
     const lastReloadCity = sessionStorage.getItem('last_reloaded_city');
-    if (lastReloadCity && lastReloadCity.toLowerCase() === city.toLowerCase() && !forceReload) {
+    if (lastReloadCity && lastReloadCity.toLowerCase() === city.toLowerCase()) {
         return;
     }
     sessionStorage.setItem('last_reloaded_city', city);
@@ -446,7 +463,7 @@ function updatePageWithLocation(lat, lon, city, locality, forceReload = false) {
     if (lon) targetUrl.searchParams.set('lon', lon); else targetUrl.searchParams.delete('lon');
     if (locality) targetUrl.searchParams.set('locality', locality); else targetUrl.searchParams.delete('locality');
 
-    window.location.replace(targetUrl.toString());
+    window.location.href = targetUrl.toString();
 }
 
 // Custom Locality Search (Neighborhood / Street / Suburb modal)

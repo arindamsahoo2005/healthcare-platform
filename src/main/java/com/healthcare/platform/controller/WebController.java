@@ -187,14 +187,15 @@ public class WebController {
     }
 
     private String lookupIpCity(String ip) {
-        if (ip == null || ip.isBlank() || ip.startsWith("127.") || ip.startsWith("10.") || ip.startsWith("192.168.") || ip.contains(":")) {
+        if (ip == null || ip.isBlank() || ip.startsWith("127.") || ip.startsWith("10.") || ip.startsWith("192.168.") || ip.equals("::1") || ip.equals("0:0:0:0:0:0:0:1")) {
             return null;
         }
         if (IP_CITY_CACHE.containsKey(ip)) {
             return IP_CITY_CACHE.get(ip);
         }
         try {
-            java.net.URI uri = new java.net.URI("https://get.geojs.io/v1/ip/geo/" + ip + ".json");
+            String encodedIp = java.net.URLEncoder.encode(ip.trim(), java.nio.charset.StandardCharsets.UTF_8);
+            java.net.URI uri = new java.net.URI("https://get.geojs.io/v1/ip/geo/" + encodedIp + ".json");
             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) uri.toURL().openConnection();
             conn.setConnectTimeout(1000);
             conn.setReadTimeout(1000);

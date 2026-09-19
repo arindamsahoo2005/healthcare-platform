@@ -1,19 +1,16 @@
-﻿// ==========================================================
+// ==========================================================
 // CarePulse Healthcare PWA Service Worker
 // Offline Support, Fast Shell Caching, and App Experience
 // ==========================================================
 
-const CACHE_NAME = "carepulse-pwa-v1";
+const CACHE_NAME = "carepulse-pwa-v2";
 const STATIC_ASSETS = [
-  "/",
   "/manifest.json",
   "/css/custom.css",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/icons/apple-touch-icon.png",
-  "/icons/favicon.png",
-  "/emergency",
-  "/health-passport"
+  "/icons/favicon.png"
 ];
 
 // 1. Install: Pre-cache core app shell
