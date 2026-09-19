@@ -1709,6 +1709,7 @@ public class DataInitializer implements CommandLineRunner {
     private void seedUsers() {
         if (userMongoRepository.findAllByEmail("arindam.sahoo@gmail.com").isEmpty()) {
             UserDocument user = new UserDocument("google_arindam", "arindam.sahoo", "Arindam Sahoo", "arindam.sahoo@gmail.com", "+91 98300 12345");
+            user.setPassword("arindam123");
             user.setState("West Bengal");
             user.setCity("Kolkata");
             user.setLocality("Budge Budge / Salt Lake");
@@ -1718,6 +1719,14 @@ public class DataInitializer implements CommandLineRunner {
             user.setEmergencyContactPhone("+91 98301 54321");
             user.setAllergies("None");
             userMongoRepository.save(user);
+
+            User jpaUser = userRepository.findByUsername("arindam.sahoo").orElseGet(() ->
+                    new User("arindam.sahoo", "Arindam Sahoo", "arindam.sahoo@gmail.com", "+91 98300 12345", "PATIENT"));
+            jpaUser.setPassword("arindam123");
+            jpaUser.setFirebaseUid("google_arindam");
+            jpaUser.setPreferredCity("Kolkata");
+            jpaUser.setBloodGroup("O+");
+            userRepository.save(jpaUser);
         }
     }
 }

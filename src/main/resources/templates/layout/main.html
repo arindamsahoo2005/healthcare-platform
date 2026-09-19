@@ -909,7 +909,7 @@
                 <div id="auth-modal-alert" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold flex items-center gap-2"></div>
 
                 <!-- 1. Google 1-Click Authentication -->
-                <div class="space-y-3 mb-5">
+                <div class="space-y-2 mb-4">
                     <button type="button" onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-4 rounded-xl border border-slate-300 shadow-sm transition hover:border-slate-400 cursor-pointer text-xs sm:text-sm">
                         <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -919,10 +919,14 @@
                         </svg>
                         <span>Continue with Google</span>
                     </button>
+                    <button type="button" onclick="quickFillModalDemoLogin()" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md shadow-emerald-600/20 text-xs sm:text-sm transition cursor-pointer active:scale-95">
+                        <i class="fa-solid fa-bolt text-amber-300"></i>
+                        <span>1-Tap Instant Sign-In (Arindam Sahoo)</span>
+                    </button>
                 </div>
 
                 <!-- Divider -->
-                <div class="relative flex py-1 items-center mb-5">
+                <div class="relative flex py-1 items-center mb-4">
                     <div class="flex-grow border-t border-slate-200"></div>
                     <span class="flex-shrink mx-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">or with email &amp; password</span>
                     <div class="flex-grow border-t border-slate-200"></div>

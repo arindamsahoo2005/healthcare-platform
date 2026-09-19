@@ -181,6 +181,11 @@ async function signInWithGoogle() {
             }
         } else if (err.code === 'auth/cancelled-popup-request') {
             // Concurrent popup suppressed
+        } else if (err.code === 'auth/unauthorized-domain') {
+            const domain = window.location.hostname;
+            if (typeof showToast === 'function') {
+                showToast("Domain not authorized in Firebase yet. Add '" + domain + "' to Firebase Console > Authentication > Settings > Authorized domains, or use 1-Tap Login.", "warning");
+            }
         } else {
             if (typeof showToast === 'function') {
                 showToast("Google Sign-In: " + (err.message || err.code), "error");
@@ -349,6 +354,16 @@ async function handleLoginSubmit(event) {
             submitBtn.innerHTML = origBtnHtml;
         }
     }
+}
+
+// 1-Tap Instant Sign-in for demo / guest / testing
+function quickFillModalDemoLogin() {
+    switchAuthTab('login');
+    const loginInput = document.getElementById('login-identifier');
+    const passInput = document.getElementById('login-password');
+    if (loginInput) loginInput.value = 'arindam.sahoo@gmail.com';
+    if (passInput) passInput.value = 'arindam123';
+    handleLoginSubmit();
 }
 
 // Create Account / Register handler (FullName, Email, Phone, Password, Confirm)

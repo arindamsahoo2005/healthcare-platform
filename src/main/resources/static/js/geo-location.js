@@ -34,14 +34,11 @@ async function detectUserLocation(isSilent = false) {
     }
 
     if (!navigator.geolocation) {
-        if (!isSilent) alert("Geolocation is not supported by your browser. Please search your local area.");
-        if (locStatus) {
-            locStatus.innerHTML = `<span>GPS Unsupported</span>`;
-            locStatus.className = "text-xs bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap";
-        }
+        await fallbackToIpLocation(isSilent);
         return;
     }
 
+    // Try fast device network/GPS position (maximumAge 5m for instantaneous cached mobile resolution)
     navigator.geolocation.getCurrentPosition(
         async (pos) => {
             const lat = pos.coords.latitude;
@@ -55,7 +52,6 @@ async function detectUserLocation(isSilent = false) {
 
             try {
                 if (locStatus) locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span><span>Resolving Area...</span>`;
-                // Reverse geocoding via OpenStreetMap Nominatim for exact local neighborhood / street / suburb
                 const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, {
                     headers: { 'Accept': 'application/json' }
                 });
@@ -81,21 +77,87 @@ async function detectUserLocation(isSilent = false) {
                 localPill.classList.remove('hidden');
             }
 
+            if (typeof showToast === 'function' && !isSilent) {
+                showToast(`📍 GPS Active: ${locality}`, 'success');
+            }
+
             // Reload current page with exact GPS parameters and neighborhood locality
             updatePageWithLocation(lat, lon, city, locality);
         },
-        (err) => {
-            console.warn("Geolocation denied or unavailable:", err.message);
-            if (locStatus) {
-                locStatus.innerHTML = `<span>Proximity Ready</span>`;
-                locStatus.className = "text-xs bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap";
-            }
-            if (!isSilent) {
-                alert("Location access was denied or timed out. You can still search for your exact neighborhood manually via 'Find Local Area'!");
-            }
+        async (err) => {
+            console.warn("Browser GPS unavailable or timed out:", err.message);
+            // Seamlessly fall back to IP-based location with ZERO permission popups
+            await fallbackToIpLocation(isSilent);
         },
-        { timeout: 8000, enableHighAccuracy: true }
+        { timeout: 6000, enableHighAccuracy: false, maximumAge: 300000 }
     );
+}
+
+async function fallbackToIpLocation(isSilent = false) {
+    const locStatus = document.getElementById('location-status-badge');
+    const localPill = document.getElementById('header-locality-badge');
+    if (locStatus) {
+        locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span><span>Network Area...</span>`;
+    }
+
+    try {
+        const res = await fetch('https://ipapi.co/json/', { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.latitude && data.longitude) {
+                const city = data.city || 'Kolkata';
+                const region = data.region || 'West Bengal';
+                const locality = `${city}, ${region}`;
+                localStorage.setItem('user_lat', data.latitude);
+                localStorage.setItem('user_lon', data.longitude);
+                localStorage.setItem('user_city', city);
+                localStorage.setItem('user_locality', locality);
+                localStorage.setItem('user_location_mode', 'IP');
+
+                if (locStatus) {
+                    locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>${city} (Network)</span>`;
+                    locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap";
+                }
+                if (localPill) {
+                    localPill.innerText = `📍 ${city}`;
+                    localPill.classList.remove('hidden');
+                }
+                if (typeof showToast === 'function' && !isSilent) {
+                    showToast(`📍 Location detected: ${city}, ${region}`, 'success');
+                }
+                updatePageWithLocation(data.latitude, data.longitude, city, locality);
+                return;
+            }
+        }
+    } catch (e) {
+        console.warn("IP geolocation fallback error:", e);
+    }
+
+    // Default to Kolkata, West Bengal gracefully
+    const def = CITY_PRESETS['Kolkata'] || { lat: 22.5726, lon: 88.3639 };
+    localStorage.setItem('user_lat', def.lat);
+    localStorage.setItem('user_lon', def.lon);
+    localStorage.setItem('user_city', 'Kolkata');
+    localStorage.setItem('user_locality', 'Kolkata, WB');
+    localStorage.setItem('user_location_mode', 'DEFAULT');
+
+    if (locStatus) {
+        locStatus.innerHTML = `<span>📍 Kolkata, WB</span>`;
+        locStatus.className = "text-xs bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap";
+    }
+    if (localPill) {
+        localPill.innerText = `📍 Kolkata`;
+        localPill.classList.remove('hidden');
+    }
+
+    if (!isSilent) {
+        if (typeof openLocalitySearchModal === 'function') {
+            openLocalitySearchModal();
+        }
+        if (typeof showToast === 'function') {
+            showToast("Defaulted to Kolkata. You can pick your local neighborhood below!", "info");
+        }
+    }
 }
 
 function handleCityChange(selectedCity) {
