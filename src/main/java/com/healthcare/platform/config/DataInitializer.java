@@ -23,6 +23,7 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired private MedicineScheduleRepository scheduleRepository;
     @Autowired private PharmacyOrderRepository pharmacyOrderRepository;
     @Autowired private AdmissionRequestRepository admissionRepository;
+    @Autowired private UserRepository userRepository;
 
     // MongoDB Repositories
     @Autowired private HospitalMongoRepository hospitalMongoRepository;
