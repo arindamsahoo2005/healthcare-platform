@@ -1521,8 +1521,6 @@ public class DataInitializer implements CommandLineRunner {
             Medicine m1 = new Medicine("Metformin (Glycomet 500 SR)", "Metformin Hydrochloride", "500 mg", "Tablet", "AFTER_FOOD", 24, 60, "Take with or right after meals to avoid stomach upset.");
             m1.setPrescribingDoctor("Dr. Subhashish Ghosh");
             medicineRepository.save(m1);
-            scheduleRepository.save(new MedicineSchedule(m1, "MORNING", LocalTime.of(8, 30), "1 Tablet", "Take after breakfast"));
-            scheduleRepository.save(new MedicineSchedule(m1, "NIGHT", LocalTime.of(20, 30), "1 Tablet", "Take after dinner"));
 
             Medicine m1b = new Medicine("Glimepiride + Metformin (Amaryl M1)", "Glimepiride 1mg + Metformin 500mg SR", "500 mg", "Tablet", "AFTER_FOOD", 30, 60, "Dual action blood sugar regulation. Take with breakfast.");
             medicineRepository.save(m1b);
@@ -1543,7 +1541,6 @@ public class DataInitializer implements CommandLineRunner {
             Medicine m2 = new Medicine("Telmisartan (Telma 40)", "Telmisartan", "40 mg", "Tablet", "AFTER_FOOD", 18, 30, "Blood pressure control. Take consistently in morning.");
             m2.setPrescribingDoctor("Dr. Kunal Sarkar");
             medicineRepository.save(m2);
-            scheduleRepository.save(new MedicineSchedule(m2, "MORNING", LocalTime.of(9, 0), "1 Tablet", "Take after breakfast"));
 
             Medicine m2b = new Medicine("Telmisartan + Amlodipine (Telma-AM)", "Telmisartan 40mg + Amlodipine 5mg", "45 mg", "Tablet", "AFTER_FOOD", 30, 30, "Dual combination antihypertensive for stage-2 BP control.");
             medicineRepository.save(m2b);
@@ -1554,7 +1551,6 @@ public class DataInitializer implements CommandLineRunner {
             Medicine m2d = new Medicine("Atorvastatin (Atorva 10)", "Atorvastatin Calcium", "10 mg", "Tablet", "AFTER_FOOD", 26, 30, "Cholesterol control. Best taken in the evening or bedtime.");
             m2d.setPrescribingDoctor("Dr. Kunal Sarkar");
             medicineRepository.save(m2d);
-            scheduleRepository.save(new MedicineSchedule(m2d, "NIGHT", LocalTime.of(21, 30), "1 Tablet", "Take before sleep"));
 
             Medicine m2e = new Medicine("Atorvastatin 20mg (Storvas 20)", "Atorvastatin Calcium", "20 mg", "Tablet", "AFTER_FOOD", 30, 30, "High-intensity lipid lowering for cardiovascular risk reduction.");
             medicineRepository.save(m2e);
@@ -1575,7 +1571,6 @@ public class DataInitializer implements CommandLineRunner {
             Medicine m3 = new Medicine("Pantoprazole (Pan 40)", "Pantoprazole Gastro-resistant", "40 mg", "Tablet", "BEFORE_FOOD", 4, 30, "Acid reflux prevention. Take 30 mins before morning breakfast.");
             m3.setPrescribingDoctor("Dr. Debabrata Roy");
             medicineRepository.save(m3);
-            scheduleRepository.save(new MedicineSchedule(m3, "MORNING", LocalTime.of(7, 30), "1 Tablet", "Take empty stomach with warm water"));
 
             Medicine m3b = new Medicine("Rabeprazole + Domperidone (Razo-D)", "Rabeprazole 20mg + Domperidone 30mg SR", "50 mg", "Capsule", "BEFORE_FOOD", 20, 30, "Proton pump inhibitor + prokinetic for severe GERD & nausea.");
             medicineRepository.save(m3b);

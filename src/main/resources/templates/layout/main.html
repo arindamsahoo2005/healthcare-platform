@@ -133,15 +133,15 @@
         <div class="sm:hidden flex items-center justify-between px-2.5 h-10 gap-1.5 w-full">
             <!-- Left: Location Dropdown Pill -->
             <div class="flex items-center gap-1 min-w-0 flex-1 max-w-[58%]">
-                <i class="fa-solid fa-location-dot text-sky-400 text-xs shrink-0"></i>
+                <i class="fa-solid fa-location-dot text-sky-400 text-xs shrink-0 cursor-pointer hover:scale-110 active:scale-95 transition" onclick="detectUserLocation(false)" title="Tap to detect exact GPS location"></i>
                 <select id="header-city-select-mobile" onchange="handleCityChange(this.value)" class="bg-slate-800 text-white text-[11px] font-bold py-1 px-1.5 rounded-lg border border-slate-700 w-full truncate focus:outline-none focus:ring-1 focus:ring-sky-400">
+                    <option value="AUTO_GPS">🎯 Auto-Detect GPS (My Location)</option>
                     <option value="" th:selected="${selectedCity == null || selectedCity == ''}">📍 Select City</option>
-                    <option value="Budge Budge" th:selected="${selectedCity == 'Budge Budge'}">📍 Budge Budge</option>
                     <option value="Kolkata" th:selected="${selectedCity == 'Kolkata'}">Kolkata</option>
-                    <option value="Salt Lake" th:selected="${selectedCity == 'Salt Lake'}">Salt Lake</option>
+                    <option value="Salt Lake" th:selected="${selectedCity == 'Salt Lake'}">Salt Lake &amp; New Town</option>
                     <option value="Howrah" th:selected="${selectedCity == 'Howrah'}">Howrah</option>
                     <option value="Siliguri" th:selected="${selectedCity == 'Siliguri'}">Siliguri</option>
-                    <option value="Durgapur" th:selected="${selectedCity == 'Durgapur'}">Durgapur</option>
+                    <option value="Durgapur" th:selected="${selectedCity == 'Durgapur'}">Durgapur &amp; Asansol</option>
                     <option value="Delhi" th:selected="${selectedCity == 'Delhi' || selectedCity == 'New Delhi'}">New Delhi &amp; NCR</option>
                     <option value="Mumbai" th:selected="${selectedCity == 'Mumbai'}">Mumbai</option>
                     <option value="Bengaluru" th:selected="${selectedCity == 'Bengaluru' || selectedCity == 'Bangalore'}">Bengaluru</option>
@@ -149,12 +149,13 @@
                     <option value="Chennai" th:selected="${selectedCity == 'Chennai'}">Chennai</option>
                     <option value="Hyderabad" th:selected="${selectedCity == 'Hyderabad'}">Hyderabad</option>
                     <option value="Pune" th:selected="${selectedCity == 'Pune'}">Pune</option>
+                    <option value="Budge Budge" th:selected="${selectedCity == 'Budge Budge'}">Budge Budge (S 24 Pgs)</option>
                 </select>
             </div>
 
             <!-- Right: GPS + Lang + SOS -->
             <div class="flex items-center gap-1.5 shrink-0">
-                <button type="button" onclick="detectUserLocation()" title="Auto Detect GPS" class="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs active:scale-95 shadow">
+                <button type="button" onclick="detectUserLocation(false)" title="Auto Detect GPS" class="w-7 h-7 rounded-lg bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center text-xs active:scale-95 shadow cursor-pointer">
                     <i class="fa-solid fa-crosshairs"></i>
                 </button>
                 <button type="button" id="custom-lang-toggle-btn-mobile" onclick="toggleLanguageMenu(event)" class="h-7 px-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-[10px] font-bold flex items-center gap-1 active:scale-95 transition">
@@ -172,18 +173,18 @@
             
             <!-- Location Selector & GPS Status -->
             <div class="flex items-center gap-2 flex-wrap">
-                <span class="flex items-center gap-1 text-slate-300">
+                <span class="flex items-center gap-1 text-slate-300 cursor-pointer hover:text-sky-300 transition" onclick="detectUserLocation(false)" title="Tap to detect exact GPS location">
                     <i class="fa-solid fa-location-dot text-sky-400 text-xs"></i>
                     <span class="font-medium text-[11px]">Location:</span>
                 </span>
                 <select id="header-city-select" onchange="handleCityChange(this.value)" class="bg-slate-800 text-white text-xs px-2 py-1 rounded border border-slate-700 focus:outline-none focus:border-sky-500 font-medium">
-                    <option value="" th:selected="${selectedCity == null || selectedCity == ''}" class="bg-white text-slate-900 font-medium">📍 Select City / Auto GPS</option>
-                    <option value="Budge Budge" th:selected="${selectedCity == 'Budge Budge'}" class="bg-white text-slate-900 font-medium">📍 Budge Budge (South 24 Parganas)</option>
-                    <option value="Kolkata" th:selected="${selectedCity == 'Kolkata'}" class="bg-white text-slate-900 font-medium">Kolkata (Apex & Superspeciality)</option>
-                    <option value="Salt Lake" th:selected="${selectedCity == 'Salt Lake'}" class="bg-white text-slate-900 font-medium">Salt Lake & New Town</option>
+                    <option value="AUTO_GPS" class="bg-sky-900 text-white font-bold">🎯 Auto-Detect GPS (My Exact Location)</option>
+                    <option value="" th:selected="${selectedCity == null || selectedCity == ''}" class="bg-white text-slate-900 font-medium">📍 Select City</option>
+                    <option value="Kolkata" th:selected="${selectedCity == 'Kolkata'}" class="bg-white text-slate-900 font-medium">Kolkata (Apex &amp; Superspeciality)</option>
+                    <option value="Salt Lake" th:selected="${selectedCity == 'Salt Lake'}" class="bg-white text-slate-900 font-medium">Salt Lake &amp; New Town</option>
                     <option value="Howrah" th:selected="${selectedCity == 'Howrah'}" class="bg-white text-slate-900 font-medium">Howrah</option>
                     <option value="Siliguri" th:selected="${selectedCity == 'Siliguri'}" class="bg-white text-slate-900 font-medium">Siliguri (North Bengal)</option>
-                    <option value="Durgapur" th:selected="${selectedCity == 'Durgapur'}" class="bg-white text-slate-900 font-medium">Durgapur & Asansol</option>
+                    <option value="Durgapur" th:selected="${selectedCity == 'Durgapur'}" class="bg-white text-slate-900 font-medium">Durgapur &amp; Asansol</option>
                     <option value="Delhi" th:selected="${selectedCity == 'Delhi' || selectedCity == 'New Delhi'}" class="bg-white text-slate-900 font-medium">New Delhi &amp; NCR</option>
                     <option value="Mumbai" th:selected="${selectedCity == 'Mumbai'}" class="bg-white text-slate-900 font-medium">Mumbai (Maharashtra)</option>
                     <option value="Bengaluru" th:selected="${selectedCity == 'Bengaluru' || selectedCity == 'Bangalore'}" class="bg-white text-slate-900 font-medium">Bengaluru (Karnataka)</option>
@@ -191,23 +192,24 @@
                     <option value="Chennai" th:selected="${selectedCity == 'Chennai'}" class="bg-white text-slate-900 font-medium">Chennai (Tamil Nadu)</option>
                     <option value="Hyderabad" th:selected="${selectedCity == 'Hyderabad'}" class="bg-white text-slate-900 font-medium">Hyderabad (Telangana)</option>
                     <option value="Pune" th:selected="${selectedCity == 'Pune'}" class="bg-white text-slate-900 font-medium">Pune (Maharashtra)</option>
+                    <option value="Budge Budge" th:selected="${selectedCity == 'Budge Budge'}" class="bg-white text-slate-900 font-medium">📍 Budge Budge (South 24 Parganas)</option>
                 </select>
 
                 <!-- Search Local Area / Neighborhood -->
-                <button type="button" onclick="openLocalitySearchModal()" title="Search your specific neighborhood, colony, or street" class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 px-2 py-1 rounded transition text-xs font-medium whitespace-nowrap">
+                <button type="button" onclick="openLocalitySearchModal()" title="Search your specific neighborhood, colony, or street" class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 px-2 py-1 rounded transition text-xs font-medium whitespace-nowrap cursor-pointer">
                     <i class="fa-solid fa-magnifying-glass-location"></i> Find Local Area
                 </button>
 
                 <!-- Browser GPS Detection -->
-                <button type="button" onclick="detectUserLocation()" title="Use real browser GPS coordinates & reverse geocode neighborhood" class="flex items-center gap-1 bg-sky-600 hover:bg-sky-500 text-white px-2.5 py-1 rounded transition text-xs font-semibold shadow-sm whitespace-nowrap">
+                <button type="button" onclick="detectUserLocation(false)" title="Use real browser GPS coordinates &amp; reverse geocode neighborhood" class="flex items-center gap-1 bg-sky-600 hover:bg-sky-500 text-white px-2.5 py-1 rounded transition text-xs font-semibold shadow-sm whitespace-nowrap active:scale-95 cursor-pointer">
                     <i class="fa-solid fa-crosshairs"></i> Auto GPS
                 </button>
 
                 <!-- Exact Neighborhood Pill -->
-                <span id="header-locality-badge" class="text-xs bg-sky-950 text-sky-300 border border-sky-800 px-2.5 py-0.5 rounded-full font-bold whitespace-nowrap" th:classappend="${selectedLocality == null ? 'hidden' : ''}" th:text="${selectedLocality != null ? '📍 ' + selectedLocality : ''}">
+                <span id="header-locality-badge" onclick="detectUserLocation(false)" title="Tap to refresh exact GPS position" class="text-xs bg-sky-950 text-sky-300 border border-sky-800 px-2.5 py-0.5 rounded-full font-bold whitespace-nowrap cursor-pointer hover:border-sky-500 transition" th:classappend="${selectedLocality == null ? 'hidden' : ''}" th:text="${selectedLocality != null ? '📍 ' + selectedLocality : ''}">
                 </span>
 
-                <span id="location-status-badge" class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap">
+                <span id="location-status-badge" onclick="detectUserLocation(false)" title="Tap to detect exact location" class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap cursor-pointer hover:border-emerald-600 transition">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span id="location-status-text" th:text="${selectedLocality != null ? 'GPS Active' : 'Proximity Ready'}">Proximity Ready</span>
                 </span>

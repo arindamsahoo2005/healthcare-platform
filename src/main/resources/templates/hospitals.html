@@ -1182,44 +1182,61 @@
             }
         }
 
-        // Client-side facility category filter
-        function filterFacilityCategory(cat) {
-            const cards = document.querySelectorAll('.hospital-card');
-            const btns = document.querySelectorAll('.cat-filter-btn');
+        // Client-side facility category filter (Government, Private, Nursing Home, ICU, All)
+        function filterFacilityCategory(category, btnEl) {
+            const cat = (category || 'all').toLowerCase();
 
-            btns.forEach(b => {
+            // Sync top buttons
+            document.querySelectorAll('.cat-filter-btn').forEach(b => {
                 b.classList.remove('bg-sky-600', 'text-white');
                 b.classList.add('bg-slate-100', 'text-slate-700');
             });
-            const activeBtn = document.getElementById('cat-btn-' + cat);
-            if (activeBtn) {
-                activeBtn.classList.add('bg-sky-600', 'text-white');
-                activeBtn.classList.remove('bg-slate-100', 'text-slate-700');
+            const activeTopBtn = document.getElementById('cat-btn-' + cat);
+            if (activeTopBtn) {
+                activeTopBtn.classList.add('bg-sky-600', 'text-white');
+                activeTopBtn.classList.remove('bg-slate-100', 'text-slate-700');
             }
 
+            // Sync secondary buttons
+            document.querySelectorAll('.fac-cat-btn').forEach(b => {
+                b.className = 'fac-cat-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer';
+            });
+            if (btnEl) {
+                btnEl.className = 'fac-cat-btn px-4 py-2 rounded-xl bg-sky-600 text-white font-black shadow-sm transition cursor-pointer';
+            }
+
+            const cards = document.querySelectorAll('.hospital-card');
+            let visibleCount = 0;
             cards.forEach(card => {
                 const type = (card.getAttribute('data-type') || '').toLowerCase();
+                const cardCat = (card.getAttribute('data-category') || '').toLowerCase();
                 const icu = parseInt(card.getAttribute('data-icu') || '0', 10);
 
                 let show = false;
                 if (cat === 'all') {
                     show = true;
-                } else if (cat === 'govt') {
-                    show = type.includes('government');
-                } else if (cat === 'nursing') {
-                    show = type.includes('nursing');
-                } else if (cat === 'private') {
-                    show = !type.includes('government') && !type.includes('nursing');
-                } else if (cat === 'icu') {
+                } else if (cat === 'govt' || cat.includes('government')) {
+                    show = type.includes('government') || cardCat.includes('government');
+                } else if (cat === 'nursing' || cat.includes('nursing')) {
+                    show = type.includes('nursing') || cardCat.includes('nursing');
+                } else if (cat === 'private' || cat.includes('private')) {
+                    show = (!type.includes('government') && !type.includes('nursing')) || cardCat.includes('private');
+                } else if (cat === 'icu' || cat.includes('icu')) {
                     show = icu > 0;
                 }
 
                 if (show) {
+                    card.style.display = '';
                     card.classList.remove('hidden');
+                    visibleCount++;
                 } else {
+                    card.style.display = 'none';
                     card.classList.add('hidden');
                 }
             });
+
+            const badge = document.getElementById('facility-count-badge');
+            if (badge) badge.innerText = visibleCount + ' Facilities';
         }
 
         async function submitAdmissionRequest(e) {
@@ -1292,34 +1309,6 @@
             } catch (e) {
                 console.error(e);
             }
-        }
-
-        // --- FACILITY CATEGORY FILTER (GOVERNMENT, PRIVATE, NURSING HOME) ---
-        let selectedFacilityCategory = 'All';
-
-        function filterFacilityCategory(category, btnEl) {
-            selectedFacilityCategory = category;
-            const buttons = document.querySelectorAll('.fac-cat-btn');
-            buttons.forEach(b => {
-                b.className = 'fac-cat-btn px-4 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer';
-            });
-            if (btnEl) {
-                btnEl.className = 'fac-cat-btn px-4 py-2 rounded-xl bg-sky-600 text-white font-black shadow-sm transition cursor-pointer';
-            }
-
-            const cards = document.querySelectorAll('.hospital-card');
-            let visibleCount = 0;
-            cards.forEach(card => {
-                const cardCat = card.getAttribute('data-category') || '';
-                if (category === 'All' || cardCat.toLowerCase().includes(category.toLowerCase())) {
-                    card.style.display = '';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-            const badge = document.getElementById('facility-count-badge');
-            if (badge) badge.innerText = visibleCount + ' Facilities';
         }
 
         // --- OUTDOOR VISIT (OPD) WEEKLY SCHEDULE & BOOKING SYSTEM ---

@@ -51,54 +51,73 @@
                         </span>
                     </div>
 
-                    <!-- Medicine Name, Form & Dosage -->
-                    <div th:if="${nextDose != null}" class="mb-6">
-                        <div class="flex flex-wrap items-baseline gap-3">
-                            <h2 class="text-3xl sm:text-4xl font-black tracking-tight" th:text="${nextDose.medicineName}">Metformin</h2>
-                            <span class="text-base sm:text-lg font-bold text-sky-300" th:text="${nextDose.dosage}">500 mg</span>
-                            <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-md font-medium" th:text="${nextDose.form}">Tablet</span>
+                    <!-- WHEN NEXT DOSE EXISTS -->
+                    <div th:if="${nextDose != null}">
+                        <!-- Medicine Name, Form & Dosage -->
+                        <div class="mb-6">
+                            <div class="flex flex-wrap items-baseline gap-3">
+                                <h2 class="text-3xl sm:text-4xl font-black tracking-tight" th:text="${nextDose.medicineName}">Metformin</h2>
+                                <span class="text-base sm:text-lg font-bold text-sky-300" th:text="${nextDose.dosage}">500 mg</span>
+                                <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-md font-medium" th:text="${nextDose.form}">Tablet</span>
+                            </div>
+                            <p class="text-xs text-slate-400 italic mt-1" th:text="${nextDose.genericName}">Metformin Hydrochloride</p>
                         </div>
-                        <p class="text-xs text-slate-400 italic mt-1" th:text="${nextDose.genericName}">Metformin Hydrochloride</p>
+
+                        <!-- Visual Separator -->
+                        <div class="w-full h-px bg-gradient-to-r from-sky-500/50 via-slate-700 to-transparent my-4"></div>
+
+                        <!-- Big Countdown Clock -->
+                        <div class="bg-slate-950/90 border border-slate-800 rounded-3xl p-6 sm:p-8 my-4 text-center shadow-inner">
+                            <div class="text-xs font-mono text-slate-400 uppercase tracking-widest mb-2 flex justify-center items-center gap-2">
+                                <i class="fa-solid fa-stopwatch text-sky-400"></i> <span>TIME UNTIL NEXT DOSE</span>
+                            </div>
+                            <div class="medicine-countdown-clock text-5xl sm:text-6xl font-black font-mono tracking-wider text-sky-400 pulse-timer" th:text="${nextDose.countdownDisplay}">
+                                00:00:00
+                            </div>
+                            <div class="mt-4 flex flex-wrap justify-center items-center gap-4 text-xs text-slate-400">
+                                <span>Take at: <strong class="text-white text-sm" th:text="${nextDose.formattedTime}">10:00 PM</strong></span>
+                                <span>•</span>
+                                <span>Schedule: <strong class="text-white" th:text="${nextDose.timeOfDay}">NIGHT</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Food Association Card -->
+                        <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 my-4 flex items-start gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
+                                <i class="fa-solid fa-utensils"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-amber-300 uppercase tracking-wider block" th:text="${nextDose.foodRelation == 'AFTER_FOOD' ? 'Take After Food' : (nextDose.foodRelation == 'BEFORE_FOOD' ? 'Take Before Food (Empty Stomach)' : 'Take With Food')}">Take After Food</span>
+                                <p class="text-xs text-slate-300 mt-0.5 leading-relaxed" th:text="${nextDose.foodAdvice}">
+                                    Take 15-30 minutes after your meal with a full glass of water.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Special Clinical Instructions -->
+                        <div th:if="${nextDose.customInstructions != null}" class="text-xs text-slate-400 italic px-2 mb-4">
+                            <i class="fa-solid fa-info-circle text-sky-400 mr-1"></i> <span th:text="${nextDose.customInstructions}"></span>
+                        </div>
                     </div>
 
-                    <!-- Visual Separator -->
-                    <div class="w-full h-px bg-gradient-to-r from-sky-500/50 via-slate-700 to-transparent my-4"></div>
-
-                    <!-- Big Countdown Clock -->
-                    <div class="bg-slate-950/90 border border-slate-800 rounded-3xl p-6 sm:p-8 my-4 text-center shadow-inner">
-                        <div class="text-xs font-mono text-slate-400 uppercase tracking-widest mb-2 flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-stopwatch text-sky-400"></i> <span>TIME UNTIL NEXT DOSE</span>
+                    <!-- WHEN NO ACTIVE DOSE (Clean Empty State, No Fake Countdown) -->
+                    <div th:if="${nextDose == null}" class="py-10 px-4 text-center space-y-4">
+                        <div class="w-16 h-16 rounded-3xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                            <i class="fa-solid fa-pills"></i>
                         </div>
-                        <div class="medicine-countdown-clock text-5xl sm:text-6xl font-black font-mono tracking-wider text-sky-400 pulse-timer">
-                            00:24:18
-                        </div>
-                        <div class="mt-4 flex flex-wrap justify-center items-center gap-4 text-xs text-slate-400">
-                            <span>Take at: <strong class="text-white text-sm" th:text="${nextDose != null ? nextDose.formattedTime : '10:00 PM'}">10:00 PM</strong></span>
-                            <span>•</span>
-                            <span>Schedule: <strong class="text-white" th:text="${nextDose != null ? nextDose.timeOfDay : 'NIGHT'}">NIGHT</strong></span>
-                        </div>
-                    </div>
-
-                    <!-- Food Association Card -->
-                    <div th:if="${nextDose != null}" class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 my-4 flex items-start gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
-                            <i class="fa-solid fa-utensils"></i>
-                        </div>
-                        <div>
-                            <span class="text-xs font-bold text-amber-300 uppercase tracking-wider block" th:text="${nextDose.foodRelation == 'AFTER_FOOD' ? 'Take After Food' : (nextDose.foodRelation == 'BEFORE_FOOD' ? 'Take Before Food (Empty Stomach)' : 'Take With Food')}">Take After Food</span>
-                            <p class="text-xs text-slate-300 mt-0.5 leading-relaxed" th:text="${nextDose.foodAdvice}">
-                                Take 15-30 minutes after your evening meal with a full glass of water.
+                        <div class="space-y-1">
+                            <h3 class="text-2xl font-black text-white">No Active Medicine Alert</h3>
+                            <p class="text-xs sm:text-sm text-slate-300 max-w-md mx-auto">
+                                You have not added any active dose reminders yet. Add your medicine and schedule your routine below to start your live countdown alarm!
                             </p>
                         </div>
-                    </div>
-
-                    <!-- Special Clinical Instructions -->
-                    <div th:if="${nextDose != null and nextDose.customInstructions != null}" class="text-xs text-slate-400 italic px-2 mb-4">
-                        <i class="fa-solid fa-info-circle text-sky-400 mr-1"></i> <span th:text="${nextDose.customInstructions}"></span>
+                        <button type="button" onclick="openAddMedicineModal()" class="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm px-6 py-3 rounded-2xl shadow-xl transition active:scale-95 cursor-pointer">
+                            <i class="fa-solid fa-plus text-base"></i> <span>Add Medicine &amp; Set Dose Time</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Live Control Action Buttons -->
+                <!-- Live Control Action Buttons (Only when nextDose != null) -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-800" th:if="${nextDose != null}">
                     <button th:attr="data-id=${nextDose.scheduleId}" onclick="takeMedicine(this.getAttribute('data-id'))" class="py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl shadow-xl shadow-emerald-600/30 transition text-sm flex items-center justify-center gap-2 active:scale-95">
                         <i class="fa-solid fa-check text-base"></i> <span>✓ TAKEN</span>

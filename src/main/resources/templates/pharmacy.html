@@ -48,9 +48,9 @@
             </button>
         </div>
 
-        <!-- 1. VERIFIED NEARBY CHEMIST SHOPS SECTION (Dynamic via API Key & Location) -->
-        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-4">
-            <div class="flex flex-wrap justify-between items-center gap-2">
+        <!-- Real-Time Chemist Shops Near Detected Locality -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
                 <div>
                     <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5 w-fit">
                         <i class="fa-solid fa-satellite-dish animate-pulse"></i> 
@@ -59,7 +59,7 @@
                     </span>
                     <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-2 flex items-center gap-2">
                         <span>Nearby Medicine Shops &amp; Pharmacies</span>
-                        <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full" th:text="${selectedCity != null && !selectedCity.isEmpty() ? '📍 ' + selectedCity : '📍 Budge Budge'}">📍 Budge Budge</span>
+                        <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full" th:text="${selectedCity != null && !selectedCity.isEmpty() ? '📍 ' + selectedCity : '📍 Your Area'}">📍 Your Area</span>
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-500">
                         Accurate verified retail chemists, Jan Aushadhi generic stores, and 24x7 emergency oxygen depots. Instant dispatch within 15–30 minutes.
@@ -315,17 +315,16 @@
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 uppercase mb-1">Home Delivery Address *</label>
-                    <input type="text" name="deliveryAddress" th:value="${selectedLocality != null ? selectedLocality + ', ' + (selectedCity != null ? selectedCity : 'Kolkata') : 'MG Road, Budge Budge, South 24 Parganas, Kolkata 700137'}" placeholder="Enter delivery street or landmark" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="text" name="deliveryAddress" th:value="${selectedLocality != null ? selectedLocality + ', ' + (selectedCity != null ? selectedCity : 'Your City') : (selectedCity != null ? selectedCity + ' City Center' : 'Your Street Address, City')}" placeholder="Enter delivery street or landmark" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 uppercase mb-1">Fulfilling Chemist Shop</label>
                     <select id="modal-pharmacy-select" name="pharmacyName" class="w-full border border-slate-300 rounded-lg p-2.5 font-bold text-slate-800">
                         <option th:each="p, stat : ${pharmacies}" th:value="${p.name}" th:selected="${stat.first}"
-                                th:text="${p.name + ' (' + (p.distanceKm != null ? #numbers.formatDecimal(p.distanceKm, 1, 1) + ' km - ' : '') + p.deliveryTimeMin + ' Min' + (p.janAushadhi ? ' - PM Jan Aushadhi' : '') + ')'}">Apollo Pharmacy Budge Budge (0.4 km away - 20 Min)</option>
-                        <option th:if="${pharmacies == null or #lists.isEmpty(pharmacies)}" value="Apollo Pharmacy Budge Budge">Apollo Pharmacy Budge Budge (0.4 km away - 20 Min)</option>
-                        <option th:if="${pharmacies == null or #lists.isEmpty(pharmacies)}" value="Frank Ross Pharmacy Budge Budge">Frank Ross Pharmacy Budge Budge (0.9 km away - 25 Min)</option>
-                        <option th:if="${pharmacies == null or #lists.isEmpty(pharmacies)}" value="PM Jan Aushadhi Kendra Budge Budge">PM Jan Aushadhi Kendra Budge Budge (1.1 km away - Generic Savings)</option>
-                        <option th:if="${pharmacies == null or #lists.isEmpty(pharmacies)}" value="MedPlus Pharmacy Maheshtala">MedPlus Pharmacy Maheshtala (1.8 km away - 30 Min)</option>
+                                th:text="${p.name + ' (' + (p.distanceKm != null ? #numbers.formatDecimal(p.distanceKm, 1, 1) + ' km - ' : '') + p.deliveryTimeMin + ' Min' + (p.janAushadhi ? ' - PM Jan Aushadhi' : '') + ')'}">Apollo Pharmacy (0.4 km away - 20 Min)</option>
+                        <option th:if="${pharmacies == null or #lists.isEmpty(pharmacies)}" th:value="${'Apollo Pharmacy ' + (selectedCity != null ? selectedCity : 'Center')}" th:text="${'Apollo Pharmacy ' + (selectedCity != null ? selectedCity : '') + ' (20 Min Delivery)'}">Apollo Pharmacy (20 Min Delivery)</option>
+                        <option th:if="${pharmacies == null or #lists.isEmpty(pharmacies)}" th:value="${'Frank Ross Pharmacy ' + (selectedCity != null ? selectedCity : 'Center')}" th:text="${'Frank Ross Pharmacy ' + (selectedCity != null ? selectedCity : '') + ' (25 Min Delivery)'}">Frank Ross Pharmacy (25 Min Delivery)</option>
+                        <option th:if="${pharmacies == null or #lists.isEmpty(pharmacies)}" th:value="${'PM Jan Aushadhi Kendra ' + (selectedCity != null ? selectedCity : 'Generic')}" th:text="${'PM Jan Aushadhi Kendra ' + (selectedCity != null ? selectedCity : '') + ' (Generic Savings)'}">PM Jan Aushadhi Kendra (Generic Savings)</option>
                     </select>
                 </div>
                 <div>

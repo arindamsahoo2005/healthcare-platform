@@ -81,12 +81,12 @@
 
         <!-- Blood Group Filter Badges -->
         <div class="flex flex-wrap gap-2 text-xs">
-            <a th:href="@{/blood-bank(city=${selectedCity})}" 
+            <a th:href="@{/blood-bank(city=${selectedCity}, lat=${userLat}, lon=${userLon})}" 
                th:class="${selectedGroup == null ? 'bg-rose-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-4 py-2 rounded-xl border border-slate-200 shadow-sm transition'">
                 All Groups
             </a>
             <a th:each="g : ${ {'O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'} }"
-               th:href="@{/blood-bank(group=${g}, city=${selectedCity})}"
+               th:href="@{/blood-bank(group=${g}, city=${selectedCity}, lat=${userLat}, lon=${userLon})}"
                th:class="${selectedGroup == g ? 'bg-rose-600 text-white font-bold' : 'bg-white text-slate-600 hover:bg-slate-100'} + ' px-4 py-2 rounded-xl border border-slate-200 shadow-sm transition font-mono font-bold'"
                th:text="${g}">
                 O+

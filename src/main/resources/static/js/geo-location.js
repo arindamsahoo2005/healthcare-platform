@@ -71,8 +71,12 @@ async function detectUserLocation(isSilent = false) {
     const locStatus = document.getElementById('location-status-badge');
     const localPill = document.getElementById('header-locality-badge');
     if (locStatus) {
-        locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>Locating...</span>`;
-        locStatus.className = "text-xs bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 animate-pulse whitespace-nowrap";
+        locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>🎯 Locating GPS...</span>`;
+        locStatus.className = "text-xs bg-amber-950 text-amber-300 border border-amber-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 animate-pulse whitespace-nowrap cursor-pointer";
+    }
+
+    if (!isSilent && typeof showToast === 'function') {
+        showToast('🎯 Detecting your exact GPS position...', 'info');
     }
 
     if (!navigator.geolocation) {
@@ -80,7 +84,7 @@ async function detectUserLocation(isSilent = false) {
         return;
     }
 
-    // Fast device network/GPS position (maximumAge 5m for instantaneous mobile resolution)
+    // High accuracy device GPS with 8-second timeout and fresh location (maximumAge: 0)
     navigator.geolocation.getCurrentPosition(
         async (pos) => {
             const lat = pos.coords.latitude;
@@ -88,15 +92,21 @@ async function detectUserLocation(isSilent = false) {
             localStorage.setItem('user_lat', lat);
             localStorage.setItem('user_lon', lon);
             localStorage.setItem('user_location_mode', 'GPS');
+            localStorage.setItem('user_device_detected', 'true');
+            sessionStorage.setItem('user_device_located', 'true');
 
             let rawLocality = '';
             let rawCity = '';
 
             try {
                 if (locStatus) locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse"></span><span>Resolving Area...</span>`;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
                 const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, {
-                    headers: { 'Accept': 'application/json' }
+                    headers: { 'Accept': 'application/json' },
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
                 if (resp.ok) {
                     const data = await resp.json();
                     const addr = data.address || {};
@@ -115,7 +125,7 @@ async function detectUserLocation(isSilent = false) {
 
             if (locStatus) {
                 locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>GPS: ${targetCity}</span>`;
-                locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap";
+                locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap cursor-pointer";
             }
             if (localPill) {
                 localPill.innerText = `📍 ${locality}`;
@@ -128,19 +138,17 @@ async function detectUserLocation(isSilent = false) {
             if (cityMobile) cityMobile.value = targetCity;
 
             if (typeof showToast === 'function' && !isSilent) {
-                showToast(`📍 Location: ${locality}`, 'success');
+                showToast(`📍 Exact Location: ${locality}`, 'success');
             }
 
-            const currentUrl = new URL(window.location.href);
-            if (currentUrl.searchParams.get('city') !== targetCity) {
-                updatePageWithLocation(lat, lon, targetCity, locality);
-            }
+            // Always update page with the fresh GPS coordinates and resolved locality
+            updatePageWithLocation(lat, lon, targetCity, locality);
         },
         async (err) => {
             console.warn("Browser GPS unavailable or timed out:", err.message);
             await fallbackToIpLocation(isSilent);
         },
-        { timeout: 7000, enableHighAccuracy: false, maximumAge: 300000 }
+        { timeout: 8000, enableHighAccuracy: true, maximumAge: 0 }
     );
 }
 
@@ -218,10 +226,12 @@ async function fallbackToIpLocation(isSilent = false) {
     localStorage.setItem('user_city', detectedCity);
     localStorage.setItem('user_locality', detectedLocality);
     localStorage.setItem('user_location_mode', 'IP');
+    localStorage.setItem('user_device_detected', 'true');
+    sessionStorage.setItem('user_device_located', 'true');
 
     if (locStatus) {
         locStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>${detectedCity}</span>`;
-        locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap";
+        locStatus.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium whitespace-nowrap cursor-pointer";
     }
     if (localPill) {
         localPill.innerText = `📍 ${detectedLocality || detectedCity}`;
@@ -237,11 +247,8 @@ async function fallbackToIpLocation(isSilent = false) {
         showToast(`📍 Detected Area: ${detectedLocality}`, 'success');
     }
 
-    // Reload page with detected city if currently missing or differing
-    const currentUrl = new URL(window.location.href);
-    if (currentUrl.searchParams.get('city') !== detectedCity) {
-        updatePageWithLocation(detectedLat, detectedLon, detectedCity, detectedLocality);
-    }
+    // Reload page with detected city & coordinates
+    updatePageWithLocation(detectedLat, detectedLon, detectedCity, detectedLocality);
 }
 
 function handleCityChange(selectedCity) {
@@ -250,7 +257,12 @@ function handleCityChange(selectedCity) {
         localStorage.removeItem('user_lat');
         localStorage.removeItem('user_lon');
         localStorage.removeItem('user_locality');
+        localStorage.removeItem('user_manual_city');
         window.location.href = window.location.pathname;
+        return;
+    }
+    if (selectedCity === 'AUTO_GPS') {
+        detectUserLocation(false);
         return;
     }
     const clean = selectedCity.trim();
@@ -271,6 +283,8 @@ function handleCityChange(selectedCity) {
     localStorage.setItem('user_city', selectedCity);
     localStorage.setItem('user_locality', selectedCity);
     localStorage.setItem('user_location_mode', 'CITY');
+    localStorage.setItem('user_manual_city', 'true');
+    sessionStorage.setItem('user_device_located', 'true');
 
     // Keep both dropdowns in sync
     const cityDesktop = document.getElementById('header-city-select');
@@ -296,7 +310,11 @@ function updatePageWithLocation(lat, lon, city, locality) {
     if (lat) url.searchParams.set('lat', lat); else url.searchParams.delete('lat');
     if (lon) url.searchParams.set('lon', lon); else url.searchParams.delete('lon');
     if (locality) url.searchParams.set('locality', locality); else url.searchParams.delete('locality');
-    window.location.replace(url.toString());
+
+    // Only replace if parameters actually changed to prevent refresh loops
+    if (url.toString() !== window.location.href) {
+        window.location.replace(url.toString());
+    }
 }
 
 // Custom Locality Search (Neighborhood / Street / Suburb modal)
@@ -385,6 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedLat = localStorage.getItem('user_lat');
     const savedLon = localStorage.getItem('user_lon');
     const savedCity = localStorage.getItem('user_city');
+    const hasManualCity = localStorage.getItem('user_manual_city') === 'true';
 
     const localPill = document.getElementById('header-locality-badge');
     if (savedLocality && localPill) {
@@ -409,12 +428,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const hasUrlLat = url.searchParams.has('lat');
     const hasUrlCity = url.searchParams.has('city');
 
-    if (isLocationPage && !hasUrlLat && !hasUrlCity) {
-        if (savedLat && savedLon && savedCity) {
-            updatePageWithLocation(savedLat, savedLon, savedCity, savedLocality || savedCity);
-        } else {
-            // Auto detect device GPS or network city silently on first visit
+    if (isLocationPage) {
+        // If visitor has not manually locked a city on this device and hasn't been located this session:
+        // Automatically detect device's actual GPS / IP location (prevents recipient seeing sender's location from shared links)
+        if (!hasManualCity && !sessionStorage.getItem('user_device_located')) {
             detectUserLocation(true);
+        } else if (!hasUrlLat && !hasUrlCity) {
+            if (savedLat && savedLon && savedCity) {
+                updatePageWithLocation(savedLat, savedLon, savedCity, savedLocality || savedCity);
+            } else {
+                detectUserLocation(true);
+            }
         }
     }
 });
